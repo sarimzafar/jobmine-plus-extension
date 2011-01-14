@@ -1,6 +1,0 @@
-     Fixes
-- add better sorting for dates
-
-
-     Addons
-- All the view applications for the employer, make it look better
