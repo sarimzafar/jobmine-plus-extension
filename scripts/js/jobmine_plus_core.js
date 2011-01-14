@@ -311,7 +311,7 @@ function startOperation()
                     $("#whiteOverlay").css("top","0px");
                     $("html").css("overflow","hidden");
                     $("#hiddenIframe").load(function(){          //Refresh recursive function
-                         if(iframeArray.length != 0){   //Start counting and removing\
+                         if(iframeArray.length != 0){   //Start counting and removing
                               loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness.<br/><span style='color:blue;font-size:20px;'>*Refresh to Cancel*</span><br/>Progress: "+(iframeCounter - iframeArray.length+1)+"/"+iframeCounter);
                               if(UNSAFEWINDOWSUPPORT)
                                    unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0','UW_CO_STUJOBLST$delete$"+(iframeArray.pop())+"$$0')")				
@@ -410,7 +410,7 @@ function startOperation()
           
           //When to run the white overlay
           $("a").click(function(){
-               if(getCookieValue('LOAD_SCREEN') != 1 && $(this).attr("target")!= "_blank" && $(this).attr("target")!= "new" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1)
+               if(getCookieValue('LOAD_SCREEN') != 1 && $(this).attr("target")!= "_blank" && $(this).html() != "View Package" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1)
                     showLoadingPopup();
           });
 
