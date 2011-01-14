@@ -1,5 +1,5 @@
 {
 	"version"       : 101,
-	"date"          : "January 14 2011"
+	"date"          : "January 14 2011",
 	"description"  : "This is a message."
 }
