@@ -4,6 +4,7 @@
 
 var CURRENT_VERSION = 101;
 var UNSAFEWINDOWSUPPORT = unsafeWindow.toString().indexOf("[object Window]") != -1;
+var SCRIPTSURL = "https://jobmine-plus.googlecode.com/svn/trunk/scripts";
 
 //Pages 
 var INTERVIEW_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STU_INTVS&RL=&target=main0&navc=5170";
@@ -18,7 +19,7 @@ var APPLICATION_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservle
 //White overlay
 var WHITE_OVERLAY = 	"<div id='popupWhiteContainer' style='display:none;'><div id='whiteOverlay' style='display:block;position:fixed;width:100%;height:100%;background-color:white;opacity:0.8;z-index:1;left:0px;top:125px;'></div><div id='popupWrapper' style='position:fixed;width:50%;height:50%;bottom:0px;right:0px;'>" +
                                    "<div id='popupWhiteContent' style='position:relative;width:450px; font-weight:bold; height:180px;top:-90px;font-size:30px;left:-225px;z-index:49;font-family:Arial,Verdana;text-align:center;text-shadow:-2px -2px 5px #777, 2px 2px 5px #777;'><span style='font-size:50px;'>Please be Patient.</span><br/>"+
-                                   "<div id='whitePopupMsg'>Jobmine has been programmed to load pages really slowly.</div><br/><img alt='' style='position:relative;top:-125px;' src='http://eatthis.iblogger.org/jobmine_plus/loading.gif'></div></div></div>";
+                                   "<div id='whitePopupMsg'>Jobmine has been programmed to load pages really slowly.</div><br/><img alt='' style='position:relative;top:-125px;' src='"+SCRIPTSURL+"/images/loading.gif'></div></div></div>";
                                    
 
 /*   ======================================================
@@ -119,7 +120,7 @@ function startOperation()
                header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
                header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
                header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
-               header +=     '"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url(http://eatthis.iblogger.org/jobmine_plus/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
+               header +=     '"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
                header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:890px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
                header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
                header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
@@ -131,7 +132,7 @@ function startOperation()
                header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+WORK_REPORT_PAGE+'>Work Report Evalutions</a> | ';
                header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" popup="false" href="javascript:showPopup()">Settings</a> | ';
                header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:saveWarning(\'main\',null,\'_top\',\'/servlets/iclientservlet/SS/?cmd=logout\')">Logout</a>';
-               header +=     '</div></td><td width="100%" valign="top"><img style="float:right;" alt="" src="http://eatthis.iblogger.org/jobmine_plus/waterloo_logo.png"/></td></tr></table></div>';
+               header +=     '</div></td><td width="100%" valign="top"><img style="float:right;" alt="" src="'+SCRIPTSURL+'/images/waterloo_logo.png"/></td></tr></table></div>';
 
                header +=     "<div id='popupContainer' style='display:none;'><div id='overlay'></div><div id='popupWrapper'><div id='popupContent'><div class='title'>Settings</div><br/><span style='color:red'>This uses cookies to save the following. </span><br/><br/>";
                header +=     "<table cellspacing='0' cellpadding='0'><tr><td valign='top'>Login Default Page:</td><td valign='top'><select id='popupSelect'>";
@@ -148,7 +149,7 @@ function startOperation()
 
           // Add a CSS stylesheet
           var style = document.createElement( "style" ); 
-          style.appendChild( document.createTextNode("@import 'http://eatthis.iblogger.org/jobmine_plus/style.css';") );
+          style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
           document.getElementsByTagName( "body" ).item(0).appendChild( style );	
 
           //Specific layouts for pages
@@ -478,7 +479,7 @@ function startOperation()
           {
                GM_xmlhttpRequest({
                     method: "GET",
-                    url: "http://eatthis.iblogger.org/jobmine_plus/version.txt",
+                    url: SCRIPTSURL+"/version.txt",
                     onload: function(response) {
                          // parseJSON is not available until jQuery 1.4.1, so eval is being used here
                          var data = eval("(" + response.responseText + ")");

@@ -1,4 +1,5 @@
 {
-	"version" : 101,
-	"date"    : "July 10 2010"
+	"version"       : 101,
+	"date"          : "January 14 2011"
+	"description"  : "This is a message."
 }
