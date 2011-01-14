@@ -407,12 +407,11 @@ function startOperation()
                injectFunction("showLoadingPopup(){if(getCookieValue('LOAD_SCREEN') != 1){document.getElementById('popupWhiteContainer').style.display = 'block';document.getElementsByTagName('html')[0].style.overflow = 'hidden';}}");
                injectFunction("saveSettings(){var autoRefresh = document.getElementById('popupText').value;if(autoRefresh && autoRefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert('Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).');return -1;}var date = new Date();date.setTime(date.getTime()+(4*31*24*60*60*1000));var remove_load = document.getElementById('loadCheckbox').checked;var remove_timer = document.getElementById('popupCheckbox').checked;var hideupdates = document.getElementById('updateCheckbox').checked;var default_page = document.getElementById('popupSelect').value;var expires =  'expires='+date.toGMTString()+'; path/';document.cookie = 'LOAD_SCREEN='+(remove_load ? 1 : 0)+';'+expires;document.cookie = 'DISABLE_TIMER='+(remove_timer ? 1 : 0)+';'+expires;document.cookie = 'HIDE_UPDATES='+(hideupdates ? 1 : 0)+';'+expires;document.cookie = 'DEFAULT_PAGE='+default_page+';'+expires;document.cookie = 'AUTO_REFRESH='+autoRefresh+';'+expires;hidePopup();showLoadingPopup();window.location.href = window.location.href;}");
           }
-          
+          alert("sdsds")
           //When to run the white overlay
           $("a").click(function(){
-          alert($(this).html() )
-               if(getCookieValue('LOAD_SCREEN') != 1 && $(this).attr("target")!= "_blank" && $(this).html() != "View Package" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1)
-                    showLoadingPopup();                 
+               if(getCookieValue('LOAD_SCREEN') != 1 && $(this).attr("target")!= "_blank" && $(this).attr("target") != "new" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1)
+                    showLoadingPopup();
           });
 
           $("input").click(function(){
