@@ -410,7 +410,7 @@ function startOperation()
           
           //When to run the white overlay
           $("a").click(function(){
-          
+          alert($(this).html() )
                if(getCookieValue('LOAD_SCREEN') != 1 && $(this).attr("target")!= "_blank" && $(this).html() != "View Package" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1)
                     showLoadingPopup();                 
           });
