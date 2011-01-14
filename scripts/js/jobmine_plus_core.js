@@ -271,7 +271,7 @@ function startOperation()
                     $(this).prepend('<td align="center" height="19" class="PSLEVEL1GRIDODDROW"><input id=chkbx'+index+' type="checkbox"></td>');
                     numOfChkbx = index+1;
                });
-               $('table table table.PSLEVEL1GRID tbody tr:first-child').prepend('<th align="LEFT" class="PSLEVEL1GRIDCOLUMNHDR" scope="col">?</th>');
+               $('table table table.PSLEVEL1GRID tbody tr:first-child').prepend('<th align="LEFT" class="PSLEVEL1GRIDCOLUMNHDR" scope="col">&nbsp;</th>');
                $("#UW_CO_JSLIST_VW_").parent().parent().html("<td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return returnFalse()'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td>")
                $("form > table > tbody > tr").eq(7).after("<tr><td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return returnFalse()'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td></tr>");
                //Add invisible iframe
