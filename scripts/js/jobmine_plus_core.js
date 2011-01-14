@@ -290,7 +290,7 @@ function startOperation()
                //Functions for the buttons to do stuff     		
                if(UNSAFEWINDOWSUPPORT){
                     unsafeWindow.selectAllChkbx = function(flag,numChkbx){for(var i=0;i<numChkbx;i++){$("#chkbx"+i).attr("checked",flag);}return false;};
-                    unsafeWindow.returnFalse= function(){return false;}
+                    unsafeWindow.returnFalse= function(){return false;};
                }
                else               
                {
