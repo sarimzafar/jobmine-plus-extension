@@ -1,3 +1,4 @@
+try{
 /*   ======================================================
  *	Constants
  */
@@ -54,6 +55,38 @@ function resetGlobalTimer(){
      	GLOBAL_TIMER  = setTimeout(function(){window.location.href = window.location.href;},getCookieValue('AUTO_REFRESH')*60*1000);
 }
 
+function insertCustomHeader(){
+     var header = '<div id="jobminepanel" style="wid``th:100%; height:125px; background-repeat: repeat-x;';
+     header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
+     header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
+     header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
+     header +=     '"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
+     header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:890px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SEARCH_PAGE +'>Job Search</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SHORT_PAGE+'>Job Short List</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+APPLICATION_PAGE+'>Applications</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+INTERVIEW_PAGE+'>Interviews</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+RANKING_PAGE+'>Rankings</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+WORK_REPORT_PAGE+'>Work Report Evalutions</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" popup="false" href="javascript:showPopup()">Settings</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:saveWarning(\'main\',null,\'_top\',\'/servlets/iclientservlet/SS/?cmd=logout\')">Logout</a>';
+     header +=     '</div></td><td width="100%" valign="top"><img style="float:right;" alt="" src="'+SCRIPTSURL+'/images/waterloo_logo.png"/></td></tr></table></div>';
+
+     header +=     "<div id='popupContainer' style='display:none;'><div id='overlay'></div><div id='popupWrapper'><div id='popupContent'><div class='title'>Settings</div><br/><span style='color:red'>This uses cookies to save the following. </span><br/><br/>";
+     header +=     "<table cellspacing='0' cellpadding='0'><tr><td valign='top'>Login Default Page:</td><td valign='top'><select id='popupSelect'>";
+     header +=     "<option value='ap'>Applications</option><option value='in'>Interviews</option><option value='js'>Job Search</option><option value='dc'>Documents</option><option value='jl'>Job Short List</option><option value='rk'>Rankings</option><option value='pr'>Profile</option><option value='wr'>Work Report Evaluations</option>";
+     header +=     "</select></td></tr><tr><td valign='top'>Load Message Off:</td><td valign='top'><input id='loadCheckbox' class='chkbox' type='checkbox'/></td></tr>";
+     header +=     "<tr><td valign='top'>Do not Show Updates:</td><td valign='top'><input id='updateCheckbox' class='chkbox' type='checkbox'/></td></tr>";
+     header +=     "<tr><td valign='top'>Remove Timer:</td><td valign='top'><input id='popupCheckbox' class='chkbox' type='checkbox' onchange='toggleRemoveTimer(this)'/></td></tr><tr>";
+     header +=     "<td valign='top'>Auto-Refresh Duration (min):<br/><span id='removeTimerDetails' class='details'>The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign='top'><input onkeypress='return decimalOnly(event)' id='popupText' type='text'/></td></tr></table>";
+     header +=     "<button class='button PSPUSHBUTTON' onclick='saveSettings()'>Save and Refresh</button><button style='float:right;' class='button PSPUSHBUTTON' onclick='hidePopup();'>Cancel</button></div></div></div>"
+     
+     header +=     WHITE_OVERLAY;
+     $("body").prepend(header);    
+}
+
 /*   ======================================================
  *   Functions that are not for Firefox
  */
@@ -69,14 +102,14 @@ function injectFunction(_function,bruteforce){
      $('body').append('<script language="javascript">function '+_function+'</script>');
 }
 
-
 /*   ======================================================
  * 	Start Operation
  */                                
 function startOperation()
 {
      if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&')
-     {	                                
+     {	           
+          //On load, please redirect to start page
           $('html').html("<body>"+WHITE_OVERLAY+"</body>");	
           document.getElementById('popupWhiteContainer').style.display = "block";
           
@@ -114,45 +147,18 @@ function startOperation()
           $("body").addClass(pagetype);
 
           // Insert navigation header at the top and overlays
-          if(pagetype != "jobmine_|_university_of_waterloo")
-          {
-               var header = '<div id="jobminepanel" style="wid``th:100%; height:125px; background-repeat: repeat-x;';
-               header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
-               header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
-               header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
-               header +=     '"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
-               header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:890px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SEARCH_PAGE +'>Job Search</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SHORT_PAGE+'>Job Short List</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+APPLICATION_PAGE+'>Applications</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+INTERVIEW_PAGE+'>Interviews</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+RANKING_PAGE+'>Rankings</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+WORK_REPORT_PAGE+'>Work Report Evalutions</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" popup="false" href="javascript:showPopup()">Settings</a> | ';
-               header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:saveWarning(\'main\',null,\'_top\',\'/servlets/iclientservlet/SS/?cmd=logout\')">Logout</a>';
-               header +=     '</div></td><td width="100%" valign="top"><img style="float:right;" alt="" src="'+SCRIPTSURL+'/images/waterloo_logo.png"/></td></tr></table></div>';
+          if(pagetype != "jobmine_|_university_of_waterloo")     
+               insertCustomHeader();
 
-               header +=     "<div id='popupContainer' style='display:none;'><div id='overlay'></div><div id='popupWrapper'><div id='popupContent'><div class='title'>Settings</div><br/><span style='color:red'>This uses cookies to save the following. </span><br/><br/>";
-               header +=     "<table cellspacing='0' cellpadding='0'><tr><td valign='top'>Login Default Page:</td><td valign='top'><select id='popupSelect'>";
-               header +=     "<option value='ap'>Applications</option><option value='in'>Interviews</option><option value='js'>Job Search</option><option value='dc'>Documents</option><option value='jl'>Job Short List</option><option value='rk'>Rankings</option><option value='pr'>Profile</option><option value='wr'>Work Report Evaluations</option>";
-               header +=     "</select></td></tr><tr><td valign='top'>Load Message Off:</td><td valign='top'><input id='loadCheckbox' class='chkbox' type='checkbox'/></td></tr>";
-               header +=     "<tr><td valign='top'>Do not Show Updates:</td><td valign='top'><input id='updateCheckbox' class='chkbox' type='checkbox'/></td></tr>";
-               header +=     "<tr><td valign='top'>Remove Timer:</td><td valign='top'><input id='popupCheckbox' class='chkbox' type='checkbox' onchange='toggleRemoveTimer(this)'/></td></tr><tr>";
-               header +=     "<td valign='top'>Auto-Refresh Duration (min):<br/><span id='removeTimerDetails' class='details'>The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign='top'><input onkeypress='return decimalOnly(event)' id='popupText' type='text'/></td></tr></table>";
-               header +=     "<button class='button PSPUSHBUTTON' onclick='saveSettings()'>Save and Refresh</button><button style='float:right;' class='button PSPUSHBUTTON' onclick='hidePopup();'>Cancel</button></div></div></div>"
-               
-               header +=     WHITE_OVERLAY;
-               $("body").prepend(header);
-          }	
+          //Removing useless parts
+          $("#WAIT_main0").remove();
 
           // Add a CSS stylesheet
           var style = document.createElement( "style" ); 
           style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
           document.getElementsByTagName( "body" ).item(0).appendChild( style );	
 
-          //Specific layouts for pages
+     //SPECIFIC PAGE LAYOUTS
           $(".PSLEVEL1GRID.tablesorter").attr("cellpadding",0);
           $('.PSLEVEL1GRID').parent().addClass("tablepanel");
           $("table a.PTBREADCRUMB").parents("table").remove();
@@ -243,7 +249,7 @@ function startOperation()
                     $("form:last").css("margin-bottom","20px");
           }
           //DOCUMENTS PAGE
-          else if(pagetype == "resumes"){         
+          else if(pagetype == "resumes"){                
                $("form table tr:eq(3)").children().eq(1).attr("colspan",20);
                $("form > table > tbody > tr:last-child > td:first-child").attr("height",10);    
                var resumeTable = $("form table tr:eq(5)").remove().children().eq(1).html();
@@ -402,9 +408,9 @@ function startOperation()
                injectFunction("saveSettings(){var autoRefresh = document.getElementById('popupText').value;if(autoRefresh && autoRefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert('Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).');return -1;}var date = new Date();date.setTime(date.getTime()+(4*31*24*60*60*1000));var remove_load = document.getElementById('loadCheckbox').checked;var remove_timer = document.getElementById('popupCheckbox').checked;var hideupdates = document.getElementById('updateCheckbox').checked;var default_page = document.getElementById('popupSelect').value;var expires =  'expires='+date.toGMTString()+'; path/';document.cookie = 'LOAD_SCREEN='+(remove_load ? 1 : 0)+';'+expires;document.cookie = 'DISABLE_TIMER='+(remove_timer ? 1 : 0)+';'+expires;document.cookie = 'HIDE_UPDATES='+(hideupdates ? 1 : 0)+';'+expires;document.cookie = 'DEFAULT_PAGE='+default_page+';'+expires;document.cookie = 'AUTO_REFRESH='+autoRefresh+';'+expires;hidePopup();showLoadingPopup();window.location.href = window.location.href;}");
           }
           
-          //The white overlay runs with these are clicked
+          //When to run the white overlay
           $("a").click(function(){
-               if(getCookieValue('LOAD_SCREEN') != 1 && $(this).attr("target")!= "_blank" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1)
+               if(getCookieValue('LOAD_SCREEN') != 1 && $(this).attr("target")!= "_blank" && $(this).attr("target")!= "new" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1)
                     showLoadingPopup();
           });
 
@@ -483,7 +489,7 @@ function startOperation()
                     onload: function(response) {
                          // parseJSON is not available until jQuery 1.4.1, so eval is being used here
                          var data = eval("(" + response.responseText + ")");
-                    
+                       
                          if (data.version != CURRENT_VERSION) {
                               $("body").prepend(
                                    $(document.createElement("div")).css("background-color","#f1f8fe").append(
@@ -502,4 +508,8 @@ function startOperation()
           }
      }
 }                             
-                                   
+
+
+
+
+}catch(e){alert(e)}
