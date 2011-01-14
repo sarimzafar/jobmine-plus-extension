@@ -1,0 +1,157 @@
+/* tables */
+body, .PSPAGE, html, .PSSRCHPAGE {
+	margin: 0px;
+	padding: 0px;
+	width:100%;
+}
+
+
+table.tablesorter {
+	font-family:arial;
+	background-color: #f1f8fe;	
+	font-size: 8pt;
+	width: 100%;
+	text-align: left;
+	background-image:url('data:image/gif;base64,R0lGODlhAQAQAIAAAODq9tzm9CH5BAAAAAAALAAAAAABABAAAAIERI6pBQA7');
+	background-repeat: repeat-x;
+	background-position:0 15px;
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+	border-top: 1px solid #FFF;
+	height:30px;
+	padding: 0 4px;
+	padding-right:15px;
+	min-width:75px;
+}
+table.tablesorter thead tr th:hover, table.tablesorter tfoot tr th:hover{
+     background-color:#c1ecfe;
+}
+table.tablesorter thead tr .header {
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+table.tablesorter tbody td {
+	color: #3D3D3D;
+	background-color: #fff;
+	padding: 4px;
+	vertical-align: top;
+}
+
+table.tablesorter tbody td {
+	padding: 4px;
+}
+
+table.tablesorter tbody tr.odd td {
+	background-color:#F0F0F6;
+}
+table.tablesorter thead tr .headerSortUp {
+	background-image: url("data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7");	
+}
+table.tablesorter thead tr .headerSortDown {
+	background-image: url("data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7");
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+	background-color: #c1c6cb;
+}
+
+#jobminepanel .links a{
+     outline: none;
+     color:white;
+}
+#jobminepanel .links a:hover{
+     color:#acbffc;
+}
+
+form{
+     margin:0 30px;
+}
+
+body:not(.job_search_component, .student_data) form table{
+     width:100% !important;
+}
+.tablepanel{
+     width:100%;
+}
+.PSLEVEL1GRID{
+    margin: 5px 0 10px;    
+    border:1px solid #CCCCCC;
+    /*-moz-box-shadow:0 0 3px #333333;*/
+}
+.PSLEVEL1GRID .PSLEVEL1GRID{
+     margin: 0px;
+     border:none;
+}
+.PSGROUPBOXLABEL{
+     background-color:#333399;
+}
+
+.tablesorter tbody tr:hover td{
+     background-color: skyblue !important;
+}
+.tablesorter tbody tr:hover a:hover{
+     color: green;
+}
+
+.student_data td.PSHYPERLINK{
+     text-align:center;
+}
+
+
+/*Black Overlay*/
+#overlay{
+     position:fixed;
+     width:100%;
+     height:100%;
+     background-color:black;
+     opacity: 0.4;
+     z-index: 99;
+     left:0px;
+     top:0px;
+}
+#popupWrapper{
+     position:fixed;
+     width:50%;
+     height:50%;
+     bottom:0px;
+     right:0px;
+}
+#popupContent{
+     position:relative;
+     padding:20px;
+     width:310px;
+     height:360px;
+     top:-200px;
+     left:-175px;
+     background-color:white;
+     z-index:100;
+     font-family:Arial,Verdana;
+     -moz-box-shadow:0 0 10px #333333;
+}
+#popupContent .title{
+     font-size:20px;
+     font-weight:bold;
+     border-bottom:1px solid black;
+}
+#popupContent table input, #popupContent table select{
+     width:101px;
+     margin-bottom:20px;
+}
+#popupContent table input.chkbox{
+     width:auto;
+}
+
+#popupContent table{
+     width:100%;
+     margin-bottom:20px;
+}
+
+#popupContent .details{
+     font-size:11px;
+     margin-left:5px;
+     display:block;
+     color:#555555;
+}
+#popupContent .disabled .details{
+     color:#cccccc;
+}
