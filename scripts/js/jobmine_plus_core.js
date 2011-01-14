@@ -1,4 +1,3 @@
-try{
 /*   ======================================================
  *	Constants
  */
@@ -37,10 +36,11 @@ function getCookieValue(name){
 	var end = cookies.indexOf(';',lookup);
 	if(end == -1){end = cookies.length}
 	var value = cookies.substring(lookup,end);
-	if(value != null)
+	if(value != null){
 		return value;
-	else
+	}else{
 		return null;	
+     }
 }
 function showLoadingPopup(){
 	$("#popupWhiteContainer").css("display","block");
@@ -50,9 +50,10 @@ function loadPopupMsg(msg){
 	$("#whitePopupMsg").html(msg);
 }
 function resetGlobalTimer(){
-	if(GLOBAL_TIMER)
+	if(GLOBAL_TIMER){
         	clearTimeout(GLOBAL_TIMER);
      	GLOBAL_TIMER  = setTimeout(function(){window.location.href = window.location.href;},getCookieValue('AUTO_REFRESH')*60*1000);
+     }
 }
 
 function insertCustomHeader(){
@@ -81,7 +82,7 @@ function insertCustomHeader(){
      header +=     "<tr><td valign='top'>Do not Show Updates:</td><td valign='top'><input id='updateCheckbox' class='chkbox' type='checkbox'/></td></tr>";
      header +=     "<tr><td valign='top'>Remove Timer:</td><td valign='top'><input id='popupCheckbox' class='chkbox' type='checkbox' onchange='toggleRemoveTimer(this)'/></td></tr><tr>";
      header +=     "<td valign='top'>Auto-Refresh Duration (min):<br/><span id='removeTimerDetails' class='details'>The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign='top'><input onkeypress='return decimalOnly(event)' id='popupText' type='text'/></td></tr></table>";
-     header +=     "<button class='button PSPUSHBUTTON' onclick='saveSettings()'>Save and Refresh</button><button style='float:right;' class='button PSPUSHBUTTON' onclick='hidePopup();'>Cancel</button></div></div></div>"
+     header +=     "<button class='button PSPUSHBUTTON' onclick='saveSettings()'>Save and Refresh</button><button style='float:right;' class='button PSPUSHBUTTON' onclick='hidePopup();'>Cancel</button></div></div></div>";
      
      header +=     WHITE_OVERLAY;
      $("body").prepend(header);    
@@ -141,15 +142,15 @@ function startOperation()
                          break;
                }
      }
-     else{
+     else
+     {
           //Get page type and add a class to body
           var pagetype = $('title').html() ? $('title').html().toLowerCase().replace(/\s|-/gi,"_").replace(/_+/gi,"_") : "none";
           $("body").addClass(pagetype);
 
           // Insert navigation header at the top and overlays
-          if(pagetype != "jobmine_|_university_of_waterloo")     
-               insertCustomHeader();
-
+          if(pagetype != "jobmine_|_university_of_waterloo"){insertCustomHeader();}
+          
           //Removing useless parts
           $("#WAIT_main0").remove();
 
@@ -163,13 +164,12 @@ function startOperation()
           $('.PSLEVEL1GRID').parent().addClass("tablepanel");
           $("table a.PTBREADCRUMB").parents("table").remove();
 
-          if(pagetype != "student_data" )
-               $(".PSACTIVETAB").parents().eq(2).remove();
+          if(pagetype != "student_data" ){$(".PSACTIVETAB").parents().eq(2).remove();}
           if(pagetype == "job_search_component")            //JOB INQUIRY PAGE
           {
                if(!$("form > span").html() || $("form > span").html().search(/Lookup/i) == -1)
                {
-                    $('form > table > tbody > tr:first-child > td:first-child').html("<div style='margin-bottom:30px;' class='PAPAGETITLE'><span style='position:absolute;margin-left:10px;'>Job Search Criteria</span></div>")
+                    $('form > table > tbody > tr:first-child > td:first-child').html("<div style='margin-bottom:30px;' class='PAPAGETITLE'><span style='position:absolute;margin-left:10px;'>Job Search Criteria</span></div>");
                     //Fix the width of the page
                     $('form > table').css('width',0);
                     $('form > table').removeAttr('width');
@@ -199,8 +199,9 @@ function startOperation()
                          tables.tablesorter();
                          tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");
                     }
-               }else
+               }else{
                     $("form").css("margin-bottom","20px");
+               }
           }
           //PROFILE PAGE
           else if(pagetype == "student_data" && $("form > table:last-child").html()) 
@@ -232,21 +233,23 @@ function startOperation()
                }
                //SKILLS INVENTORY
                else if(bottomNav.indexOf("| \nSkills Inventory") != -1){
-                    $("form table td").find("label:contains('Student ID:')").parent().attr("colspan",3).css("padding-left","10px")			
-                         $("form table td.tablepanel table").css("margin","0 auto").css("width","auto");
-                         $("form table.PSLEVEL1GRIDLABEL").css("width","100%");
-                         $("body form table").eq(-2).css("text-align","center");
-                         $("textarea").css("width","100%").attr("cols","").parent().append("<br/><br/>");
-                    if(UNSAFEWINDOWSUPPORT)
+                    $("form table td").find("label:contains('Student ID:')").parent().attr("colspan",3).css("padding-left","10px");			
+                    $("form table td.tablepanel table").css("margin","0 auto").css("width","auto");
+                    $("form table.PSLEVEL1GRIDLABEL").css("width","100%");
+                    $("body form table").eq(-2).css("text-align","center");
+                    $("textarea").css("width","100%").attr("cols","").parent().append("<br/><br/>");
+                    if(UNSAFEWINDOWSUPPORT){
                          $("form table td.tablepanel").attr("colspan",20);
-               else
-                    $("body > form:last > table > tbody > tr").eq('11').children(':last').attr("colspan","14");
+                    }else{
+                         $("body > form:last > table > tbody > tr").eq('11').children(':last').attr("colspan","14");
+                    }
                }
                //LOOKUP PAGES
-               if($("form span").html() && $("form span").html().search(/Lookup.*ID/ig) == -1)
+               if($("form span").html() && $("form span").html().search(/Lookup.*ID/ig) == -1){
                     $("body form table:first").css("width","auto").css("margin","0 auto");
-               else
+               }else{
                     $("form:last").css("margin-bottom","20px");
+               }
           }
           //DOCUMENTS PAGE
           else if(pagetype == "resumes"){                
@@ -269,7 +272,7 @@ function startOperation()
           else if(pagetype == "job_short_list")
           { 
                window.scrollTo(0,0);
-               $(".PAERRORTEXT").html("(You can remove multiple jobs by checking the rows off and clicking 'Delete Selected' or use the minus button ( - ) to remove jobs from your list.)")
+               $(".PAERRORTEXT").html("(You can remove multiple jobs by checking the rows off and clicking 'Delete Selected' or use the minus button ( - ) to remove jobs from your list.)");
                
                var numOfChkbx = 0;
                //Add another column
@@ -278,31 +281,32 @@ function startOperation()
                     numOfChkbx = index+1;
                });
                $('table table table.PSLEVEL1GRID tbody tr:first-child').prepend('<th align="LEFT" class="PSLEVEL1GRIDCOLUMNHDR" scope="col">&nbsp;</th>');
-               $("#UW_CO_JSLIST_VW_").parent().parent().html("<td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return returnFalse()'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td>")
+               $("#UW_CO_JSLIST_VW_").parent().parent().html("<td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return returnFalse()'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td>");
                $("form > table > tbody > tr").eq(7).after("<tr><td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return returnFalse()'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td></tr>");
                //Add invisible iframe
-               $("body").append("<iframe style='display:none;' name='hiddenIframe' id='hiddenIframe' width='100%' height='400' src=''></iframe>")     		
+               $("body").append("<iframe style='display:none;' name='hiddenIframe' id='hiddenIframe' width='100%' height='400' src=''></iframe>");     		
                $("body").append("<script language='javascript'>function runIframeFunction(name,_function){window.frames[name].eval(_function);}</script>");
                
                //Functions for the buttons to do stuff     		
                if(UNSAFEWINDOWSUPPORT){
-                    unsafeWindow.selectAllChkbx = function(flag,numChkbx){for(var i=0;i<numChkbx;i++){$("#chkbx"+i).attr("checked",flag);}return false;}
+                    unsafeWindow.selectAllChkbx = function(flag,numChkbx){for(var i=0;i<numChkbx;i++){$("#chkbx"+i).attr("checked",flag);}return false;};
                     unsafeWindow.returnFalse= function(){return false;}
                }
-               else{
+               else               
+               {
                     injectFunction("selectAllChkbx(flag,numChkbx){for(var i=0;i<numChkbx;i++){document.getElementById('chkbx'+i).checked = flag;}return false;}");
                     injectFunction("returnFalse(){return false;}");               
                }
                
                $('.deleteSelectedButton').click(function(){                 //Mulitple job removal function
                     var numChkbx = $(this).attr('total');
-                         var iframeArray = new Array();
-                         for(var i=0;i<numChkbx;i++)
-                              if($("#chkbx"+i).attr("checked"))
-                                   iframeArray.push(i);
+                    var iframeArray = new Array();
+                    for(var i=0;i<numChkbx;i++){
+                         if($("#chkbx"+i).attr("checked")){iframeArray.push(i);}
+                    }
                     var iframeCounter = iframeArray.length;
                     if(iframeCounter == 0){return false;}    //if nothing is selected
-                    var answer = confirm (iframeCounter < 10 ? "Do you wish to delete the checked rows from this page? The page itself will refresh after the transaction is saved." : "Do you wish to delete the checked rows from this page? You have "+iframeCounter+" rows to delete and this may take a while. The page itself will refresh after the transaction is saved.")
+                    var answer = confirm (iframeCounter < 10 ? "Do you wish to delete the checked rows from this page? The page itself will refresh after the transaction is saved." : "Do you wish to delete the checked rows from this page? You have "+iframeCounter+" rows to delete and this may take a while. The page itself will refresh after the transaction is saved.");
                     if(!answer){return false;}    //if nothing is selected
                     $("#hiddenIframe").attr("src","servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOB_SLIST&RL=&target=main0&navc=5170"); 
                     loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness.<br/><span style='color:blue;font-size:20px;'>*Refresh to Cancel*</span><br/>Starting...");
@@ -313,21 +317,24 @@ function startOperation()
                     $("#hiddenIframe").load(function(){          //Refresh recursive function
                          if(iframeArray.length != 0){   //Start counting and removing
                               loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness.<br/><span style='color:blue;font-size:20px;'>*Refresh to Cancel*</span><br/>Progress: "+(iframeCounter - iframeArray.length+1)+"/"+iframeCounter);
-                              if(UNSAFEWINDOWSUPPORT)
-                                   unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0','UW_CO_STUJOBLST$delete$"+(iframeArray.pop())+"$$0')")				
-                              else
+                              if(UNSAFEWINDOWSUPPORT){
+                                   unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0','UW_CO_STUJOBLST$delete$"+(iframeArray.pop())+"$$0')");				
+                              }else{
                                    runJS('runIframeFunction("hiddenIframe","submitAction_main0(document.main0,\'UW_CO_STUJOBLST$delete$'+(iframeArray.pop())+'$$0\')")');	
+                              }
                          }
                          else if(iframeCounter > 0){     //Save 
                               loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness. <br/><span style='color:red'>Saving now... Do not refresh.</span>");
                               iframeCounter = -1;      // go to next step
-                              if(UNSAFEWINDOWSUPPORT)	
+                              if(UNSAFEWINDOWSUPPORT){
                                    unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0', '#ICSave')");
-                              else
+                              }else{
                                    runJS('runIframeFunction("hiddenIframe","submitAction_main0(document.main0, \'#ICSave\')")');
+                              }
                          }
-                         else if(iframeCounter == -1)       //Just refresh the page itself
-                              window.location = JOB_SHORT_PAGE;
+                         else if(iframeCounter == -1){       //Just refresh the page itself
+                              window.location = JOB_SHORT_PAGE;                              
+                         }
                     });
                     return false;
                });
@@ -368,23 +375,24 @@ function startOperation()
                     $('#updateCheckbox').attr("checked",(unsafeWindow.getCookieValue('HIDE_UPDATES') == 1 ? true : false));  
                     $('#loadCheckbox').attr("checked",(unsafeWindow.getCookieValue('LOAD_SCREEN') == 1 ? true : false));  
                     unsafeWindow.toggleRemoveTimer(document.getElementById("popupCheckbox"));
-               }
+               };
                unsafeWindow.toggleRemoveTimer = function(obj){
-                    if(obj.checked)
+                    if(obj.checked){                    
                          $("#popupText").removeAttr("disabled").css("background-color","white").css("color","black").parent().prev().css("color","black").removeClass("disabled");
-                    else
+                    }else{
                          $("#popupText").attr("disabled","disabled").css("background-color","#EEE").css("color","#CCC").parent().prev().addClass('disabled').css("color","#CCC");
-               }
+                    }
+               };
                unsafeWindow.saveSettings = function(){
                     var autorefresh = $("#popupText").attr("value");
-                    if(autorefresh && autorefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert("Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).");return;}
+                    if(autorefresh && autorefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert("Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).");return;};
                     var date = new Date();
                     date.setTime(date.getTime()+(4*31*24*60*60*1000));     //4 months
                     var remove_load = $('#loadCheckbox').attr("checked");
                     var remove_timer = $('#popupCheckbox').attr("checked");
                     var hideupdates = $('#updateCheckbox').attr("checked");
                     var default_page = $("#popupSelect").attr("value");
-                    var expires =  'expires='+date.toGMTString()+'; path/'
+                    var expires =  'expires='+date.toGMTString()+'; path/';
                     document.cookie = 'LOAD_SCREEN='+(remove_load ? 1 : 0)+';'+expires;
                     document.cookie = 'DISABLE_TIMER='+(remove_timer ? 1 : 0)+';'+expires;
                     document.cookie = 'HIDE_UPDATES='+(hideupdates ? 1 : 0)+';'+expires;
@@ -393,9 +401,9 @@ function startOperation()
                     unsafeWindow.hidePopup();
                     unsafeWindow.showLoadingPopup();
                     window.location.reload();
-               }
-               unsafeWindow.hidePopup = function(){$("#popupContainer").css("display","none");$("html").css("overflow","auto");}
-               unsafeWindow.decimalOnly = function(evt){var charCode = (evt.which) ? evt.which : event.keyCode;if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46){return false;}return true;}                  
+               };
+               unsafeWindow.hidePopup = function(){$("#popupContainer").css("display","none");$("html").css("overflow","auto");};
+               unsafeWindow.decimalOnly = function(evt){var charCode = (evt.which) ? evt.which : event.keyCode;if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46){return false;}return true;};        
                unsafeWindow.showLoadingPopup = function(){if(unsafeWindow.getCookieValue('LOAD_SCREEN') != 1){$("#popupWhiteContainer").css("display","block");$("html").css("overflow","hidden");}}
           }
           else
@@ -423,19 +431,18 @@ function startOperation()
           var GLOBAL_TIMER = null;
           if(getCookieValue('DISABLE_TIMER') == 1){    
                if(UNSAFEWINDOWSUPPORT){
-                    unsafeWindow.setupTimeout = function(){return false;}
-                    unsafeWindow.displayTimeoutMsg = function(){return false;}
-                    unsafeWindow.displayTimeoutWarningMsg = function(){return false;}
+                    unsafeWindow.setupTimeout = function(){return false;};
+                    unsafeWindow.displayTimeoutMsg = function(){return false;};
+                    unsafeWindow.displayTimeoutWarningMsg = function(){return false;};
                }else{
                     injectFunction('displayTimeoutMsg(){return false;}');
                     injectFunction('displayTimeoutWarningMsg(){return false;}');
                     runJS("clearInterval(timeoutID)");
                     runJS("clearInterval(timeoutWarningID)");
                }
-               if(getCookieValue('AUTO_REFRESH') <= 0  || getCookieValue('AUTO_REFRESH') > 19)
+               if(getCookieValue('AUTO_REFRESH') <= 0  || getCookieValue('AUTO_REFRESH') > 19){
                     setTimeout(function(){window.location = window.location;},19*60*1000);
-               else
-               {
+               }else{
                     document.addEventListener('click',resetGlobalTimer,true);
                     resetGlobalTimer();
                }
@@ -501,15 +508,10 @@ function startOperation()
                                              ).attr("href", isChrome() ? "http://userscripts.org/scripts/show/80771" : "http://userscripts.org/scripts/source/80771.user.js").attr('target',isChrome() ? "_blank" : "")
                                    ).css("width","100%").css("text-align","center")
                               );
-                              $("#whiteOverlay").css("top","145px")
+                              $("#whiteOverlay").css("top","145px");
                          }
                     }
                });
           }
      }
-}                             
-
-
-
-
-}catch(e){alert(e)}
+}   
