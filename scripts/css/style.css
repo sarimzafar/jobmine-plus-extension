@@ -159,10 +159,10 @@ body:not(.job_search_component, .student_data) form table{
      display:none;
 }
 
-#popupContent .About span.panels#About{
+#popupContent .About span#About{
      display:block;
 }
 
-#popupContent .Settings span.panels#Settings{
+#popupContent .Settings span#Settings{
      display:block;
 }
