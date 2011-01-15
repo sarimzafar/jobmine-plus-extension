@@ -154,15 +154,3 @@ body:not(.job_search_component, .student_data) form table{
 #popupContent .disabled .details{
      color:#cccccc;
 }
-
-#popupContent span.panels{
-     display:none;
-}
-
-#popupContent .About span#About{
-     display:block;
-}
-
-#popupContent .Settings span#Settings{
-     display:block;
-}
