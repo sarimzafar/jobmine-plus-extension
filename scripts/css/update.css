@@ -8,5 +8,5 @@ body:not(.v103) div#updateInfo{
      display:block !important;
 }
 body:not(.v103) div#whiteOverlay{
-     top:148px;
+     top:148px !important;
 }
