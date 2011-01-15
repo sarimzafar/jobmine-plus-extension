@@ -1,7 +1,5 @@
 Issues:
-- make the header and css load faster if possible
 - fix the updating for chrome
-- clean up code
 
 Optional Fixes:
 - add better sorting for dates
