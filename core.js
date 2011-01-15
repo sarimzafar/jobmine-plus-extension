@@ -2,7 +2,7 @@
  *	Constants
  */
 
-var CURRENT_VERSION = 101;
+var CURRENT_VERSION = 103;
 var UNSAFEWINDOWSUPPORT = unsafeWindow.toString().indexOf("[object Window]") != -1;
 var SCRIPTSURL = "https://jobmine-plus.googlecode.com/svn/trunk/scripts";
 
@@ -56,7 +56,9 @@ function resetGlobalTimer(){
 }
 
 function insertCustomHeader(){
-     var header = '<div id="jobminepanel" style="wid``th:100%; height:125px; background-repeat: repeat-x;';
+     var header = '<div id="updateInfo" style="display:none;background-color: #f1f8fe; width: 100%; text-align: center;"><a popup="false" href="http://userscripts.org/scripts/source/80771.user.js">There is a newer version of Jobmine Plus, click to install.</a></div>';
+     
+     header +=     '<div id="jobminepanel" style="width:100%; height:125px; background-repeat: repeat-x;';
      header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
      header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
      header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
@@ -159,10 +161,14 @@ function startOperation()
           // Insert navigation header at the top and overlays
           if(pagetype != "jobmine_|_university_of_waterloo"){insertCustomHeader();}
           
-          // Add a CSS stylesheet
+          // Add a CSS stylesheets
           var style = document.createElement( "style" ); 
           style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
+          if(getCookieValue('HIDE_UPDATES') == 0){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
           document.getElementsByTagName( "body" ).item(0).appendChild( style );	
+          
+          //Adds current version to the body class
+          $('body').addClass("v"+CURRENT_VERSION);
           
           //Removing useless parts
           $("#WAIT_main0").remove();
@@ -503,33 +509,6 @@ function startOperation()
           }else if(pagetype == 'job_search_component'){
                tables.find("tr:contains('On Short List')").find("td").css("background-color",WORST);
                tables.find("tr:contains('Already Applied')").find("td").css("background-color",WORST);
-          }	
-          
-          // Check for Updates
-          if(getCookieValue('HIDE_UPDATES') != 1)
-          {
-               GM_xmlhttpRequest({
-                    method: "GET",
-                    url: SCRIPTSURL+"/version.txt",
-                    onload: function(response) {
-                         // parseJSON is not available until jQuery 1.4.1, so eval is being used here
-                         var data = eval("(" + response.responseText + ")");
-                       
-                         if (data.version != CURRENT_VERSION) {
-                              $("body").prepend(
-                                   $(document.createElement("div")).css("background-color","#f1f8fe").append(
-                                             $(document.createElement("a")).append(
-                                                  isChrome() ? 
-                                                       "Version " + (data.version/100) + " now available. Click to here to jump to userscript page. ( " + data.date + ")"
-                                                  :
-                                                       "Version " + (data.version/100) + " now available. Click to install. ( " + data.date + ")"
-                                             ).attr("href", isChrome() ? "http://userscripts.org/scripts/show/80771" : "http://userscripts.org/scripts/source/80771.user.js").attr('target',isChrome() ? "_blank" : "")
-                                   ).css("width","100%").css("text-align","center")
-                              );
-                              $("#whiteOverlay").css("top","145px");
-                         }
-                    }
-               });
           }
      }   
-}   
+}  

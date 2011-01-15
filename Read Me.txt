@@ -1,5 +1,4 @@
 Issues:
-- fix the updating for chrome
 
 Optional Fixes:
 - add better sorting for dates
