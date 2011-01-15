@@ -4,6 +4,6 @@
  *        the same as in the userscript CURRENT_VERSION
 */
 
-body.v103 div#updateInfo{
-     display:none;
+body:not(.v103) div#updateInfo{
+     display:block !important;
 }
