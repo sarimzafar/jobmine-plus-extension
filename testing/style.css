@@ -6,27 +6,32 @@ input.button{
      color:red;
 }
 
-#jobDescriptionArea{
-     margin-top:15px;
+.jobDescriptionArea{
      width:100%;
 }
 
-#jobDescriptionArea td, #comments td{
+.jobDescriptionArea td, #comments td{
      font-size:14px;
 }
 
-#jobDescriptionArea .right{
-     width:300px;
+.jobDescriptionArea .left{
+     width:100%;
 }
 
-#jobDescriptionArea a.location{
+.jobDescriptionArea .right td{
+     white-space:nowrap;     
+}
+
+.jobDescriptionArea a.location{
      color: #3333cc;
      text-decoration: none;
 }
 
-#jobDescriptionArea .category{
+.jobDescriptionArea .category{
      font-weight:bold;
      padding-right:10px;
+     white-space:nowrap;   
+     width:10px;
 }
 
 #comments{

@@ -4,6 +4,7 @@
           <style>
                hr{  
                     color:#6c6cbd;
+                    margin:10px 0;
                }
                .page{
                     width:760px;
@@ -11,7 +12,8 @@
                     margin-top: 40px;
                     margin-bottom: 40px;
                     -moz-box-shadow: 0 0 1em black;
-                    height:1000px;
+                    -webkit-box-shadow: 0 0 1em black;
+                   
                     background-color: #f6f6f6;
                     padding: 35px 20px;
                     font-family: Arial, Verdana, san-serif;
@@ -20,11 +22,12 @@
               
                #jobDetails .title{
                     font-size:19px;                    
-                    color: #4b4bb4 !important;
+                    color: #4b4bb4 !important;                   
                     font-weight: bold;
                }
                #jobDetails .title a{
                     font-weight: normal;
+                    margin-left:10px;
                }
           </style>
      </head>
@@ -33,7 +36,8 @@
                <span class='title'>Employer: <a href='#'>Research In Motion Limited</a></span>
                <input class='button' type='button' value='Print Job Description'/>
                <br/>
-               <table id='jobDescriptionArea' cellspacing='0' cellpadding='0'>
+               <br/>
+               <table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>
                     <tr>
                          <td valign='top' class='left'>
                               <table cellspacing='0' cellpadding='0'>
@@ -62,10 +66,11 @@
                                         <td valign='top'>Required</td>
                                    </tr>
                               </table>
+                              <input style='margin-top:10px;' class='button' type='button' value='View Employer Profile'/>
                          </td>
                     </tr>
                </table>
-               <input class='button' type='button' value='View Employer Profile'/><br/><br/>
+               <br/>
                <table id='comments' cellspacing='0' cellpadding='0'>
                     <tr>
                          <td class='category' valign='top'>Comments:</td>
@@ -128,6 +133,44 @@
                          https://rim.taleo.net/careersection/rimcampus/jobdetail.ftl?lang=en&job=1003200
                     </div>
                     <hr/>
+                    <table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>
+                         <tr>
+                              <td valign='top' class='left'>
+                                   <table cellspacing='0' cellpadding='0'>
+                                        <tr>
+                                             <td valign='top' class='category'>Posting Open Date:</td>
+                                             <td valign='top'>07 JUL 2010</td>
+                                        </tr>
+                                        <tr>
+                                             <td valign='top' class='category'>CECS Field Co-ordinator:</td>
+                                             <td valign='top'>Anderson, John</td>
+                                        </tr>
+                                        <tr>
+                                             <td colspan='2'>
+                                                  <br/>
+                                                  <table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>
+                                                       <tr>
+                                                            <td valign='top' class='category'>Disciplines:</td>
+                                                            <td valign='top'>MATH-Computer Science, ENG-Computer, ENG-Electrical, ENG-Software Engineering, ENG-Systems Design</td>
+                                                       </tr>
+                                                  </table>
+                                             </td>
+                                        </tr>
+                                   </table>
+                              </td>
+                              <td valign='top' class='right'>
+                                   <table cellspacing='0' cellpadding='0'>
+                                        <tr>
+                                             <td valign='top' class='category'>Last Day to Apply:</td>
+                                             <td valign='top'>11 JUL 2010</td>
+                                        </tr>
+                                   </table>
+                              </td>
+                         </tr>
+                    </table> 
+                    <hr/>  
+                    <br/>            
+                    <br/>            
                </div>             
           </div>
      </body>

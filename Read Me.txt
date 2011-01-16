@@ -8,7 +8,7 @@ Features:
 - Add in the title of how much is being deleted in the job short list tab
 - All the view applications for the employer, make it look better
 - popups to allow people to understand features
-
+- search maps google with location use: http://maps.google.ca/maps?hl=en&q=location
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html
