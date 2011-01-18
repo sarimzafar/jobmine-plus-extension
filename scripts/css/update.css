@@ -4,9 +4,9 @@
  *        the same as in the userscript CURRENT_VERSION
 */
 
-body:not(.v104) div#updateInfo{
+body:not(.v105) div#updateInfo{
      display:block !important;
 }
-body:not(.v104) div#whiteOverlay{
+body:not(.v105) div#whiteOverlay{
      top:144px !important;
 }
