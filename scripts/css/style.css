@@ -154,7 +154,3 @@ body:not(.job_search_component, .student_data) form table{
 #popupContent .disabled .details{
      color:#cccccc;
 }
-
-#crazyTesting{
-     display:none;
-}
