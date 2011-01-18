@@ -1,5 +1,6 @@
 Issues:
 
+
 Optional Fixes:
 - add better sorting for dates
 
@@ -9,8 +10,15 @@ Features:
 - All the view applications for the employer, make it look better
 - popups to allow people to understand features
 - search maps google with location use: http://maps.google.ca/maps?hl=en&q=location
+- checkboxes on applications to update or use a newer or different resume
+
+Added to this Release:
+- All traces of ES is now sent to SS
+
+
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html
 2. Then use notepad++ to do a regex on "\r\n" and replace that with nothing
      Error: then check the file make sure semicolons and brakets are applied
+     

@@ -1,3 +1,28 @@
+/*var headID = document.getElementsByTagName("head")[0];         
+var newScript = document.createElement('script');
+newScript.type = 'text/javascript';
+
+var tnode = document.createTextNode("function alert(){confirm('i own u')}")
+newScript.appendChild(tnode)
+headID.appendChild(newScript);*/
+
+
+
+/*========================================================
+ *   Redirects
+ */
+
+//Redirect them ES to ES
+if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1)
+{
+     window.location.href = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";
+     return;        //redirect, do not need to do more
+}
+else if(document.getElementById("search"))        //SS login screen
+{
+     return;
+}
+
 /*   ======================================================
  *	Constants
  */
@@ -42,6 +67,8 @@ function getCookieValue(name){
      }
 }
 function showLoadingPopup(){
+     //Fix chrome overlay problem
+     if(!UNSAFEWINDOWSUPPORT && $("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
 	$("#popupWhiteContainer").css("display","block");
         $("html").css("overflow","hidden");
 }
@@ -99,11 +126,8 @@ function insertCustomHeader(){
 }
 
 /*   ======================================================
- *   Functions that are not for Firefox
+ *   Functions that are alternatives for unsafeWindow
  */
-function isChrome(){
-     return navigator.userAgent.indexOf("Chrome") != -1;
-}
 //run js code, its ugly, runs after page loads,		RUN THIS LAST
 function runJS(code){	
      window.location.href = "javascript:"+code;
@@ -164,7 +188,7 @@ function startOperation()
           // Add a CSS stylesheets
           var style = document.createElement( "style" ); 
           style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
-          if(getCookieValue('HIDE_UPDATES') == 0){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
+          if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
           document.getElementsByTagName( "body" ).item(0).appendChild( style );	
           
           //Adds current version to the body class
@@ -379,7 +403,7 @@ function startOperation()
           
          
           //Setting Popup Specifics
-          /* LEAVING HERE FOR READING PURPOSES.*/
+          /* LEAVING HERE FOR READING PURPOSES.
           if(UNSAFEWINDOWSUPPORT)
           {
                unsafeWindow.showPopup = function(panelName){
@@ -431,14 +455,14 @@ function startOperation()
                unsafeWindow.showLoadingPopup = function(){if(unsafeWindow.getCookieValue('LOAD_SCREEN') != 1){$("#popupWhiteContainer").css("display","block");$("html").css("overflow","hidden");}}
           }
           else
-          {
+          {*/
                injectFunction("showPopup(panelName){if(document.getElementById(panelName)){document.getElementById(panelName).style.display = 'block';document.getElementById('popupTitle').innerHTML = panelName;document.getElementById('popupContainer').style.display = 'block';document.getElementsByTagName('html')[0].style.overflow = 'hidden';if(panelName == 'Settings'){document.getElementById('popupSelect').value = getCookieValue('DEFAULT_PAGE');document.getElementById('popupText').value = getCookieValue('AUTO_REFRESH') != -1 ? getCookieValue('AUTO_REFRESH') : 0;document.getElementById('popupCheckbox').checked = getCookieValue('DISABLE_TIMER') == 1 ? true : false;document.getElementById('updateCheckbox').checked = getCookieValue('HIDE_UPDATES') == 1 ? true : false;document.getElementById('loadCheckbox').checked = getCookieValue('LOAD_SCREEN') == 1 ? true : false;toggleRemoveTimer(document.getElementById('popupCheckbox'));}}}");
                injectFunction("toggleRemoveTimer(obj){var textfield = document.getElementById('popupText');if(obj.checked){textfield.disabled = '';textfield.style.backgroundColor = 'white';textfield.style.color = 'black';document.getElementById('removeTimerDetails').disabled = '';document.getElementById('removeTimerDetails').style.color= 'black';}else{textfield.disabled = 'disabled';textfield.style.backgroundColor = '#EEE';textfield.style.color = '#CCC';document.getElementById('removeTimerDetails').disabled = 'disabled';document.getElementById('removeTimerDetails').style.color= '#CCC';}}");
                injectFunction("hidePopup(){document.getElementById('popupContainer').style.display='none';document.getElementsByTagName('html')[0].style.overflow = 'auto';for(var p=0;p<document.getElementById('panelWrapper').childNodes.length;p++){document.getElementById('panelWrapper').childNodes[p].style.display = 'none';}}");
                injectFunction("decimalOnly(evt){var charCode = (evt.which) ? evt.which : event.keyCode;if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46){return false;}else{return true;}}");
                injectFunction("showLoadingPopup(){if(getCookieValue('LOAD_SCREEN') != 1){document.getElementById('popupWhiteContainer').style.display = 'block';document.getElementsByTagName('html')[0].style.overflow = 'hidden';}}");
                injectFunction("saveSettings(){var autoRefresh = document.getElementById('popupText').value;if(autoRefresh && autoRefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert('Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).');return -1;}var date = new Date();date.setTime(date.getTime()+(4*31*24*60*60*1000));var remove_load = document.getElementById('loadCheckbox').checked;var remove_timer = document.getElementById('popupCheckbox').checked;var hideupdates = document.getElementById('updateCheckbox').checked;var default_page = document.getElementById('popupSelect').value;var expires =  'expires='+date.toGMTString()+'; path/';document.cookie = 'LOAD_SCREEN='+(remove_load ? 1 : 0)+';'+expires;document.cookie = 'DISABLE_TIMER='+(remove_timer ? 1 : 0)+';'+expires;document.cookie = 'HIDE_UPDATES='+(hideupdates ? 1 : 0)+';'+expires;document.cookie = 'DEFAULT_PAGE='+default_page+';'+expires;document.cookie = 'AUTO_REFRESH='+autoRefresh+';'+expires;hidePopup();showLoadingPopup();window.location.href = window.location.href;}");
-          }
+          //}
           
           //When to run the white overlay
           $("a").click(function(){
@@ -512,3 +536,8 @@ function startOperation()
           }
      }   
 }  
+
+/*
+ *   Start running code
+ */
+startOperation();
