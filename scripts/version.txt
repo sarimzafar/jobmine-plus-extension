@@ -1,6 +1,4 @@
 {
-	"version"       : 103,
-	"date"          : "January 15 2011",
-	"permissions" : ["http://jobmine-plus.googlecode.com","https://jobmine.ccol.uwaterloo.ca"],
-	"description"  : "This is a message."
+	"version"       : 104,
+	"date"          : "January 17 2011"
 }
