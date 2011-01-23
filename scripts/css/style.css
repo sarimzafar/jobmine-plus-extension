@@ -162,7 +162,7 @@ body:not(.job_search_component, .student_data) form table{
      color:black;
      border:1px solid black;     
      font-size:11px;
-     background-image:url("hintbox.png");
+     background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hintbox.png");
 }
 
 #hintmsg a{    
@@ -170,7 +170,7 @@ body:not(.job_search_component, .student_data) form table{
      height:10px;
      display:block;
      outline:none;
-     background-image:url("hint_close.png");
+     background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hint_close.png");
      float:right;     
 }
 #hintmsg a:hover{  
