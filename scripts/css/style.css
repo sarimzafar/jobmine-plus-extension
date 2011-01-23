@@ -160,7 +160,6 @@ body:not(.job_search_component, .student_data) form table{
      position:absolute;
      font-family:Verdana, Arial;
      color:black;
-     border:1px solid black;     
      font-size:11px;
      background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hintbox.png");
 }
