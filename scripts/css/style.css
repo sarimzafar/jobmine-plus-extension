@@ -157,7 +157,7 @@ body:not(.job_search_component, .student_data) form table{
 
 /*Hint Popup*/
 #hintmsg{
-     position:absolute;
+     visibility:visible !important;
      font-family:Verdana, Arial;
      color:black;
      font-size:11px;
