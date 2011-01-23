@@ -230,3 +230,6 @@ body:not(.job_search_component, .student_data) form table{
      color:#777777;
 }
 
+#cssLoadTest{  
+     display:none !important;
+}
