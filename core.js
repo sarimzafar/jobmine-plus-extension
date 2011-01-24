@@ -1,3 +1,11 @@
+/*
+     BLock new tabs
+     javascript   =    function open(){//do stuff}
+     unsafewindow   =    unsafeWindow.window.open = function(){//do stuff}
+     
+*/
+
+
 /*var headID = document.getElementsByTagName("head")[0];         
 var newScript = document.createElement('script');
 newScript.type = 'text/javascript';

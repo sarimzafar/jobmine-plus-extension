@@ -53,11 +53,753 @@ else if(document.getElementById("search"))        //SS login screen
 (function($){$.extend({tablesorter:new
 function(){var parsers=[],widgets=[];this.defaults={cssHeader:"header",cssAsc:"headerSortUp",cssDesc:"headerSortDown",cssChildRow:"expand-child",sortInitialOrder:"asc",sortMultiSortKey:"shiftKey",sortForce:null,sortAppend:null,sortLocaleCompare:true,textExtraction:"simple",parsers:{},widgets:[],widgetZebra:{css:["even","odd"]},headers:{},widthFixed:false,cancelSelection:true,sortList:[],headerList:[],dateFormat:"us",decimal:'/\.|\,/g',onRenderHeader:null,selectorHeaders:'thead th',debug:false};function benchmark(s,d){log(s+","+(new Date().getTime()-d.getTime())+"ms");}this.benchmark=benchmark;function log(s){if(typeof console!="undefined"&&typeof console.debug!="undefined"){console.log(s);}else{alert(s);}}function buildParserCache(table,$headers){if(table.config.debug){var parsersDebug="";}if(table.tBodies.length==0)return;var rows=table.tBodies[0].rows;if(rows[0]){var list=[],cells=rows[0].cells,l=cells.length;for(var i=0;i<l;i++){var p=false;if($.metadata&&($($headers[i]).metadata()&&$($headers[i]).metadata().sorter)){p=getParserById($($headers[i]).metadata().sorter);}else if((table.config.headers[i]&&table.config.headers[i].sorter)){p=getParserById(table.config.headers[i].sorter);}if(!p){p=detectParserForColumn(table,rows,-1,i);}if(table.config.debug){parsersDebug+="column:"+i+" parser:"+p.id+"\n";}list.push(p);}}if(table.config.debug){log(parsersDebug);}return list;};function detectParserForColumn(table,rows,rowIndex,cellIndex){var l=parsers.length,node=false,nodeValue=false,keepLooking=true;while(nodeValue==''&&keepLooking){rowIndex++;if(rows[rowIndex]){node=getNodeFromRowAndCellIndex(rows,rowIndex,cellIndex);nodeValue=trimAndGetNodeText(table.config,node);if(table.config.debug){log('Checking if value was empty on row:'+rowIndex);}}else{keepLooking=false;}}for(var i=1;i<l;i++){if(parsers[i].is(nodeValue,table,node)){return parsers[i];}}return parsers[0];}function getNodeFromRowAndCellIndex(rows,rowIndex,cellIndex){return rows[rowIndex].cells[cellIndex];}function trimAndGetNodeText(config,node){return $.trim(getElementText(config,node));}function getParserById(name){var l=parsers.length;for(var i=0;i<l;i++){if(parsers[i].id.toLowerCase()==name.toLowerCase()){return parsers[i];}}return false;}function buildCache(table){if(table.config.debug){var cacheTime=new Date();}var totalRows=(table.tBodies[0]&&table.tBodies[0].rows.length)||0,totalCells=(table.tBodies[0].rows[0]&&table.tBodies[0].rows[0].cells.length)||0,parsers=table.config.parsers,cache={row:[],normalized:[]};for(var i=0;i<totalRows;++i){var c=$(table.tBodies[0].rows[i]),cols=[];if(c.hasClass(table.config.cssChildRow)){cache.row[cache.row.length-1]=cache.row[cache.row.length-1].add(c);continue;}cache.row.push(c);for(var j=0;j<totalCells;++j){cols.push(parsers[j].format(getElementText(table.config,c[0].cells[j]),table,c[0].cells[j]));}cols.push(cache.normalized.length);cache.normalized.push(cols);cols=null;};if(table.config.debug){benchmark("Building cache for "+totalRows+" rows:",cacheTime);}return cache;};function getElementText(config,node){var text="";if(!node)return"";if(!config.supportsTextContent)config.supportsTextContent=node.textContent||false;if(config.textExtraction=="simple"){if(config.supportsTextContent){text=node.textContent;}else{if(node.childNodes[0]&&node.childNodes[0].hasChildNodes()){text=node.childNodes[0].innerHTML;}else{text=node.innerHTML;}}}else{if(typeof(config.textExtraction)=="function"){text=config.textExtraction(node);}else{text=$(node).text();}}return text;}function appendToTable(table,cache){if(table.config.debug){var appendTime=new Date()}var c=cache,r=c.row,n=c.normalized,totalRows=n.length,checkCell=(n[0].length-1),tableBody=$(table.tBodies[0]),rows=[];for(var i=0;i<totalRows;i++){var pos=n[i][checkCell];rows.push(r[pos]);if(!table.config.appender){var l=r[pos].length;for(var j=0;j<l;j++){tableBody[0].appendChild(r[pos][j]);}}}if(table.config.appender){table.config.appender(table,rows);}rows=null;if(table.config.debug){benchmark("Rebuilt table:",appendTime);}applyWidget(table);setTimeout(function(){$(table).trigger("sortEnd");},0);};function buildHeaders(table){if(table.config.debug){var time=new Date();}var meta=($.metadata)?true:false;var header_index=computeTableHeaderCellIndexes(table);$tableHeaders=$(table.config.selectorHeaders,table).each(function(index){this.column=header_index[this.parentNode.rowIndex+"-"+this.cellIndex];this.order=formatSortingOrder(table.config.sortInitialOrder);this.count=this.order;if(checkHeaderMetadata(this)||checkHeaderOptions(table,index))this.sortDisabled=true;if(checkHeaderOptionsSortingLocked(table,index))this.order=this.lockedOrder=checkHeaderOptionsSortingLocked(table,index);if(!this.sortDisabled){var $th=$(this).addClass(table.config.cssHeader);if(table.config.onRenderHeader)table.config.onRenderHeader.apply($th);}table.config.headerList[index]=this;});if(table.config.debug){benchmark("Built headers:",time);log($tableHeaders);}return $tableHeaders;};function computeTableHeaderCellIndexes(t){var matrix=[];var lookup={};var thead=t.getElementsByTagName('THEAD')[0];var trs=thead.getElementsByTagName('TR');for(var i=0;i<trs.length;i++){var cells=trs[i].cells;for(var j=0;j<cells.length;j++){var c=cells[j];var rowIndex=c.parentNode.rowIndex;var cellId=rowIndex+"-"+c.cellIndex;var rowSpan=c.rowSpan||1;var colSpan=c.colSpan||1
 var firstAvailCol;if(typeof(matrix[rowIndex])=="undefined"){matrix[rowIndex]=[];}for(var k=0;k<matrix[rowIndex].length+1;k++){if(typeof(matrix[rowIndex][k])=="undefined"){firstAvailCol=k;break;}}lookup[cellId]=firstAvailCol;for(var k=rowIndex;k<rowIndex+rowSpan;k++){if(typeof(matrix[k])=="undefined"){matrix[k]=[];}var matrixrow=matrix[k];for(var l=firstAvailCol;l<firstAvailCol+colSpan;l++){matrixrow[l]="x";}}}}return lookup;}function checkCellColSpan(table,rows,row){var arr=[],r=table.tHead.rows,c=r[row].cells;for(var i=0;i<c.length;i++){var cell=c[i];if(cell.colSpan>1){arr=arr.concat(checkCellColSpan(table,headerArr,row++));}else{if(table.tHead.length==1||(cell.rowSpan>1||!r[row+1])){arr.push(cell);}}}return arr;};function checkHeaderMetadata(cell){if(($.metadata)&&($(cell).metadata().sorter===false)){return true;};return false;}function checkHeaderOptions(table,i){if((table.config.headers[i])&&(table.config.headers[i].sorter===false)){return true;};return false;}function checkHeaderOptionsSortingLocked(table,i){if((table.config.headers[i])&&(table.config.headers[i].lockedOrder))return table.config.headers[i].lockedOrder;return false;}function applyWidget(table){var c=table.config.widgets;var l=c.length;for(var i=0;i<l;i++){getWidgetById(c[i]).format(table);}}function getWidgetById(name){var l=widgets.length;for(var i=0;i<l;i++){if(widgets[i].id.toLowerCase()==name.toLowerCase()){return widgets[i];}}};function formatSortingOrder(v){if(typeof(v)!="Number"){return(v.toLowerCase()=="desc")?1:0;}else{return(v==1)?1:0;}}function isValueInArray(v,a){var l=a.length;for(var i=0;i<l;i++){if(a[i][0]==v){return true;}}return false;}function setHeadersCss(table,$headers,list,css){$headers.removeClass(css[0]).removeClass(css[1]);var h=[];$headers.each(function(offset){if(!this.sortDisabled){h[this.column]=$(this);}});var l=list.length;for(var i=0;i<l;i++){h[list[i][0]].addClass(css[list[i][1]]);}}function fixColumnWidth(table,$headers){var c=table.config;if(c.widthFixed){var colgroup=$('<colgroup>');$("tr:first td",table.tBodies[0]).each(function(){colgroup.append($('<col>').css('width',$(this).width()));});$(table).prepend(colgroup);};}function updateHeaderSortCount(table,sortList){var c=table.config,l=sortList.length;for(var i=0;i<l;i++){var s=sortList[i],o=c.headerList[s[0]];o.count=s[1];o.count++;}}function multisort(table,sortList,cache){if(table.config.debug){var sortTime=new Date();}var dynamicExp="var sortWrapper = function(a,b) {",l=sortList.length;for(var i=0;i<l;i++){var c=sortList[i][0];var order=sortList[i][1];var s=(table.config.parsers[c].type=="text")?((order==0)?makeSortFunction("text","asc",c):makeSortFunction("text","desc",c)):((order==0)?makeSortFunction("numeric","asc",c):makeSortFunction("numeric","desc",c));var e="e"+i;dynamicExp+="var "+e+" = "+s;dynamicExp+="if("+e+") { return "+e+"; } ";dynamicExp+="else { ";}var orgOrderCol=cache.normalized[0].length-1;dynamicExp+="return a["+orgOrderCol+"]-b["+orgOrderCol+"];";for(var i=0;i<l;i++){dynamicExp+="}; ";}dynamicExp+="return 0; ";dynamicExp+="}; ";if(table.config.debug){benchmark("Evaling expression:"+dynamicExp,new Date());}eval(dynamicExp);cache.normalized.sort(sortWrapper);if(table.config.debug){benchmark("Sorting on "+sortList.toString()+" and dir "+order+" time:",sortTime);}return cache;};function makeSortFunction(type,direction,index){var a="a["+index+"]",b="b["+index+"]";if(type=='text'&&direction=='asc'){return"("+a+" == "+b+" ? 0 : ("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : ("+a+" < "+b+") ? -1 : 1 )));";}else if(type=='text'&&direction=='desc'){return"("+a+" == "+b+" ? 0 : ("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : ("+b+" < "+a+") ? -1 : 1 )));";}else if(type=='numeric'&&direction=='asc'){return"("+a+" === null && "+b+" === null) ? 0 :("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : "+a+" - "+b+"));";}else if(type=='numeric'&&direction=='desc'){return"("+a+" === null && "+b+" === null) ? 0 :("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : "+b+" - "+a+"));";}};function makeSortText(i){return"((a["+i+"] < b["+i+"]) ? -1 : ((a["+i+"] > b["+i+"]) ? 1 : 0));";};function makeSortTextDesc(i){return"((b["+i+"] < a["+i+"]) ? -1 : ((b["+i+"] > a["+i+"]) ? 1 : 0));";};function makeSortNumeric(i){return"a["+i+"]-b["+i+"];";};function makeSortNumericDesc(i){return"b["+i+"]-a["+i+"];";};function sortText(a,b){if(table.config.sortLocaleCompare)return a.localeCompare(b);return((a<b)?-1:((a>b)?1:0));};function sortTextDesc(a,b){if(table.config.sortLocaleCompare)return b.localeCompare(a);return((b<a)?-1:((b>a)?1:0));};function sortNumeric(a,b){return a-b;};function sortNumericDesc(a,b){return b-a;};function getCachedSortType(parsers,i){return parsers[i].type;};this.construct=function(settings){return this.each(function(){if(!this.tHead||!this.tBodies)return;var $this,$document,$headers,cache,config,shiftDown=0,sortOrder;this.config={};config=$.extend(this.config,$.tablesorter.defaults,settings);$this=$(this);$.data(this,"tablesorter",config);$headers=buildHeaders(this);this.config.parsers=buildParserCache(this,$headers);cache=buildCache(this);var sortCSS=[config.cssDesc,config.cssAsc];fixColumnWidth(this);$headers.click(function(e){var totalRows=($this[0].tBodies[0]&&$this[0].tBodies[0].rows.length)||0;if(!this.sortDisabled&&totalRows>0){$this.trigger("sortStart");var $cell=$(this);var i=this.column;this.order=this.count++%2;if(this.lockedOrder)this.order=this.lockedOrder;if(!e[config.sortMultiSortKey]){config.sortList=[];if(config.sortForce!=null){var a=config.sortForce;for(var j=0;j<a.length;j++){if(a[j][0]!=i){config.sortList.push(a[j]);}}}config.sortList.push([i,this.order]);}else{if(isValueInArray(i,config.sortList)){for(var j=0;j<config.sortList.length;j++){var s=config.sortList[j],o=config.headerList[s[0]];if(s[0]==i){o.count=s[1];o.count++;s[1]=o.count%2;}}}else{config.sortList.push([i,this.order]);}};setTimeout(function(){setHeadersCss($this[0],$headers,config.sortList,sortCSS);appendToTable($this[0],multisort($this[0],config.sortList,cache));},1);return false;}}).mousedown(function(){if(config.cancelSelection){this.onselectstart=function(){return false};return false;}});$this.bind("update",function(){var me=this;setTimeout(function(){me.config.parsers=buildParserCache(me,$headers);cache=buildCache(me);},1);}).bind("updateCell",function(e,cell){var config=this.config;var pos=[(cell.parentNode.rowIndex-1),cell.cellIndex];cache.normalized[pos[0]][pos[1]]=config.parsers[pos[1]].format(getElementText(config,cell),cell);}).bind("sorton",function(e,list){$(this).trigger("sortStart");config.sortList=list;var sortList=config.sortList;updateHeaderSortCount(this,sortList);setHeadersCss(this,$headers,sortList,sortCSS);appendToTable(this,multisort(this,sortList,cache));}).bind("appendCache",function(){appendToTable(this,cache);}).bind("applyWidgetId",function(e,id){getWidgetById(id).format(this);}).bind("applyWidgets",function(){applyWidget(this);});if($.metadata&&($(this).metadata()&&$(this).metadata().sortlist)){config.sortList=$(this).metadata().sortlist;}if(config.sortList.length>0){$this.trigger("sorton",[config.sortList]);}applyWidget(this);});};this.addParser=function(parser){var l=parsers.length,a=true;for(var i=0;i<l;i++){if(parsers[i].id.toLowerCase()==parser.id.toLowerCase()){a=false;}}if(a){parsers.push(parser);};};this.addWidget=function(widget){widgets.push(widget);};this.formatFloat=function(s){var i=parseFloat(s);return(isNaN(i))?0:i;};this.formatInt=function(s){var i=parseInt(s);return(isNaN(i))?0:i;};this.isDigit=function(s,config){return/^[-+]?\d*$/.test($.trim(s.replace(/[,.']/g,'')));};this.clearTableBody=function(table){if($.browser.msie){function empty(){while(this.firstChild)this.removeChild(this.firstChild);}empty.apply(table.tBodies[0]);}else{table.tBodies[0].innerHTML="";}};}});$.fn.extend({tablesorter:$.tablesorter.construct});var ts=$.tablesorter;ts.addParser({id:"text",is:function(s){return true;},format:function(s){return $.trim(s.toLocaleLowerCase());},type:"text"});ts.addParser({id:"digit",is:function(s,table){var c=table.config;return $.tablesorter.isDigit(s,c);},format:function(s){return $.tablesorter.formatFloat(s);},type:"numeric"});ts.addParser({id:"currency",is:function(s){return/^[A’$a?Ê?.]/.test(s);},format:function(s){return $.tablesorter.formatFloat(s.replace(new RegExp(/[A’$a?Ê]/g),""));},type:"numeric"});ts.addParser({id:"ipAddress",is:function(s){return/^\d{2,3}[\.]\d{2,3}[\.]\d{2,3}[\.]\d{2,3}$/.test(s);},format:function(s){var a=s.split("."),r="",l=a.length;for(var i=0;i<l;i++){var item=a[i];if(item.length==2){r+="0"+item;}else{r+=item;}}return $.tablesorter.formatFloat(r);},type:"numeric"});ts.addParser({id:"url",is:function(s){return/^(https?|ftp|file):\/\/$/.test(s);},format:function(s){return jQuery.trim(s.replace(new RegExp(/(https?|ftp|file):\/\//),''));},type:"text"});ts.addParser({id:"isoDate",is:function(s){return/^\d{4}[\/-]\d{1,2}[\/-]\d{1,2}$/.test(s);},format:function(s){return $.tablesorter.formatFloat((s!="")?new Date(s.replace(new RegExp(/-/g),"/")).getTime():"0");},type:"numeric"});ts.addParser({id:"percent",is:function(s){return/\%$/.test($.trim(s));},format:function(s){return $.tablesorter.formatFloat(s.replace(new RegExp(/%/g),""));},type:"numeric"});ts.addParser({id:"usLongDate",is:function(s){return s.match(new RegExp(/^[A-Za-z]{3,10}\.? [0-9]{1,2}, ([0-9]{4}|'?[0-9]{2}) (([0-2]?[0-9]:[0-5][0-9])|([0-1]?[0-9]:[0-5][0-9]\s(AM|PM)))$/));},format:function(s){return $.tablesorter.formatFloat(new Date(s).getTime());},type:"numeric"});ts.addParser({id:"shortDate",is:function(s){return/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(s);},format:function(s,table){var c=table.config;s=s.replace(/\-/g,"/");if(c.dateFormat=="us"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,"$3/$1/$2");}else if(c.dateFormat=="uk"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,"$3/$2/$1");}else if(c.dateFormat=="dd/mm/yy"||c.dateFormat=="dd-mm-yy"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})/,"$1/$2/$3");}return $.tablesorter.formatFloat(new Date(s).getTime());},type:"numeric"});ts.addParser({id:"time",is:function(s){return/^(([0-2]?[0-9]:[0-5][0-9])|([0-1]?[0-9]:[0-5][0-9]\s(am|pm)))$/.test(s);},format:function(s){return $.tablesorter.formatFloat(new Date("2000/01/01 "+s).getTime());},type:"numeric"});ts.addParser({id:"metadata",is:function(s){return false;},format:function(s,table,cell){var c=table.config,p=(!c.parserMetadataName)?'sortValue':c.parserMetadataName;return $(cell).metadata()[p];},type:"numeric"});ts.addWidget({id:"zebra",format:function(table){if(table.config.debug){var time=new Date();}var $tr,row=-1,odd;$("tr:visible",table.tBodies[0]).each(function(i){$tr=$(this);if(!$tr.hasClass(table.config.cssChildRow))row++;odd=(row%2==0);$tr.removeClass(table.config.widgetZebra.css[odd?0:1]).addClass(table.config.widgetZebra.css[odd?1:0])});if(table.config.debug){$.tablesorter.benchmark("Applying Zebra widget",time);}}});})(jQuery);
-
 /*
  *   Jobmine plus code
  */ 
-var INTERVIEW_PAGE="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STU_INTVS&RL=&target=main0&navc=5170";var JOB_SEARCH_PAGE="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOBSRCH&RL=&target=main0&navc=5170";var DOCUMENT_PAGE="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STUDDOCS&RL=&target=main0&navc=5170";var JOB_SHORT_PAGE="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOB_SLIST&RL=&target=main0&navc=5170";var RANKING_PAGE="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STU_RNK2&RL=&target=main0&navc=5170";var PROFILE_PAGE="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STUDENT&RL=&target=main0&navc=5170";var WORK_REPORT_PAGE="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_WORKRPRT&RL=&target=main0&navc=5170";var APPLICATION_PAGE="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_APP_SUMMARY&RL=&target=main0&navc=5170";var WHITE_OVERLAY="<div id='popupWhiteContainer' style='display:none;'><div id='whiteOverlay' style='display:block;position:fixed;width:100%;height:100%;background-color:white;opacity:0.8;z-index:1;left:0px;top:125px;'></div><div id='popupWrapper' style='position:fixed;width:50%;height:50%;bottom:0px;right:0px;'><div id='popupWhiteContent' style='position:relative;width:450px; font-weight:bold; height:180px;top:-90px;font-size:30px;left:-225px;z-index:49;font-family:Arial,Verdana;text-align:center;text-shadow:-2px -2px 5px #777, 2px 2px 5px #777;'><span style='font-size:50px;'>Please be Patient.</span><br/><div id='whitePopupMsg'>Jobmine has been programmed to load pages really slowly.</div><br/><img alt='' style='position:relative;top:-125px;' src='"+SCRIPTSURL+"/images/loading.gif'></div></div></div>";function getCookieValue(name){var cookies=document.cookie;var lookup=cookies.indexOf(name+'=');if(lookup==-1){return-1;}lookup+=name.length+1;var end=cookies.indexOf(';',lookup);if(end==-1){end=cookies.length}var value=cookies.substring(lookup,end);if(value!=null){return value;}else{return null;}}function showLoadingPopup(){if(!UNSAFEWINDOWSUPPORT&&$("body").scrollTop()!=0){$("#whiteOverlay").css("top",0);};$("#popupWhiteContainer").css("display","block");$("html").css("overflow","hidden");}function loadPopupMsg(msg){$("#whitePopupMsg").html(msg);}function resetGlobalTimer(){if(GLOBAL_TIMER){clearTimeout(GLOBAL_TIMER);GLOBAL_TIMER=setTimeout(function(){window.location.href=window.location.href;},getCookieValue('AUTO_REFRESH')*60*1000);}}function insertCustomHeader(){var header='<div id="updateInfo" style="display:none;background-color: #f1f8fe; width: 100%; text-align: center;"><a popup="false" href="http://userscripts.org/scripts/source/80771.user.js">There is a newer version of Jobmine Plus, click to install.</a></div>';header+='<div id="jobminepanel" style="width:100%; height:125px; background-repeat: repeat-x;';header+='background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';header+='"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';header+='background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';header+='"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';header+='<td valign="top"><div class="links" style="margin-top:30px;width:940px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SEARCH_PAGE+'>Job Search</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SHORT_PAGE+'>Job Short List</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+APPLICATION_PAGE+'>Applications</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+INTERVIEW_PAGE+'>Interviews</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+RANKING_PAGE+'>Rankings</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+WORK_REPORT_PAGE+'>Work Report Evalutions</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" popup="false" href="javascript:showPopup(\'Settings\')">Settings</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" popup="false" href="javascript:showPopup(\'About\')">About</a> | ';header+='<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:saveWarning(\'main\',null,\'_top\',\'/servlets/iclientservlet/SS/?cmd=logout\')">Logout</a>';header+='</div></td><td width="100%" valign="top"><img style="float:right;" alt="" src="'+SCRIPTSURL+'/images/waterloo_logo.png"/></td></tr></table></div>';header+="<div id='popupContainer' style='display:none;'><div id='overlay'></div><div id='popupWrapper'><div id='popupContent'><div id='popupTitle' class='title'></div><br/><span id='panelWrapper'>";header+="<span class='panels' style='display:none;' id='Settings'><span style='color:red'>This uses cookies to save the following. </span><br/><br/>";header+="<table cellspacing='0' cellpadding='0'><tr><td valign='top'>Login Default Page:</td><td valign='top'>";header+="<select id='popupSelect'><option value='ap'>Applications</option><option value='in'>Interviews</option><option value='js'>Job Search</option><option value='dc'>Documents</option><option value='jl'>Job Short List</option><option value='rk'>Rankings</option><option value='pr'>Profile</option><option value='wr'>Work Report Evaluations</option></select>";header+="</td></tr><tr><td valign='top'>Load Message Off:</td><td valign='top'><input id='loadCheckbox' class='chkbox' type='checkbox'/></td></tr>";header+="<tr><td valign='top'>Do not Show Updates:</td><td valign='top'><input id='updateCheckbox' class='chkbox' type='checkbox'/></td></tr>";header+="<tr><td valign='top'>Remove Timer:</td><td valign='top'><input id='popupCheckbox' class='chkbox' type='checkbox' onchange='toggleRemoveTimer(this)'/></td></tr><tr>";header+="<td valign='top'>Auto-Refresh Duration (min):<br/><span id='removeTimerDetails' class='details'>The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign='top'><input onkeypress='return decimalOnly(event)' id='popupText' type='text'/></td></tr></table>";header+="<button class='button PSPUSHBUTTON' onclick='saveSettings()'>Save and Refresh</button><button style='float:right;' class='button PSPUSHBUTTON' onclick='hidePopup();'>Cancel</button></span>";header+="<span style='display:none;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>Any problems/issues/wanted features email me at <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button PSPUSHBUTTON' onclick='hidePopup();'>Cancel</button></span>";header+="</span></div></div></div>";header+=WHITE_OVERLAY;$("body").prepend(header);}function runJS(code){window.location.href="javascript:"+code;}function injectFunction(_function,bruteforce){$('body').append('<script language="javascript">function '+_function+'</script>');}function startOperation(){if(window.location.href=='https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&'){$('html').html("<body>"+WHITE_OVERLAY+"</body>");document.getElementById('popupWhiteContainer').style.display="block";var default_page=getCookieValue('DEFAULT_PAGE');switch(default_page){case'in':window.location=INTERVIEW_PAGE;break;case'js':window.location=JOB_SEARCH_PAGE;break;case'dc':window.location=DOCUMENT_PAGE;break;case'jl':window.location=JOB_SHORT_PAGE;break;case'rk':window.location=RANKING_PAGE;break;case'pr':window.location=PROFILE_PAGE;break;case'wr':window.location=WORK_REPORT_PAGE;break;default:window.location=APPLICATION_PAGE;break;}}else{var pagetype=$('title').html()?$('title').html().toLowerCase().replace(/\s|-/gi,"_").replace(/_+/gi,"_"):"none";$("body").addClass(pagetype);if(pagetype!="jobmine_|_university_of_waterloo"){insertCustomHeader();}var style=document.createElement("style");style.appendChild(document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';"));if(getCookieValue('HIDE_UPDATES')!=1){style.appendChild(document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';"));};document.getElementsByTagName("body").item(0).appendChild(style);$('body').addClass("v"+CURRENT_VERSION);$("#WAIT_main0").remove();$(".PSLEVEL1GRID.tablesorter").attr("cellpadding",0);$('.PSLEVEL1GRID').parent().addClass("tablepanel");$("table a.PTBREADCRUMB").parents("table").remove();if(pagetype!="student_data"){$(".PSACTIVETAB").parents().eq(2).remove();}if(pagetype=="job_search_component"){if(!$("form > span").html()||$("form > span").html().search(/Lookup/i)==-1){$('form > table > tbody > tr:first-child > td:first-child').html("<div style='margin-bottom:30px;' class='PAPAGETITLE'><span style='position:absolute;margin-left:10px;'>Job Search Criteria</span></div>");$('form > table').css('width',0);$('form > table').removeAttr('width');$('form > table > tbody > tr:first-child > td').eq(-2).remove();var searchTable=$('form > table > tbody > tr').eq(-2).html();var appsRemaining="<span class='PSEDITBOXLABEL'>"+$('form > table > tbody > tr').eq(21).html().replace(/<.*?>|\n/gi,"");var number=$('form > table > tbody > tr').eq(22).html().replace(/<.*?>|\n/gi,"");appsRemaining="<div class='PSTEXT' style='margin-bottom:15px;'><span style='position:absolute;margin-left:10px;'>"+appsRemaining.replace("(","</span>  "+number+"  (")+"</span></div>";$('form > table > tbody > tr').eq(21).remove();$('form > table > tbody > tr').eq(21).remove();$('form > table > tbody > tr').eq(-2).remove();$('form > table > tbody > tr').eq(-2).remove();$('form > table > tbody > tr:last-child').remove();$('table.PSGROUPBOX').parent().prev().attr("colspan",2).parent().prev().children(":first-child").attr("height","30");$('form:last').append("<table id='searchTable' cellspacing='0' cellpadding='0'><tr><td>"+appsRemaining+"</td></tr>"+searchTable+"</table>").css("margin-bottom","30px");var tables=$("table table table.PSLEVEL1GRID");if(tables.size()){$("#searchTable table").css("width","100%");$("#searchTable").css("width","100%");tables.css("width","100%");tables.each(function(){$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));});tables.addClass("tablesorter");tables.tablesorter();tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");}}else{$("form").css("margin-bottom","20px");}}else if(pagetype=="student_data"&&$("form > table:last-child").html()){var tables=$("table table table.PSLEVEL1GRID");if(tables.size()){$("table").css("width","100%");tables.css("width","100%");tables.each(function(){$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));});tables.addClass("tablesorter");tables.tablesorter();tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");}var bottomNav=$("form > table:last-child").html();if(bottomNav.indexOf("Term Cards |")!=-1){$("form > table > tbody >tr:first-child > td:last-child").attr("width",1);$("form > table > tbody >tr:first-child > td:last-child > img").attr("width",1);$("form > table > tbody >tr:first-child > td:first-child").attr("width",1);$("form > table > tbody >tr:first-child > td:first-child > img").attr("width",1);$("body form table").eq(1).children().children().eq(2).children(":first-child").attr("height",1);$("body form table").css("width","100%");}else if(bottomNav.indexOf("Student Personal Info |")!=-1||bottomNav.indexOf("Acad Info. |")!=-1){$("body form table").css("margin","0 auto");$("body form table").eq(-2).css("width","auto");}else if(bottomNav.indexOf("| \nSkills Inventory")!=-1){$("form table td").find("label:contains('Student ID:')").parent().attr("colspan",3).css("padding-left","10px");$("form table td.tablepanel table").css("margin","0 auto").css("width","auto");$("form table.PSLEVEL1GRIDLABEL").css("width","100%");$("body form table").eq(-2).css("text-align","center");$("textarea").css("width","100%").attr("cols","").parent().append("<br/><br/>");if(UNSAFEWINDOWSUPPORT){$("form table td.tablepanel").attr("colspan",20);}else{$("body > form:last > table > tbody > tr").eq('11').children(':last').attr("colspan","14");}}if($("form span").html()&&$("form span").html().search(/Lookup.*ID/ig)==-1){$("body form table:first").css("width","auto").css("margin","0 auto");}else{$("form:last").css("margin-bottom","20px");}}else if(pagetype=="resumes"){$("form table tr:eq(3)").children().eq(1).attr("colspan",20);$("form > table > tbody > tr:last-child > td:first-child").attr("height",10);var resumeTable=$("form table tr:eq(5)").remove().children().eq(1).html();$("form:last").append(resumeTable);$("table.PSLEVEL1GRID").css("width","100%");var tables=$("table table.PSLEVEL1GRID");if(tables.size()){tables.each(function(){$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));});tables.addClass("tablesorter");tables.tablesorter();tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");}}else if(pagetype=="job_short_list"){window.scrollTo(0,0);$(".PAERRORTEXT").html("(You can remove multiple jobs by checking the rows off and clicking 'Delete Selected' or use the minus button ( - ) to remove jobs from your list.)");var numOfChkbx=0;$('table table table.PSLEVEL1GRID > tbody > tr').not(':first-child').each(function(index){$(this).prepend('<td align="center" height="19" class="PSLEVEL1GRIDODDROW"><input id=chkbx'+index+' type="checkbox"></td>');numOfChkbx=index+1;});$('table table table.PSLEVEL1GRID tbody tr:first-child').prepend('<th align="LEFT" class="PSLEVEL1GRIDCOLUMNHDR" scope="col">&nbsp;</th>');$("#UW_CO_JSLIST_VW_").parent().parent().html("<td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return returnFalse()'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td>");$("form > table > tbody > tr").eq(7).after("<tr><td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return returnFalse()'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td></tr>");$("body").append("<iframe style='display:none;' name='hiddenIframe' id='hiddenIframe' width='100%' height='400' src=''></iframe>");$("body").append("<script language='javascript'>function runIframeFunction(name,_function){window.frames[name].eval(_function);}</script>");if(UNSAFEWINDOWSUPPORT){unsafeWindow.selectAllChkbx=function(flag,numChkbx){for(var i=0;i<numChkbx;i++){$("#chkbx"+i).attr("checked",flag);}return false;};unsafeWindow.returnFalse=function(){return false;};}else{injectFunction("selectAllChkbx(flag,numChkbx){for(var i=0;i<numChkbx;i++){document.getElementById('chkbx'+i).checked = flag;}return false;}");injectFunction("returnFalse(){return false;}");}$('.deleteSelectedButton').click(function(){var numChkbx=$(this).attr('total');var iframeArray=new Array();for(var i=0;i<numChkbx;i++){if($("#chkbx"+i).attr("checked")){iframeArray.push(i);}}var iframeCounter=iframeArray.length;if(iframeCounter==0){return false;}var answer=confirm(iframeCounter<10?"Do you wish to delete the checked rows from this page? The page itself will refresh after the transaction is saved.":"Do you wish to delete the checked rows from this page? You have "+iframeCounter+" rows to delete and this may take a while. The page itself will refresh after the transaction is saved.");if(!answer){return false;}$("#hiddenIframe").attr("src","servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOB_SLIST&RL=&target=main0&navc=5170");loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness.<br/><span style='color:blue;font-size:20px;'>*Refresh to Cancel*</span><br/>Starting...");$("#popupWhiteContainer").css("display","block");$("#popupWhiteContent").css("top","-150px");$("#whiteOverlay").css("top","0px");$("html").css("overflow","hidden");$("#hiddenIframe").load(function(){if(iframeArray.length!=0){loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness.<br/><span style='color:blue;font-size:20px;'>*Refresh to Cancel*</span><br/>Progress: "+(iframeCounter-iframeArray.length+1)+"/"+iframeCounter);if(UNSAFEWINDOWSUPPORT){unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0','UW_CO_STUJOBLST$delete$"+(iframeArray.pop())+"$$0')");}else{runJS('runIframeFunction("hiddenIframe","submitAction_main0(document.main0,\'UW_CO_STUJOBLST$delete$'+(iframeArray.pop())+'$$0\')")');}}else if(iframeCounter>0){loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness. <br/><span style='color:red'>Saving now... Do not refresh.</span>");iframeCounter=-1;if(UNSAFEWINDOWSUPPORT){unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0', '#ICSave')");}else{runJS('runIframeFunction("hiddenIframe","submitAction_main0(document.main0, \'#ICSave\')")');}}else if(iframeCounter==-1){window.location=JOB_SHORT_PAGE;}});return false;});var tables=$("table table table.PSLEVEL1GRID");if(tables.size()){$("table").css("width","100%");tables.css("width","100%");tables.each(function(){$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));});tables.addClass("tablesorter");tables.tablesorter();tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");}}else{var tables=$("table table table.PSLEVEL1GRID");if(tables.size()){$("table").css("width","100%");tables.css("width","100%");tables.each(function(){$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));});tables.addClass("tablesorter");tables.tablesorter();tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");}}injectFunction("showPopup(panelName){if(document.getElementById(panelName)){document.getElementById(panelName).style.display = 'block';document.getElementById('popupTitle').innerHTML = panelName;document.getElementById('popupContainer').style.display = 'block';document.getElementsByTagName('html')[0].style.overflow = 'hidden';if(panelName == 'Settings'){document.getElementById('popupSelect').value = getCookieValue('DEFAULT_PAGE');document.getElementById('popupText').value = getCookieValue('AUTO_REFRESH') != -1 ? getCookieValue('AUTO_REFRESH') : 0;document.getElementById('popupCheckbox').checked = getCookieValue('DISABLE_TIMER') == 1 ? true : false;document.getElementById('updateCheckbox').checked = getCookieValue('HIDE_UPDATES') == 1 ? true : false;document.getElementById('loadCheckbox').checked = getCookieValue('LOAD_SCREEN') == 1 ? true : false;toggleRemoveTimer(document.getElementById('popupCheckbox'));}}}");injectFunction("toggleRemoveTimer(obj){var textfield = document.getElementById('popupText');if(obj.checked){textfield.disabled = '';textfield.style.backgroundColor = 'white';textfield.style.color = 'black';document.getElementById('removeTimerDetails').disabled = '';document.getElementById('removeTimerDetails').style.color= 'black';}else{textfield.disabled = 'disabled';textfield.style.backgroundColor = '#EEE';textfield.style.color = '#CCC';document.getElementById('removeTimerDetails').disabled = 'disabled';document.getElementById('removeTimerDetails').style.color= '#CCC';}}");injectFunction("hidePopup(){document.getElementById('popupContainer').style.display='none';document.getElementsByTagName('html')[0].style.overflow = 'auto';for(var p=0;p<document.getElementById('panelWrapper').childNodes.length;p++){document.getElementById('panelWrapper').childNodes[p].style.display = 'none';}}");injectFunction("decimalOnly(evt){var charCode = (evt.which) ? evt.which : event.keyCode;if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46){return false;}else{return true;}}");injectFunction("showLoadingPopup(){if(getCookieValue('LOAD_SCREEN') != 1){document.getElementById('popupWhiteContainer').style.display = 'block';document.getElementsByTagName('html')[0].style.overflow = 'hidden';}}");injectFunction("saveSettings(){var autoRefresh = document.getElementById('popupText').value;if(autoRefresh && autoRefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert('Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).');return -1;}var date = new Date();date.setTime(date.getTime()+(4*31*24*60*60*1000));var remove_load = document.getElementById('loadCheckbox').checked;var remove_timer = document.getElementById('popupCheckbox').checked;var hideupdates = document.getElementById('updateCheckbox').checked;var default_page = document.getElementById('popupSelect').value;var expires =  'expires='+date.toGMTString()+'; path/';document.cookie = 'LOAD_SCREEN='+(remove_load ? 1 : 0)+';'+expires;document.cookie = 'DISABLE_TIMER='+(remove_timer ? 1 : 0)+';'+expires;document.cookie = 'HIDE_UPDATES='+(hideupdates ? 1 : 0)+';'+expires;document.cookie = 'DEFAULT_PAGE='+default_page+';'+expires;document.cookie = 'AUTO_REFRESH='+autoRefresh+';'+expires;hidePopup();showLoadingPopup();window.location.href = window.location.href;}");$("a").click(function(){if(getCookieValue('LOAD_SCREEN')!=1&&$(this).attr("target")!="_blank"&&$(this).attr("target")!="new"&&$(this).attr("popup")!="false"&&$(this).parent().html().indexOf('onclick="return ')==-1&&$(this).attr('href').indexOf('mailto')==-1)showLoadingPopup();});$("input").click(function(){if(getCookieValue('LOAD_SCREEN')!=1&&$(this).attr("type")=="button")showLoadingPopup();});var GLOBAL_TIMER=null;if(getCookieValue('DISABLE_TIMER')==1){if(UNSAFEWINDOWSUPPORT){unsafeWindow.setupTimeout=function(){return false;};unsafeWindow.displayTimeoutMsg=function(){return false;};unsafeWindow.displayTimeoutWarningMsg=function(){return false;};}else{injectFunction('displayTimeoutMsg(){return false;}');injectFunction('displayTimeoutWarningMsg(){return false;}');runJS("clearInterval(timeoutID)");runJS("clearInterval(timeoutWarningID)");}if(getCookieValue('AUTO_REFRESH')<=0||getCookieValue('AUTO_REFRESH')>19){setTimeout(function(){window.location=window.location;},19*60*1000);}else{document.addEventListener('click',resetGlobalTimer,true);resetGlobalTimer();}}var VERYGOOD="#9f9";var GOOD="#96f0b1";var MEDIOCRE="#faf39a";var BAD="#fdaaaa";var WORST="#b5bbc1";if(pagetype=="student_app_summary"){tables.find("tr").find("td:first, th:first").remove();tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);tables.find("tr:contains('Alternate')").find("td").css("background-color",MEDIOCRE);tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);tables.find("tr:contains('Employed')").find("td").css("background-color",VERYGOOD);tables.find("tr:contains('Not Selected')").find("td").css("background-color",WORST);tables.find("tr:contains('Cancelled')").find("td").css("background-color",BAD);tables.find("tr:contains('Filled')").find("td").css("background-color",BAD);tables.find("tr:contains('Not Ranked')").find("td").css("background-color",WORST);}else if(pagetype=="student_sel.interview_schedule"){tables.find("tr:contains('Break')").find("td").css("background-color",MEDIOCRE);}else if(pagetype=="job_short_list"){tables.find("tr:contains('Already Applied')").find("td").css("background-color",VERYGOOD);tables.find("tr:contains('Not Posted')").find("td").css("background-color",BAD);tables.find("tr:contains('Not Authorized to Apply')").find("td").css("background-color",WORST);}else if(pagetype=="student_interviews"){tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);tables.find("tr:contains('Filled')").find("td").css("background-color",WORST);tables.find("tr:contains('Unfilled')").find("td").css("background-color",WORST);}else if(pagetype=="student_ranking_open"){tables.find("tr:contains('Offer')").find("td").css("background-color",VERYGOOD);tables.find("tr:contains('Ranked')").find("td").css("background-color",GOOD);tables.find("tr:contains('Not Ranked')").find("td").css("background-color",WORST);}else if(pagetype=='job_search_component'){tables.find("tr:contains('On Short List')").find("td").css("background-color",WORST);tables.find("tr:contains('Already Applied')").find("td").css("background-color",WORST);}}}
+//Pages 
+var INTERVIEW_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STU_INTVS&RL=&target=main0&navc=5170";
+var JOB_SEARCH_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOBSRCH&RL=&target=main0&navc=5170";
+var DOCUMENT_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STUDDOCS&RL=&target=main0&navc=5170";
+var JOB_SHORT_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOB_SLIST&RL=&target=main0&navc=5170";
+var RANKING_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STU_RNK2&RL=&target=main0&navc=5170";
+var PROFILE_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STUDENT&RL=&target=main0&navc=5170";
+var WORK_REPORT_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_WORKRPRT&RL=&target=main0&navc=5170";
+var APPLICATION_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_APP_SUMMARY&RL=&target=main0&navc=5170";
+
+//White overlay
+var WHITE_OVERLAY = 	"<div id='popupWhiteContainer' style='display:none;'><div id='whiteOverlay' style='display:block;position:fixed;width:100%;height:100%;background-color:white;opacity:0.5;z-index:1;left:0px;top:125px;'></div><div id='popupWrapper' style='position:fixed;width:50%;height:50%;bottom:0px;right:0px;'><div id='popupWhiteContent' style='position:relative;width:450px; font-weight:bold; height:180px;top:-90px;font-size:30px;left:-225px;z-index:49;font-family:Arial,Verdana;text-align:center;text-shadow:-2px -2px 5px #777, 2px 2px 5px #777;'><span style='font-size:50px;'>Please be Patient.</span><br/><div id='whitePopupMsg'>Jobmine has been programmed to load pages really slowly.</div><br/><img alt='' style='position:relative;top:-125px;' src='"+SCRIPTSURL+"/images/loading.gif'></div></div></div>";
+
+                                   
+
+/*======================================*\
+l*        FUNCTIONS                                                |
+\*======================================*/
+//Able get cookies, -1 means it does not exist
+function getCookieValue(name){
+	var cookies = document.cookie;
+	var lookup = cookies.indexOf(name+'=');
+	if(lookup == -1){return -1;}
+	
+	lookup += name.length + 1;
+	var end = cookies.indexOf(';',lookup);
+	if(end == -1){end = cookies.length}
+	var value = cookies.substring(lookup,end);
+	if(value != null){
+		return value;
+	}else{
+		return null;	
+     }
+}
+function showLoadingPopup(){
+     //Fix chrome overlay problem
+     if($("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
+	$("#popupWhiteContainer").css("display","block");	
+     $("body").css("overflow","hidden");
+}
+function loadPopupMsg(msg){
+	$("#whitePopupMsg").html(msg);
+}
+function resetGlobalTimer(){
+	if(GLOBAL_TIMER){
+        	clearTimeout(GLOBAL_TIMER);
+     	GLOBAL_TIMER  = setTimeout(function(){window.location.href = window.location.href;},getCookieValue('AUTO_REFRESH')*60*1000);
+     }
+}
+function applyTableSorting(path){
+     var tables = $(path);
+     if (tables.size()) {
+          $("table:not('.PSGROUPBOX')").css("width","100%");
+          tables.each(function() {$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));	});
+          tables.addClass("tablesorter");
+          tables.tablesorter();
+          tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");
+     }
+     return tables;
+}
+
+//Runs the function when CSS is ready, very customized
+function cssReady(the_function){var style = window.getComputedStyle(document.getElementById('cssLoadTest'), null).getPropertyValue("display");if(window.getComputedStyle(document.getElementById('cssLoadTest'), null).getPropertyValue("display") == "none"){the_function();}else{setTimeout(function(){cssReady(the_function)},300);}}
+
+function insertCustomHeader(){
+     var header = '<div id="updateInfo" style="display:none;background-color: #f1f8fe; width: 100%; text-align: center;"><a popup="false" href="http://userscripts.org/scripts/source/80771.user.js">There is a newer version of Jobmine Plus, click to install.</a></div>';
+     
+     header +=     '<div id="jobminepanel" style="width:100%; height:125px; background-repeat: repeat-x;';
+     header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
+     header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
+     header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
+     header +=     '"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
+     header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:940px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SEARCH_PAGE +'>Job Search</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SHORT_PAGE+'>Job Short List</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+APPLICATION_PAGE+'>Applications</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+INTERVIEW_PAGE+'>Interviews</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+RANKING_PAGE+'>Rankings</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+WORK_REPORT_PAGE+'>Work Report Evalutions</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" id="settings_nav" popup="false" href="javascript:showPopup(\'Settings\')">Settings</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" popup="false" href="javascript:showPopup(\'About\')">About</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:saveWarning(\'main\',null,\'_top\',\'/servlets/iclientservlet/SS/?cmd=logout\')">Logout</a>';
+     header +=     '</div></td><td width="100%" valign="top"><img style="float:right;" alt="" src="'+SCRIPTSURL+'/images/waterloo_logo.png"/></td></tr></table></div>';
+     
+     header +=     "<div id='popupContainer' style='display:none;'><div id='overlay'></div><div id='popupWrapper'><div id='popupContent'><div id='popupTitle' class='title'></div><br/><span id='panelWrapper'>";
+     
+     //Settings Popup
+     header +=     "<span class='panels' style='display:none;' id='Settings'><span style='color:red'>This uses cookies to save the following. </span><br/><br/>";
+     header +=     "<table cellspacing='0' cellpadding='0'><tr><td valign='top'>Login Default Page:</td><td valign='top'>";
+     header +=     "<select id='popupSelect'><option value='ap'>Applications</option><option value='in'>Interviews</option><option value='js'>Job Search</option><option value='dc'>Documents</option><option value='jl'>Job Short List</option><option value='rk'>Rankings</option><option value='pr'>Profile</option><option value='wr'>Work Report Evaluations</option></select>";
+     header +=     "</td></tr><tr><td valign='top'>Load Message Off:</td><td valign='top'><input id='loadCheckbox' class='chkbox' type='checkbox'/></td></tr>";
+     header +=     "<tr><td valign='top'>Do not Show Updates:</td><td valign='top'><input id='updateCheckbox' class='chkbox' type='checkbox'/></td></tr>";
+     header +=     "<tr><td valign='top'>Remove Timer:</td><td valign='top'><input id='popupCheckbox' class='chkbox' type='checkbox' onchange='toggleRemoveTimer(this)'/></td></tr><tr>";
+     header +=     "<td valign='top'>Auto-Refresh Duration (min):<br/><span id='removeTimerDetails' class='details'>The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign='top'><input onkeypress='return decimalOnly(event)' id='popupText' type='text'/></td></tr></table>";
+     header +=     "<button class='button PSPUSHBUTTON' onclick='saveSettings()'>Save and Refresh</button><button style='float:right;' class='button PSPUSHBUTTON' onclick='hidePopup();'>Cancel</button></span>";
+     
+     //About Popup
+     header +=     "<span style='display:none;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>Any problems/issues/wanted features email me at <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button PSPUSHBUTTON' onclick='hidePopup();'>Cancel</button></span>";
+     
+     header +=     "</span></div></div></div>";
+     
+     //White overlay
+     header +=     WHITE_OVERLAY;
+     
+     //Hint Popup
+     header +=     "<div id='hintmsg' style='display:none;visibility:hidden;position:absolute;' class=''><a style='cursor:pointer;' popup='false'></a><div id='description'></div><input type='checkbox' id='preventShowingChkbx'  /><div id='preventShowingText'>Never show me this again.</div></div>";
+     header +=     "<div id='cssLoadTest' style='visibility:hidden;display:block;'></div>";
+     $("body").prepend(header);    
+}
+
+/*======================================*\
+l*        ALTERNATIVE UNSAFEWINDOW FUCNTIONS      |
+\*======================================*/
+//run js code, its ugly, runs after page loads,		RUN THIS LAST
+function runJS(code){	
+     window.location.href = "javascript:"+code;
+}
+	//Able to inject functions into the page or rewrite functions, DOES NOT RUN IF runJS IS EXECUTED BEFORE, bruteforce forces the function to be set even if unsafeWindow is supported
+function injectFunction(_function,bruteforce){
+     $('body').append('<script language="javascript">function '+_function+'</script>');
+}
+
+/*======================================*\
+l*        START OPERATION                                      |
+\*======================================*/                      
+function startOperation()
+{try{
+     if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&')
+     {	 
+          //On load, please redirect to start page          
+          $('html').html("<body>"+WHITE_OVERLAY+"</body>");	
+          document.getElementById('popupWhiteContainer').style.display = "block";
+          
+          var default_page = getCookieValue('DEFAULT_PAGE');
+          switch(default_page){
+               case 'in':
+                    window.location = INTERVIEW_PAGE;
+                    break;
+               case 'js':
+                    window.location = JOB_SEARCH_PAGE;
+                    break;
+               case 'dc':
+                    window.location = DOCUMENT_PAGE;
+                    break;
+               case 'jl':
+                    window.location = JOB_SHORT_PAGE;
+                    break;
+               case 'rk':
+                    window.location = RANKING_PAGE;
+                    break;
+               case 'pr':
+                    window.location = PROFILE_PAGE;
+                    break;
+               case 'wr':
+                    window.location = WORK_REPORT_PAGE;
+                    break;
+               default:
+                    window.location = APPLICATION_PAGE;
+                    break;
+          }
+     }
+     else
+     {
+/*======================================*\
+l*        PAGE CLEAN UP                                           |
+\*======================================*/
+          //Get page type and add a class to body
+          var pagetype = $('title').html() ? $('title').html().toLowerCase().replace(/\s|-/gi,"_").replace(/_+/gi,"_") : "none";
+          $("body").addClass(pagetype);
+
+          // Insert navigation header at the top and overlays
+          if(pagetype != "jobmine_|_university_of_waterloo"){insertCustomHeader();}
+          
+          // Add a CSS stylesheets
+          var style = document.createElement( "style" ); 
+          style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
+          if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
+          document.getElementsByTagName( "body" ).item(0).appendChild( style );	
+          
+          //Adds current version to the body class
+          $('body').addClass("v"+CURRENT_VERSION);
+          
+          //Removing useless parts
+          $("#WAIT_main0").remove();
+          $("#WAIT_main").remove();
+          
+          //Makes all View buttons to the next tab
+          $("a.PSHYPERLINK:contains('View')").attr("target","_blank");
+          
+     //SPECIFIC PAGE LAYOUTS
+          $(".PSLEVEL1GRID.tablesorter").attr("cellpadding",0);
+          $('.PSLEVEL1GRID').parent().addClass("tablepanel");
+          $("table a.PTBREADCRUMB").parents("table").remove();
+
+          if(pagetype != "student_data" ){$(".PSACTIVETAB").parents().eq(2).remove();}
+          
+/*======================================*\
+l*        JOB SEARCH PAGE                                       |
+\*======================================*/
+          if(pagetype == "job_search_component")            
+          {
+               var tableBody = null;
+               if(!$("form > span").html() || $("form > span").html().search(/Lookup/i) == -1)
+               {
+                    $('form > table > tbody > tr:first-child > td:first-child').html("<div style='margin-bottom:30px;' class='PAPAGETITLE'><span style='position:absolute;margin-left:10px;'>Job Search Criteria</span></div>");
+                    //Fix the width of the page
+                    $('form > table').css('width',0);
+                    $('form > table').removeAttr('width');
+                    $('form > table > tbody > tr:first-child > td').eq(-2).remove();
+                    //move the application text to the second table
+                    var searchTable = $('form > table > tbody > tr').eq(-2).html();
+                    var appsRemaining = "<span class='PSEDITBOXLABEL'>"+$('form > table > tbody > tr').eq(21).html().replace(/<.*?>|\n/gi,"");    
+                    var number = $('form > table > tbody > tr').eq(22).html().replace(/<.*?>|\n/gi,"");
+                    appsRemaining = "<div class='PSTEXT' style='margin-bottom:15px;'><span style='position:absolute;margin-left:10px;'>"+appsRemaining.replace("(","</span>  "+number+"  (")+"</span></div>";
+                    //Remove left over tr's and fix layouts
+                    $('form > table > tbody > tr').eq(21).remove();
+                    $('form > table > tbody > tr').eq(21).remove();    
+                    $('form > table > tbody > tr').eq(-2).remove();
+                    $('form > table > tbody > tr').eq(-2).remove();
+                    $('form > table > tbody > tr:last-child').remove();
+                    $('table.PSGROUPBOX').parent().prev().attr("colspan",2).parent().prev().children(":first-child").attr("height","30");
+                    $('form:last').append("<table id='searchTable' cellspacing='0' cellpadding='0'><tr><td>"+appsRemaining+"</td></tr>"+searchTable+"</table>").css("margin-bottom","30px");              //full width table
+                    
+                    //Playing with the table
+                    tableBody = $("#searchTable tr tr:eq(1) td.tablepanel table.PSLEVEL1GRID tr");
+                    if(tableBody.length > 2)
+                    {
+                         tableBody.each(function(row){                                                
+                              var obj = $(this).children();                         
+                              if(row == 0)   //Header
+                              {
+                                   //Adds a changes column
+                                   obj.eq(8).after("<th title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Hiring Chances*</th>");
+                              }
+                              else      //Body
+                              {
+                                   //Adds a changes column
+                                   var numApps = obj.eq(8);
+                                  /*   Reading Purposes
+                                        var openings = parseInt(obj.eq(5).html());
+                                        var applications = parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1));
+                                   */
+                                   numApps.after("<td title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+Math.round((parseInt(obj.eq(5).html())/parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1)))*10000)/100+"%</td>");
+                                   
+                                   if(obj.eq(7).children().html().trim() == "&nbsp;")
+                                   {
+                                        obj.eq(7).children().html("Job Shortlist Deleted").attr("title","Jobmine has a thing where if you delete a job from shortlist, you cannot shortlist the job again. Sorry.");
+                                   }
+                              }         
+                         });
+                    }
+                    var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+                    $("body > form > table").css("width","auto");
+               }else{
+                    $("form").css("margin-bottom","20px");
+               }
+              
+               //Alter the tables by column and row, there needs to be at least 1 result
+               if(tableBody && tableBody.length > 2)
+               {
+                    tableBody.each(function(num){
+                         if(num != 0)   //Avoid headers
+                         {
+                              var obj = $(this).children();
+                              var company = obj.eq(2).html();
+                              var location = obj.eq(4).html();
+                              
+                              //This is the Google search for the company
+                              obj.eq(2).wrapInner("<a title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
+                              //This is for google map the location
+                              obj.eq(4).wrapInner("<a title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
+                         }
+                    });
+               }
+          }
+/*======================================*\
+l*        PROFILE PAGE                                            |
+\*======================================*/
+          else if(pagetype == "student_data" && $("form > table:last-child").html()) 
+          {
+               applyTableSorting("table table table.PSLEVEL1GRID");
+               var bottomNav = $("form > table:last-child").html();
+               /*======================================*\
+               l*        TERM CARDS                                              |
+               \*======================================*/
+               if(bottomNav.indexOf("Term Cards |") != -1){
+                    $("form > table > tbody >tr:first-child > td:last-child").attr("width",1);
+                    $("form > table > tbody >tr:first-child > td:last-child > img").attr("width",1);
+                    $("form > table > tbody >tr:first-child > td:first-child").attr("width",1);
+                    $("form > table > tbody >tr:first-child > td:first-child > img").attr("width",1);
+                    $("body form table").eq(1).children().children().eq(2).children(":first-child").attr("height",1);        
+               }
+               /*======================================*\
+               l*        STUDENT PERSONAL INFO & ACADEMIC INFO    |
+               \*======================================*/
+               else if(bottomNav.indexOf("Student Personal Info |") != -1 || bottomNav.indexOf("Acad Info. |") != -1){
+                    $("body form table").css("margin","0 auto");
+                    $("body form table").eq(-2).css("width","auto");          
+               }
+               /*======================================*\
+               l*        SKILLS INVENTORY                                      |
+               \*======================================*/
+               else if(bottomNav.indexOf("| \nSkills Inventory") != -1){
+                    $("form table td").find("label:contains('Student ID:')").parent().attr("colspan",3).css("padding-left","10px");			
+                    $("form table td.tablepanel table").css("margin","0 auto").css("width","auto");
+                    $("body form table").eq(-2).css("text-align","center");
+                    $("textarea").css("width","100%").attr("cols","").parent().append("<br/><br/>");
+                    if(UNSAFEWINDOWSUPPORT){
+                         $("form table td.tablepanel").attr("colspan",20);
+                    }else{
+                         $("body > form:last > table > tbody > tr").eq('11').children(':last').attr("colspan","14");
+                    }
+               }
+               /*======================================*\
+               l*        LOOK UP PAGESS                                        |
+               \*======================================*/
+               if($("form span").html() && $("form span").html().search(/Lookup.*ID/ig) == -1){
+                    $("body form table:first").css("width","auto").css("margin","0 auto");
+               }else{
+                    $("form:last").css("margin-bottom","20px");
+               }
+          }
+/*======================================*\
+l*        DOCUMENTS PAGE                                       |
+\*======================================*/
+          else if(pagetype == "resumes"){                
+               $("form table tr:eq(3)").children().eq(1).attr("colspan",20);
+               $("form > table > tbody > tr:last-child > td:first-child").attr("height",10);    
+               var resumeTable = $("form table tr:eq(5)").remove().children().eq(1).html();
+               $("form:last").append(resumeTable);
+
+               applyTableSorting("table table.PSLEVEL1GRID");
+               $("body > form > table").eq(0).css("width","auto");
+          }
+/*======================================*\
+l*        JOB SHORT LIST PAGE                                  |
+\*======================================*/
+          else if(pagetype == "job_short_list")
+          { 
+               window.scrollTo(0,0);
+               $(".PAERRORTEXT").html("(You can remove multiple jobs by checking the rows off and clicking 'Delete Selected' or use the minus button ( - ) to remove jobs from your list.)");
+               
+               var numOfChkbx = 0;
+               //Adding columns to tables:
+               //   Added checkboxes 
+               //   Added the google search and map feature
+               $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(row){        
+                    var obj = $(this);
+                    var child = obj.children();
+                    if(row == 0)   //Header
+                    {   
+                         obj.prepend('<th align="LEFT" class="PSLEVEL1GRIDCOLUMNHDR" scope="col">&nbsp;</th>');
+                    }
+                    else      //Body
+                    {
+                         //Add checkboxes
+                         obj.prepend('<td align="center" height="19" class="PSLEVEL1GRIDODDROW"><input class="editChkbx" row="'+numOfChkbx+'" id=chkbx'+(numOfChkbx++)+' type="checkbox"></td>');
+                         
+                         //Add company and location href
+                         var company = child.eq(2).html();
+                         var location = child.eq(4).html();                         
+                         child.eq(2).wrapInner("<a title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
+                         child.eq(4).wrapInner("<a title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"'/>"); 
+                    }    
+               });
+               //Add invisible iframe
+               $("body").append("<iframe style='display:none;' name='hiddenIframe' id='hiddenIframe' width='100%' height='400' src=''></iframe>");     		
+               $("body").append("<script language='javascript'>function runIframeFunction(name,_function){window.frames[name].eval(_function);}</script>");
+               
+               //Add the buttons that auto select/deselect the checkboxes
+               $("#UW_CO_JSLIST_VW_").parent().parent().html("<td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return false'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td>");
+               $("form > table > tbody > tr").eq(7).after("<tr><td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return false'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td></tr>");
+               
+               /*======================================*\
+               l*        MULTISELECT CHECKBOXES                           |
+               \*======================================*/
+               var anchorChkbox = null;
+               var shiftDown = false;
+               $(document).keydown(function(evt){if(evt.shiftKey){evt.preventDefault();shiftDown = true;}});
+               $(document).keyup(function(evt){if(evt.keyCode == '16'){evt.preventDefault();shiftDown = false;}});
+               $(".editChkbx").click(function(evt)
+               {
+                    var obj = $(this);
+                    var row = parseInt(obj.attr("row"));         
+                    //If shift held, the anchor is set, and the checkbox is not the same as the last clicked
+                    if(shiftDown && anchorChkbox != null && row != anchorChkbox)
+                    {
+                         if(anchorChkbox < row)        //Sees if you are going from down up or up down
+                              for(var i=anchorChkbox; i<=row;i++)
+                                   $("#chkbx"+i).attr("checked",obj.is(':checked'));
+                         else
+                              for(var i=anchorChkbox; i>row;i--)
+                                   $("#chkbx"+i).attr("checked",obj.is(':checked'));
+                    }   
+                    anchorChkbox = row;                   
+               });
+               
+               //Functions for the buttons to do stuff     		
+               if(UNSAFEWINDOWSUPPORT){
+                    unsafeWindow.selectAllChkbx = function(flag,numChkbx){for(var i=0;i<numChkbx;i++){$("#chkbx"+i).attr("checked",flag);}return false;};
+               }else{
+                    injectFunction("selectAllChkbx(flag,numChkbx){for(var i=0;i<numChkbx;i++){document.getElementById('chkbx'+i).checked = flag;}return false;}");
+               }
+               
+               /*======================================*\
+               l*        MULTIJOB REMOVAL                                     |
+               \*======================================*/
+               $('.deleteSelectedButton').click(function(){                 
+                    var numChkbx = $(this).attr('total');
+                    var iframeArray = new Array();
+                    //Get the checkboxes in an array
+                    for(var i=0;i<numChkbx;i++){
+                         if($("#chkbx"+i).attr("checked")){iframeArray.push(i);}
+                    }
+                    var iframeCounter = iframeArray.length;
+                    if(iframeCounter == 0){return false;}    //if nothing is selected
+                    var answer = confirm (iframeCounter < 10 ? "Do you wish to delete the checked rows from this page? The page itself will refresh after the transaction is saved." : "Do you wish to delete the checked rows from this page? You have "+iframeCounter+" rows to delete and this may take a while. The page itself will refresh after the transaction is saved.");
+                    if(!answer){return false;}    //if nothing is selected
+                    $("#hiddenIframe").attr("src","servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOB_SLIST&RL=&target=main0&navc=5170"); 
+                    loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness.<br/><span style='color:blue;font-size:20px;'>*Refresh to Cancel*</span><br/>Starting...");
+                    $("title").html("Job Short List | Starting...");
+                    $("#popupWhiteContainer").css("display","block");
+                    $("#popupWhiteContent").css("top","-150px");
+                    $("#whiteOverlay").css("top","0px");
+                    $("body").css("overflow","hidden");
+                    $("#hiddenIframe").load(function(){          //Refresh recursive function
+                         if(iframeArray.length != 0){   //Start counting and removing
+                              var progress = (iframeCounter - iframeArray.length+1)+"/"+iframeCounter;
+                              $("title").html("Job Short List | Removing: "+progress);
+                              loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness.<br/><span style='color:blue;font-size:20px;'>*Refresh to Cancel*</span><br/>Progress: "+progress);
+                              if(UNSAFEWINDOWSUPPORT){
+                                   unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0','UW_CO_STUJOBLST$delete$"+(iframeArray.pop())+"$$0')");				
+                              }else{
+                                   runJS('runIframeFunction("hiddenIframe","submitAction_main0(document.main0,\'UW_CO_STUJOBLST$delete$'+(iframeArray.pop())+'$$0\')")');	
+                              }
+                         }
+                         else if(iframeCounter > 0){     //Save 
+                              loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness. <br/><span style='color:red'>Saving now... Do not refresh.</span>");
+                              $("title").html("Job Short List | Saving...");
+                              iframeCounter = -1;      // go to next step
+                              if(UNSAFEWINDOWSUPPORT){
+                                   unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0', '#ICSave')");
+                              }else{
+                                   runJS('runIframeFunction("hiddenIframe","submitAction_main0(document.main0, \'#ICSave\')")');
+                              }
+                         }
+                         else if(iframeCounter == -1){       //Just refresh the page itself
+                              window.location = JOB_SHORT_PAGE;                              
+                         }
+                    });
+                    return false;
+               });
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+          }
+/*======================================*\
+l*        APPLICATIONS PAGE                                    |
+\*======================================*/
+          else if(pagetype == "student_app_summary")
+          {
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+               tables.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
+          }
+          else
+/*======================================*\
+l*        OTHER PAGES                                             |
+\*======================================*/
+          {
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+          }
+          
+         
+          //Setting Popup Specifics
+          /* LEAVING HERE FOR READING PURPOSES.
+          if(UNSAFEWINDOWSUPPORT)
+          {
+               unsafeWindow.showPopup = function(panelName){
+                    if($("#"+panelName))
+                    {
+                         $("#"+panelName).css("display","block");
+                         $('#popupTitle').html(panelName);
+                         $("#popupContainer").css("display","block");
+                         $("body").css("overflow","hidden");
+                         if(panelName == "Settings")   //Other pages don't need this
+                         {
+                              $("#popupSelect").attr("value",unsafeWindow.getCookieValue('DEFAULT_PAGE'));
+                              $("#popupText").attr("value",(unsafeWindow.getCookieValue('AUTO_REFRESH') != -1 ? unsafeWindow.getCookieValue('AUTO_REFRESH') : 0));
+                              $('#popupCheckbox').attr("checked",(unsafeWindow.getCookieValue('DISABLE_TIMER') == 1 ? true : false));  
+                              $('#updateCheckbox').attr("checked",(unsafeWindow.getCookieValue('HIDE_UPDATES') == 1 ? true : false));  
+                              $('#loadCheckbox').attr("checked",(unsafeWindow.getCookieValue('LOAD_SCREEN') == 1 ? true : false));  
+                              unsafeWindow.toggleRemoveTimer(document.getElementById("popupCheckbox"));
+                         }
+                    }
+               };
+               unsafeWindow.toggleRemoveTimer = function(obj){
+                    if(obj.checked){                    
+                         $("#popupText").removeAttr("disabled").css("background-color","white").css("color","black").parent().prev().css("color","black").removeClass("disabled");
+                    }else{
+                         $("#popupText").attr("disabled","disabled").css("background-color","#EEE").css("color","#CCC").parent().prev().addClass('disabled').css("color","#CCC");
+                    }
+               };
+               unsafeWindow.saveSettings = function(){
+                    var autorefresh = $("#popupText").attr("value");
+                    if(autorefresh && autorefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert("Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).");return;};
+                    var date = new Date();
+                    date.setTime(date.getTime()+(4*31*24*60*60*1000));     //4 months
+                    var remove_load = $('#loadCheckbox').attr("checked");
+                    var remove_timer = $('#popupCheckbox').attr("checked");
+                    var hideupdates = $('#updateCheckbox').attr("checked");
+                    var default_page = $("#popupSelect").attr("value");
+                    var expires =  'expires='+date.toGMTString()+'; path/';
+                    document.cookie = 'LOAD_SCREEN='+(remove_load ? 1 : 0)+';'+expires;
+                    document.cookie = 'DISABLE_TIMER='+(remove_timer ? 1 : 0)+';'+expires;
+                    document.cookie = 'HIDE_UPDATES='+(hideupdates ? 1 : 0)+';'+expires;
+                    document.cookie = 'DEFAULT_PAGE='+default_page+';'+expires;
+                    document.cookie = 'AUTO_REFRESH='+autorefresh+';'+expires;  
+                    unsafeWindow.hidePopup();
+                    unsafeWindow.showLoadingPopup();
+                    window.location.reload();
+               };
+               unsafeWindow.hidePopup = function(){$("#popupContainer").css("display","none");$("body").css("overflow","auto");$("#panelWrapper").children().each(function(){$(this).css("display","none");});};
+               unsafeWindow.decimalOnly = function(evt){var charCode = (evt.which) ? evt.which : event.keyCode;if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46){return false;}return true;};        
+               unsafeWindow.showLoadingPopup = function(){if(unsafeWindow.getCookieValue('LOAD_SCREEN') != 1){$("#popupWhiteContainer").css("display","block");$("body").css("overflow","hidden");}}
+          }
+          else
+          {*/
+/*======================================*\
+l*        INJECT COMMON FUNCTIONS                         |
+\*======================================*/
+          injectFunction("showPopup(panelName){if(document.getElementById(panelName)){document.getElementById(panelName).style.display = 'block';document.getElementById('popupTitle').innerHTML = panelName;document.getElementById('popupContainer').style.display = 'block';document.getElementsByTagName('html')[0].style.overflow = 'hidden';if(panelName == 'Settings'){document.getElementById('popupSelect').value = getCookieValue('DEFAULT_PAGE');document.getElementById('popupText').value = getCookieValue('AUTO_REFRESH') != -1 ? getCookieValue('AUTO_REFRESH') : 0;document.getElementById('popupCheckbox').checked = getCookieValue('DISABLE_TIMER') == 1 ? true : false;document.getElementById('updateCheckbox').checked = getCookieValue('HIDE_UPDATES') == 1 ? true : false;document.getElementById('loadCheckbox').checked = getCookieValue('LOAD_SCREEN') == 1 ? true : false;toggleRemoveTimer(document.getElementById('popupCheckbox'));}}}");
+          injectFunction("toggleRemoveTimer(obj){var textfield = document.getElementById('popupText');if(obj.checked){textfield.disabled = '';textfield.style.backgroundColor = 'white';textfield.style.color = 'black';document.getElementById('removeTimerDetails').disabled = '';document.getElementById('removeTimerDetails').style.color= 'black';}else{textfield.disabled = 'disabled';textfield.style.backgroundColor = '#EEE';textfield.style.color = '#CCC';document.getElementById('removeTimerDetails').disabled = 'disabled';document.getElementById('removeTimerDetails').style.color= '#CCC';}}");
+          injectFunction("hidePopup(){document.getElementById('popupContainer').style.display='none';document.getElementsByTagName('html')[0].style.overflow = 'auto';for(var p=0;p<document.getElementById('panelWrapper').childNodes.length;p++){document.getElementById('panelWrapper').childNodes[p].style.display = 'none';}}");
+          injectFunction("decimalOnly(evt){var charCode = (evt.which) ? evt.which : event.keyCode;if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 46){return false;}else{return true;}}");
+          injectFunction("showLoadingPopup(){if(getCookieValue('LOAD_SCREEN') != 1){document.getElementById('popupWhiteContainer').style.display = 'block';document.getElementsByTagName('html')[0].style.overflow = 'hidden';}}");
+          injectFunction("saveSettings(){var autoRefresh = document.getElementById('popupText').value;if(autoRefresh && autoRefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert('Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).');return -1;}var date = new Date();date.setTime(date.getTime()+(4*31*24*60*60*1000));var remove_load = document.getElementById('loadCheckbox').checked;var remove_timer = document.getElementById('popupCheckbox').checked;var hideupdates = document.getElementById('updateCheckbox').checked;var default_page = document.getElementById('popupSelect').value;var expires =  'expires='+date.toGMTString()+'; path/';document.cookie = 'LOAD_SCREEN='+(remove_load ? 1 : 0)+';'+expires;document.cookie = 'DISABLE_TIMER='+(remove_timer ? 1 : 0)+';'+expires;document.cookie = 'HIDE_UPDATES='+(hideupdates ? 1 : 0)+';'+expires;document.cookie = 'DEFAULT_PAGE='+default_page+';'+expires;document.cookie = 'AUTO_REFRESH='+autoRefresh+';'+expires;hidePopup();showLoadingPopup();window.location.href = window.location.href;}");
+          //}
+          
+/*======================================*\
+l*        WHEN TO RUN THE WHITE OVERLAY               |
+\*======================================*/
+          if(getCookieValue('LOAD_SCREEN') != 1)
+          {
+               $("a").click(function(){
+                    if($(this).attr("target")!= "_blank" && $(this).attr("target") != "new" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1  && $(this).attr('href').indexOf('mailto') == -1){
+                         $("#hintmsg").css("display","none");
+                         showLoadingPopup();
+                    }
+               });
+
+               $("input").click(function(){
+                    if($(this).attr("type") == "button"){
+                         $("#hintmsg").css("display","none");
+                         showLoadingPopup();
+                    }
+               });
+          }
+          
+/*======================================*\
+l*        REMOVING THE TIMER                                  |
+\*======================================*/         
+          var GLOBAL_TIMER = null;
+          if(getCookieValue('DISABLE_TIMER') == 1){    
+               if(UNSAFEWINDOWSUPPORT){
+                    unsafeWindow.setupTimeout = function(){return false;};
+                    unsafeWindow.displayTimeoutMsg = function(){return false;};
+                    unsafeWindow.displayTimeoutWarningMsg = function(){return false;};
+               }else{
+                    injectFunction('displayTimeoutMsg(){return false;}');
+                    injectFunction('displayTimeoutWarningMsg(){return false;}');
+                    runJS("clearInterval(timeoutID)");
+                    runJS("clearInterval(timeoutWarningID)");
+               }
+               if(getCookieValue('AUTO_REFRESH') <= 0  || getCookieValue('AUTO_REFRESH') > 19){
+                    setTimeout(function(){window.location = window.location;},19*60*1000);
+               }else{
+                    document.addEventListener('click',resetGlobalTimer,true);
+                    resetGlobalTimer();
+               }
+          }
+/*======================================*\
+l*        HIGHLIGHTING                                            |
+\*======================================*/         
+          // Set syntax highlighting colours for various statuses
+          var VERYGOOD = "#9f9";
+          var GOOD = "#96f0b1";
+          var MEDIOCRE = "#faf39a";
+          var BAD = "#fdaaaa";
+          var WORST = "#b5bbc1";
+          
+          if(tables)
+          {
+               switch(pagetype)
+               {
+                    case "student_app_summary":
+                         tables.find("tr").find("td:first, th:first").remove();
+                         tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);
+                         tables.find("tr:contains('Alternate')").find("td").css("background-color",MEDIOCRE);
+                         tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);	
+                         tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);
+                         tables.find("tr:contains('Employed')").find("td").css("background-color",VERYGOOD);
+                         tables.find("tr:contains('Not Selected')").find("td").css("background-color",WORST);
+                         tables.find("tr:contains('Cancelled')").find("td").css("background-color",BAD);
+                         tables.find("tr:contains('Filled')").find("td").css("background-color",BAD);
+                         tables.find("tr:contains('Not Ranked')").find("td").css("background-color",WORST);
+                         tables.find("tr:contains('Approved')").find("td").css("background-color",BAD);
+                         break;
+                    case "student_sel.interview_schedule":
+                         tables.find("tr:contains('Break')").find("td").css("background-color",MEDIOCRE);
+                         break;
+                    case "job_short_list":
+                         tables.find("tr:contains('Already Applied')").find("td").css("background-color",VERYGOOD);
+                         tables.find("tr:contains('Not Posted')").find("td").css("background-color",BAD);
+                         tables.find("tr:contains('Not Authorized to Apply')").find("td").css("background-color",WORST);
+                         break;
+                    case "student_interviews":
+                         tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);
+                         tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);
+                         tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);
+                         tables.find("tr:contains('Filled')").find("td").css("background-color",WORST);
+                         tables.find("tr:contains('Unfilled')").find("td").css("background-color",WORST);
+                         break;
+                    case "student_ranking_open":
+                         tables.find("tr:contains('Offer')").find("td").css("background-color",VERYGOOD);
+                         tables.find("tr:contains('Ranked')").find("td").css("background-color",GOOD);
+                         tables.find("tr:contains('Not Ranked')").find("td").css("background-color",WORST);
+                         break;
+                    case 'job_search_component':
+                         tables.find("tr:contains('On Short List')").find("td").css("background-color",WORST);
+                         tables.find("tr:contains('Job Shortlist Deleted')").find("td").css("background-color",WORST);
+                         tables.find("tr:contains('Have Already Applied')").find("td").css("background-color",WORST);
+                         break;
+               }
+          }
+/*======================================*\
+l*        HINT SYSTEM                                             |
+\*======================================*/
+          var hintArray = new Array();
+          var commonHintArray = new Array();
+          
+          //Closes and fades out the hint box
+          $("#hintmsg a").bind("click",function(){
+               $(this).unbind("click");
+               $(this.parentNode).fadeOut(500);
+          });
+                    
+          //Common hints for all pages
+          commonHintArray.push("Check out the settings tab to customize your experience. You can remove the timer and set the default page Jobmine Plus loads.");
+          
+          
+          function showHint(description, objPoint, num)
+          {
+               var orientation = null;
+               
+               //Dimensions of Orientations, HARDCODED
+               var landscapeHint = new Array(218, 157);
+               var portraitHint    = new Array(235, 138);
+               
+               var marginPercentage = 0.2;
+               
+               var offsets = $(objPoint).offset();
+               var objLeft = parseInt(offsets.left);
+               var objTop = parseInt(offsets.top);
+             
+               //Find the best orientation for the hint box
+               if(objTop < $("body").height()/2)
+               {
+                    if((objLeft+landscapeHint[0]/2)*parseInt(1+marginPercentage) > window.innerWidth)
+                         orientation = "right";
+                    else if(objLeft-landscapeHint[0]/2 < window.innerWidth*marginPercentage)
+                         orientation = "left";
+                    else
+                         orientation = "up";
+               }
+               else
+               {
+                    if((objLeft+landscapeHint[0]/2)*parseInt(1+marginPercentage) > window.innerWidth)
+                         orientation = "right";
+                    else if(objLeft-landscapeHint[0]/2 < window.innerWidth*marginPercentage)
+                         orientation = "left";
+                    else
+                         orientation = "down";
+               }
+               
+               //Position the hint box
+               switch(orientation)   
+               {
+                    case "up":     
+                         objLeft += parseInt(-landscapeHint[0]/2+$(objPoint).outerWidth(true)/2);
+                         objTop += parseInt($(objPoint).outerHeight(true));
+                         break;
+                    case "down":
+                         objLeft += parseInt(-landscapeHint[0]/2+$(objPoint).outerWidth(true)/2);
+                         objTop -= landscapeHint[1];
+                         break;
+                    case "left":
+                         objLeft += $(objPoint).outerWidth(true);
+                         objTop -= parseInt(portraitHint[1]/2-$(objPoint).outerHeight(true)/2);
+                         break;
+                    case "right":
+                         objLeft -= portraitHint[0];
+                         objTop -= parseInt(portraitHint[1]/2-$(objPoint).outerHeight(true)/2);
+                         break;
+                    default:
+                         return;
+                         break;
+               }
+               $("#hintmsg")[0].className = orientation;
+               $("#hintmsg #description").html(description);
+               $("#hintmsg").css("left",objLeft+"px").css("top",objTop+"px").fadeIn(1200);
+          }
+          
+          
+      
+          
+          //When the DOM is loaded
+          $(document).ready(function(){
+               //When CSS is loaded
+               cssReady(function(){
+                    showHint(commonHintArray[0], $(".PSLEVEL1GRIDEVENROW a").eq(40)[0],1);
+               });
+          });
+          
+          //Hints for specific pages
+         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     } 
+}catch(e){alert(e)}}  
 
 /*
  *   Start running code

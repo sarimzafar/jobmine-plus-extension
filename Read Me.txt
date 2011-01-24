@@ -1,21 +1,23 @@
 Issues:
-
+-chrome make job details appear in tabs like firefox
 
 Optional Fixes:
 - add better sorting for dates
 
-
 Features:
-- Add in the title of how much is being deleted in the job short list tab
 - All the view applications for the employer, make it look better
 - popups to allow people to understand features
-- search maps google with location use: http://maps.google.ca/maps?hl=en&q=location
 - checkboxes on applications to update or use a newer or different resume
+- click the back to change the colour of a row
 
-Added to this Release:
+
+Added to this Release:   1.06, stuff to check
 - All traces of ES is now sent to SS
-
-
+- added the ability to google search and maps the location and company
+- added a hiring chance, make sure calculation works
+- view in edit application is now new tab
+- changed Already Applied --> Have Already Applied, allows sorting
+- approved has now changed to --> been approved
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html
