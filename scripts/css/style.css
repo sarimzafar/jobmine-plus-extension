@@ -177,7 +177,7 @@ body:not(.job_search_component, .student_data) form table{
      text-align:left;
      font-family:Verdana,Arial;
      font-size:20px;
-     text-shadow: black -0 0  10px;
+     text-shadow: #777777 -0 0  10px;
      text-decoration:none;
      font-weight: bold; 
      color: black;
