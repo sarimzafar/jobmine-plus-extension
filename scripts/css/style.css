@@ -156,6 +156,25 @@ body:not(.job_search_component, .student_data) form table{
      color:#cccccc;
 }
 
+/* Settings */
+#popupContent #settingsLeft{
+     width:150px;
+     -moz-box-shadow:2px 0 10px #333333;
+     -webkit-box-shadow:2px 0 10px #333333;
+     height:100%;
+     padding:20px;
+}
+#popupContent #settingsRight{
+     width:350px;
+     height:100%;
+     padding:19px;
+}
+#popupContent #settingsContent{
+     height:260px;
+     overflow:auto;
+     padding:5px 0;
+}
+
 /*Hint Popup*/
 #hintmsg{
      visibility:visible !important;
