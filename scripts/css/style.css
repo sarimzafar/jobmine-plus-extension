@@ -185,6 +185,11 @@ body:not(.job_search_component, .student_data) form table{
      outline:none;
      margin-bottom:25px;
 }
+
+#popupContent #settingsNav a:hover{
+     opacity:0.8;
+}
+
 #popupContent #settingsContent{
      height:260px;
      overflow:auto;
