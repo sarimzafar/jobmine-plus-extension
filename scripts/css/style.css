@@ -143,7 +143,6 @@ body:not(.job_search_component, .student_data) form table{
 
 #popupContent table{
      width:100%;
-     margin-bottom:20px;
 }
 
 #popupContent .details{
@@ -162,7 +161,7 @@ body:not(.job_search_component, .student_data) form table{
      -moz-box-shadow:2px 0 10px #333333;
      -webkit-box-shadow:2px 0 10px #333333;
      height:100%;
-     padding:20px;
+     padding:15px;
 }
 #popupContent #settingsRight{
      width:350px;
@@ -182,11 +181,13 @@ body:not(.job_search_component, .student_data) form table{
      text-decoration:none;
      font-weight: bold; 
      color: black;
+     display:block;
+     outline:none;
+     margin-bottom:25px;
 }
 #popupContent #settingsContent{
      height:260px;
      overflow:auto;
-     padding:5px 0;
 }
 
 /*Hint Popup*/
