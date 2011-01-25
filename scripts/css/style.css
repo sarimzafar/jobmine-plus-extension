@@ -192,6 +192,7 @@ body:not(.job_search_component, .student_data) form table{
 
 #popupContent #settingsContent{
      height:260px;
+     width:302px;
      overflow:auto;
 }
 
