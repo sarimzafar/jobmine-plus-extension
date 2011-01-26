@@ -194,7 +194,7 @@ body:not(.job_search_component, .student_data) form table{
      height:270px;
      margin-bottom:5px;
      width:302px;
-     overflow-x:auto;
+     overflow:auto;
 }
 
 /*Hint Popup*/
