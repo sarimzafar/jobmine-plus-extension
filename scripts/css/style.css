@@ -206,6 +206,7 @@ body:not(.job_search_component, .student_data) form table{
 }
 #popupContent input#enableTooltip{ 
      margin-bottom:15px;
+     margin-left:0px;
 }
 
 #popupContent #settings_tooltip td{   
