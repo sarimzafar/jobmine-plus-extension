@@ -133,7 +133,7 @@ body:not(.job_search_component, .student_data) form table{
      font-weight:bold;
      border-bottom:1px solid black;
 }
-#popupContent table input, #popupContent table select{
+#popupContent table input.textField, #popupContent table select{
      width:101px;
      margin-bottom:20px;
 }
