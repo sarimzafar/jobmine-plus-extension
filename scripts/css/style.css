@@ -197,6 +197,21 @@ body:not(.job_search_component, .student_data) form table{
      overflow:auto;
 }
 
+/* TOOLTIP */ 
+#popupContent input.tooltipChkbx{
+     width:auto;
+     margin-bottom:0px;
+     margin-right:7px;
+     margin-left:20px;
+}
+#popupContent input#enableTooltip{ 
+     margin-bottom:15px;
+}
+
+#popupContent #settings_tooltip td{   
+     font-size:12px;
+}
+
 /*Hint Popup*/
 #hintmsg{
      visibility:visible !important;
