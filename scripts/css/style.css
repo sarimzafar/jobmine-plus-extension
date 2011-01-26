@@ -133,11 +133,11 @@ body:not(.job_search_component, .student_data) form table{
      font-weight:bold;
      border-bottom:1px solid black;
 }
-#popupContent #settings_general table input, #popupContent #settings_general table select{
+#popupContent table input, #popupContent table select{
      width:101px;
      margin-bottom:20px;
 }
-#popupContent #settings_general table input.chkbox{
+#popupContent table input.chkbox{
      width:auto;
 }
 
