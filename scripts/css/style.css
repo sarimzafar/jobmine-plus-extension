@@ -201,11 +201,10 @@ body:not(.job_search_component, .student_data) form table{
 #popupContent input.tooltipChkbx{
      width:auto;
      margin-bottom:0px;
-     margin-right:7px;
+     margin-right:2px;
      margin-left:20px;
 }
 #popupContent input#enableTooltip{ 
-     margin-bottom:15px;
      margin-left:0px;
 }
 
