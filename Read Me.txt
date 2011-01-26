@@ -9,7 +9,7 @@ Features:
 - popups to allow people to understand features
 - checkboxes on applications to update or use a newer or different resume
 - click the back to change the colour of a row
-
+- add google calendar to the jobmine
 
 Added to this Release:   1.06, stuff to check
 - All traces of ES is now sent to SS
