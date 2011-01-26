@@ -137,7 +137,7 @@ body:not(.job_search_component, .student_data) form table{
      width:101px;
      margin-bottom:20px;
 }
-#popupContent table input.chkbox{
+#popupContent #settings_general table input.chkbox{
      width:auto;
 }
 
