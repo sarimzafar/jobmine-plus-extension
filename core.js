@@ -1,122 +1,7 @@
-/*
-     BLock new tabs DOESNT WORK ON CHROME
-     javascript   =    function open(){//do stuff}
-     unsafewindow   =    unsafeWindow.window.open = function(){//do stuff}
-     
-    
-     
-     https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Market=GBL&Page=UW_CO_STU_JOBDTLS&Action=U&target=Transfer19&UW_CO_JOB_TITLE=Software%20Design%20Engineering&UW_CO_PARENT_NAME=A9.com%20Inc&UW_CO_WT_SESSION=1115
-          One way: use this in iframe for applications and it will search for it, 
-          
-          https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS && everything else<--- manditory
-          
-          &UW_CO_JOB_TITLE= <--- copy job name
-          
-          &UW_CO_PARENT_NAME= <--- copy company name
-       
-          &UW_CO_WT_SESSION= <--- copy from cookies, this will be set from job search anomysly
-          
-     shortlist & work has this but not applications page
-          https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Action=U&UW_CO_JOB_ID=###### <---opens the page dependent on the number
-*/
-
-
-/*var headID = document.getElementsByTagName("head")[0];         
-var newScript = document.createElement('script');
-newScript.type = 'text/javascript';
-
-var tnode = document.createTextNode("function alert(){confirm('i own u')}")
-newScript.appendChild(tnode)
-headID.appendChild(newScript);*/
-
-/*
- *   Constants
- */
-var CURRENT_VERSION=105;
-var UNSAFEWINDOWSUPPORT=unsafeWindow.toString().indexOf("[object Window]")!=-1;
-var SCRIPTSURL="https://jobmine-plus.googlecode.com/svn/trunk/scripts";
-var GLOBAL_TIMER = null;
-
-/*
- *   White Overlay
- */
-function white_overlay(text, fontSize, includeImg)
-{
-     var image = includeImg == false  ? "" : "<img alt='' style='position:relative;top:-125px;' src='"+SCRIPTSURL+"/images/loading.gif'/>"; 
-     fontSize = fontSize != null ? fontSize+"px" : "30px";
-     text = text != null ? text : "Jobmine has been programmed to load pages really slowly.";
-     return "<div id='popupWhiteContainer' style='display:none;'><div id='whiteOverlay' style='display:block;position:fixed;width:100%;height:100%;background-color:white;opacity:0.5;z-index:1;left:0px;top:125px;'></div><div id='popupWrapper' style='position:fixed;width:50%;height:50%;bottom:0px;right:0px;'><div id='popupWhiteContent' style='position:relative;width:450px; font-weight:bold; height:180px;top:-90px;font-size:"+fontSize+";left:-225px;z-index:49;font-family:Arial,Verdana;text-align:center;text-shadow:-2px -2px 5px #777, 2px 2px 5px #777;'><span style='font-size:50px;'>Please be Patient.</span><br/><div id='whitePopupMsg'>"+text+"</div><br/>"+image+"</div></div></div>";
-}
-
-/*
- *Pages 
- */
-var INTERVIEW_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STU_INTVS&RL=&target=main0&navc=5170";
-var JOB_SEARCH_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOBSRCH&RL=&target=main0&navc=5170";
-var DOCUMENT_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STUDDOCS&RL=&target=main0&navc=5170";
-var JOB_SHORT_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOB_SLIST&RL=&target=main0&navc=5170";
-var RANKING_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STU_RNK2&RL=&target=main0&navc=5170";
-var PROFILE_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_STUDENT&RL=&target=main0&navc=5170";
-var WORK_REPORT_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_WORKRPRT&RL=&target=main0&navc=5170";
-var APPLICATION_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=Panel&Menu=UW_CO_STUDENTS&PanelGroupName=UW_CO_APP_SUMMARY";
-
-/*
- *   Redirects
- */
-if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1){window.location.href = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";return;}
-else if(document.getElementById("search")){return;}
-else if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&')
-{try{
-     document.getElementsByTagName("html")[0].innerHTML = "<body>"+white_overlay("Welcome to Jobmine Plus! No Jobmine Plus is not slower than Jobmine (well only by a bit since it does extra enhancements after), it is about the same timing. If you don't like this because it is slower, then you will miss out on all the great features. By the time you read this, the next page would have loaded.",21,false)+"</body>";	
-     document.getElementById('popupWhiteContainer').style.display = "block";
-     document.getElementById('popupWhiteContent').style.top = "-130px";
-     window.stop();
-     setTimeout(function(){
-          var default_page = getCookieValue('DEFAULT_PAGE');
-          switch(default_page){
-               case 'in':
-                    window.location.href = INTERVIEW_PAGE;
-                    break;
-               case 'js':
-                    window.location.href = JOB_SEARCH_PAGE;
-                    break;
-               case 'dc':
-                    window.location.href = DOCUMENT_PAGE;
-                    break;
-               case 'jl':
-                    window.location.href = JOB_SHORT_PAGE;
-                    break;
-               case 'rk':
-                    window.location.href = RANKING_PAGE;
-                    break;
-               case 'pr':
-                    window.location.href = PROFILE_PAGE;
-                    break;
-               case 'wr':
-                    window.location.href = WORK_REPORT_PAGE;
-                    break;
-               default:
-                    window.location.href = APPLICATION_PAGE;
-                    break;
-          }
-     },1);
-     return;
-}catch(e){alert(e)}}
-
-
-
-/*======================================*\
-l*        JQUERY AND TABLESORTER                           |
-\*======================================*/
-
-
-/*
- *   Jobmine plus code
- */ 
 /*======================================*\
 l*        CONSTANTS                                               |
 \*======================================*/
- var SETTINGS_GENERAL = '<table id="settings_general" cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><option value="wr">Work Report Evaluations</option></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" id="popupText" type="text"></td></tr></tbody></table>';
+ var SETTINGS_GENERAL = '<table cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><option value="wr">Work Report Evaluations</option></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" class="textField" id="popupText" type="text"></td></tr></tbody></table>';
 /*======================================*\
 l*        FUNCTIONS                                                |
 \*======================================*/
@@ -143,10 +28,11 @@ function writeCookie(name, value){
      document.cookie = name+'='+value+';expires='+date.toGMTString()+'; path/';
 }
 function showLoadingPopup(){
-     //Fix chrome overlay problem
      if($("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
 	$("#popupWhiteContainer").css("display","block");	
      $("body").css("overflow","hidden");
+     $("#hintmsg").css("display","none");
+     $("#popupContainer").css("visibility","hidden");
 }
 function loadPopupMsg(msg){
 	$("#whitePopupMsg").html(msg);
@@ -195,11 +81,13 @@ function insertCustomHeader(){
      
      //Popup
      header +=     "<div id='popupContainer' style='display:none;'><div id='overlay'></div><div id='popupWrapper'><div id='popupContent' style='padding: 0px !important'><span id='panelWrapper'>";
-     header +=     '<div class="panels" id="Settings" style="display: block; height: 100%;"><table style="width: 100%;" cellpadding="0" cellspacing="0" height="100%"><tr><td id="settingsLeft" valign="top"><div id="settingsNav" style="padding: 30px 0px; height: 100%;"></div></td><td id="settingsRight" valign="top"><div id="popupTitle" class="title">General Settings</div><div style="color: red; margin: 10px 0pt;">This uses cookies to save the following.</div><div id="settingsContent">';
-     header +=      '</div><button class="button PSPUSHBUTTON" id="saveSettings">Save and Refresh</button><button style="float: right;" class="button PSPUSHBUTTON closePopup">Cancel</button></td></tr></table></div></span></div></div></div>';
+     header +=     '<div class="panels" id="Settings" style="display: block; height: 100%;"><table style="width: 100%;" cellpadding="0" cellspacing="0" height="100%"><tr><td id="settingsLeft" valign="top"><div id="settingsNav" style="padding: 30px 0px; height: 100%;"></div></td><td id="settingsRight" valign="top"><div id="popupTitle" class="title"></div><div style="color: red; margin: 10px 0pt;">This uses cookies to save the following.</div><div id="settingsContent">';
+     header +=      '</div><button class="button PSPUSHBUTTON" id="saveSettings">Save and Refresh</button><button style="float: right;" class="button PSPUSHBUTTON closePopup">Cancel</button></td></tr></table></div>';
      
      //About Popup
-     header +=     "<span style='display:none;' style='padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>Any problems/issues/wanted features email me at <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></span>";
+     header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>Any problems/issues/wanted features email me at <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
+     
+     header +=     "</span></div></div></div>";
      
      //White overlay
      header +=     white_overlay();
@@ -215,10 +103,9 @@ function addSettingsItem(name, html)
      if(!document.getElementById("general_"+name.toLowerCase()))
      {
           $("#settingsNav").append('<a popup="false" href="javascript:void(0)">'+name+'</a>');
-          $("#settingsContent").append(html);
+          $("#settingsContent").append('<div class="settingsItem" id="settings_'+name.toLowerCase()+'">'+html+'</div>');
      }
 }
-
 
 /*======================================*\
 l*        ALTERNATIVE UNSAFEWINDOW FUCNTIONS      |
@@ -236,7 +123,7 @@ function injectFunction(_function,bruteforce){
 l*        START OPERATION                                      |
 \*======================================*/                      
 function startOperation()
-{try{
+{
      //if(this page and do stuff)
      {
 /*======================================*\
@@ -344,9 +231,9 @@ l*        JOB SEARCH PAGE                                       |
                               var location = obj.eq(4).html();
                               
                               //This is the Google search for the company
-                              obj.eq(2).wrapInner("<a title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
+                              obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
                               //This is for google map the location
-                              obj.eq(4).wrapInner("<a title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
+                              obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
                          }
                     });
                }
@@ -356,7 +243,7 @@ l*        PROFILE PAGE                                            |
 \*======================================*/
           else if(pagetype == "student_data" && $("form > table:last-child").html()) 
           {
-               applyTableSorting("table table table.PSLEVEL1GRID");
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
                var bottomNav = $("form > table:last-child").html();
                /*======================================*\
                l*        TERM CARDS                                              |
@@ -407,7 +294,7 @@ l*        DOCUMENTS PAGE                                       |
                var resumeTable = $("form table tr:eq(5)").remove().children().eq(1).html();
                $("form:last").append(resumeTable);
 
-               applyTableSorting("table table.PSLEVEL1GRID");
+               var tables = applyTableSorting("table table.PSLEVEL1GRID");
                $("body > form > table").eq(0).css("width","auto");
           }
 /*======================================*\
@@ -437,8 +324,8 @@ l*        JOB SHORT LIST PAGE                                  |
                          //Add company and location href
                          var company = child.eq(2).html();
                          var location = child.eq(4).html();                         
-                         child.eq(2).wrapInner("<a title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
-                         child.eq(4).wrapInner("<a title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"'/>"); 
+                         child.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
+                         child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"'/>"); 
                     }    
                });
                //Add invisible iframe
@@ -448,10 +335,21 @@ l*        JOB SHORT LIST PAGE                                  |
                //Add the buttons that auto select/deselect the checkboxes
                $("#UW_CO_JSLIST_VW_").parent().parent().html("<td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return false'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td>");
                $("form > table > tbody > tr").eq(7).after("<tr><td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return false'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td></tr>");
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
                
                /*======================================*\
                l*        MULTISELECT CHECKBOXES                           |
                \*======================================*/
+               
+               //Binds so that the ids of the table are reset everytime
+               tables.bind("sortEnd", function()
+               {
+                    tables.find("input").each(function(order){
+                         $(this).attr("id","chkbx"+order);
+                    });
+                    anchorChkbox = null;
+               });
+               
                var anchorChkbox = null;
                var shiftDown = false;
                $(document).keydown(function(evt){if(evt.shiftKey){evt.preventDefault();shiftDown = true;}});
@@ -459,26 +357,21 @@ l*        JOB SHORT LIST PAGE                                  |
                $(".editChkbx").click(function(evt)
                {
                     var obj = $(this);
-                    var row = parseInt(obj.attr("row"));         
+                    var row = parseInt(obj.attr("id").substr(obj.attr("id").indexOf("chkbx")+5));     
                     //If shift held, the anchor is set, and the checkbox is not the same as the last clicked
                     if(shiftDown && anchorChkbox != null && row != anchorChkbox)
                     {
                          if(anchorChkbox < row)        //Sees if you are going from down up or up down
-                              for(var i=anchorChkbox; i<=row;i++)
-                                   $("#chkbx"+i).attr("checked",obj.is(':checked'));
+                         {
+                              for(var i=anchorChkbox; i<=row;i++){$("#chkbx"+i).attr("checked",obj.is(':checked'));}
+                         }
                          else
-                              for(var i=anchorChkbox; i>row;i--)
-                                   $("#chkbx"+i).attr("checked",obj.is(':checked'));
+                         {
+                              for(var i=anchorChkbox; i>row;i--){$("#chkbx"+i).attr("checked",obj.is(':checked'));}
+                         }
                     }   
                     anchorChkbox = row;                   
                });
-               
-               //Functions for the buttons to do stuff     		
-               if(UNSAFEWINDOWSUPPORT){
-                    unsafeWindow.selectAllChkbx = function(flag,numChkbx){for(var i=0;i<numChkbx;i++){$("#chkbx"+i).attr("checked",flag);}return false;};
-               }else{
-                    injectFunction("selectAllChkbx(flag,numChkbx){for(var i=0;i<numChkbx;i++){document.getElementById('chkbx'+i).checked = flag;}return false;}");
-               }
                
                /*======================================*\
                l*        MULTIJOB REMOVAL                                     |
@@ -487,9 +380,9 @@ l*        JOB SHORT LIST PAGE                                  |
                     var numChkbx = $(this).attr('total');
                     var iframeArray = new Array();
                     //Get the checkboxes in an array
-                    for(var i=0;i<numChkbx;i++){
-                         if($("#chkbx"+i).attr("checked")){iframeArray.push(i);}
-                    }
+                    tables.find("input").each(function(){
+                         if($(this).attr("checked")){iframeArray.push($(this).attr("row"));}
+                    });
                     var iframeCounter = iframeArray.length;
                     if(iframeCounter == 0){return false;}    //if nothing is selected
                     var answer = confirm (iframeCounter < 10 ? "Do you wish to delete the checked rows from this page? The page itself will refresh after the transaction is saved." : "Do you wish to delete the checked rows from this page? You have "+iframeCounter+" rows to delete and this may take a while. The page itself will refresh after the transaction is saved.");
@@ -528,7 +421,12 @@ l*        JOB SHORT LIST PAGE                                  |
                     });
                     return false;
                });
-               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+               //Functions for the buttons to do stuff     		
+               if(UNSAFEWINDOWSUPPORT){
+                    unsafeWindow.selectAllChkbx = function(flag,numChkbx){for(var i=0;i<numChkbx;i++){$("#chkbx"+i).attr("checked",flag);}return false;};
+               }else{
+                    injectFunction("selectAllChkbx(flag,numChkbx){for(var i=0;i<numChkbx;i++){document.getElementById('chkbx'+i).checked = flag;}return false;}");
+               }
           }
 /*======================================*\
 l*        APPLICATIONS PAGE                                    |
@@ -537,6 +435,14 @@ l*        APPLICATIONS PAGE                                    |
           {
                var tables = applyTableSorting("table table table.PSLEVEL1GRID");
                tables.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
+               
+               //Add company for google search
+               $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(row){        
+                    if(row > 0)   //Header
+                    {
+                         $(this).children().eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+$(this).children().eq(2).html().replace(/\s/g,"+")+"'/>");            
+                    }    
+               });
           }
           else
 /*======================================*\
@@ -548,32 +454,105 @@ l*        OTHER PAGES                                             |
 /*======================================*\
 l*        HINT SYSTEM                                             |
 \*======================================*/
+          //Constants 
           var hintArray = new Array();
-          var commonHintArray = new Array();
+          hintArray["com"] = new Array();
+          hintArray["apps"] = new Array();
+          hintArray["short"] = new Array();
+          hintArray["search"] = new Array();
+         
+          //Common hints for all pages
+          hintArray["com"].push({page: "com",percentage: 0.4,obj:$("#settings_nav")[0], text : "Check out the settings tab to customize your experience. You can remove the timer and/or set the default page Jobmine Plus loads."});
+          hintArray["com"].push({page: "com",percentage: 0.3,obj:tables.find("th.PSLEVEL1GRIDCOLUMNHDR.header")[2], text : "Click the header a column to sort jobs and other information."});
           
+          //Applications hints
+          hintArray["apps"].push({page: "apps",percentage: 0.4,obj:tables.find("a.googleSearch")[0], text : "You can now select the company name and Jobmine Plus will Google search it for you in a new tab."});
+          
+          //Shortlist hints
+          hintArray["short"].push({page: "short",percentage: 0.5,obj:tables.find("input.editChkbx")[0], text : "You can delete multiple short list jobs with checkboxes. It also supports shift-click functionality."});
+          
+          //Job Search hints
+          hintArray["search"].push({page: "search",percentage: 0.4,obj:tables.find("a.mapsSearch")[0], text : "You can now select the location and Jobmine Plus will Google Maps it for you."});
+          hintArray["search"].push({page: "search",percentage: 0.3,obj:tables.find("th.PSLEVEL1GRIDCOLUMNHDR:contains('Hiring Chances*')")[0], text : "This is hiring changes. Note: you need to be skilled to get the job, I am not responsible for incorrect statistics."});
+          
+          function saveTooltip()
+          {               
+              var cookieQuery = $("#enableTooltip")[0].checked ? 1 : 0;  
+               if(cookieQuery != 0)               //is tooltips enabled?           
+               {
+                    var searchTable = $("#settings_tooltip table");
+                    for(var page in hintArray)
+                    {
+                         if(page != "enable")
+                         {
+                              cookieQuery += "|"+page +"=";
+                              for(var i=0;i<hintArray[page].length;i++){cookieQuery += (searchTable.find("input[num='"+i+"'][page='"+page+"']")[0].checked ? 1 : 0) + ",";}
+                              cookieQuery = cookieQuery.slice(0, -1);        //removes last comma                    
+                         }
+                    }
+               }
+               writeCookie("TOOLTIP", cookieQuery);         //alert(cookieQuery);
+          }
+                  
           //Closes and fades out the hint box
           $("#hintmsg a").bind("click",function(){
                $(this).unbind("click");
+               $(window).unbind("resize");
                $(this.parentNode).fadeOut(500);
+               
+               if($("#preventShowingChkbx").attr("checked"))
+               {              
+                    var index = 0;
+                    var query = getCookieValue("TOOLTIP").split("|");
+                    var page = $("#preventShowingChkbx").attr("page");
+                    while(query[index].indexOf(page+"=") == -1 && index++ < query.length);
+                    var selectedValues = query.splice(index,1).toString().split("=")[1].split(",");
+                    index = $("#preventShowingChkbx").attr("num");
+                    if(index > selectedValues.length)       //if the jobmine plus has a new hint that is not in cookies
+                    {
+                         var diff = index-selectedValues.length;
+                         var count = hintArray[page].length - selectedValues.length;
+                         for(var i=0; i<count;i++){
+                              if(i == diff){selectedValues.push(0);}       //when they are the same           
+                              else{selectedValues.push(1);}
+                         }
+                    }
+                    else                                              //if the hint is in the cookies
+                    {
+                         selectedValues.splice(index, 1, 0);          //we go to the index in the array and replace it with 0 (which is false)
+                    }
+                    query.push(page+"="+selectedValues.join(","));
+                    writeCookie("TOOLTIP", query.join("|"));
+             }
           });
-                    
-          //Common hints for all pages
-          commonHintArray.push({percentage: 0.5,obj:$("#settings_nav")[0], text : "Check out the settings tab to customize your experience. You can remove the timer and set the default page Jobmine Plus loads."});
-          commonHintArray.push({percentage: 0.1,obj:$(".PSHYPERLINK a")[0], text : "Hint 2"});
-          commonHintArray.push({percentage: 0.3,obj:$(".PSHYPERLINK a")[1], text : "Hint 3"});
-          commonHintArray.push({percentage: 0.8,obj:$(".PSHYPERLINK a")[2], text : "Hint 4"});
           
+          var tempPageHint;
           
-          function showHint(description, objPoint, num)
+          //Map the hints
+          switch(pagetype)
+          {
+               case "student_app_summary":
+                    tempPageHint = hintArray["apps"];
+                    break;
+               case "job_short_list":
+                    tempPageHint = hintArray["short"];
+                    break;
+               case "job_search_component":
+                    tempPageHint = hintArray["search"];
+                    break;
+               default:
+                    tempPageHint = new Array();
+                    break;
+          }
+          
+          function positionHint(objPoint)
           {
                var orientation = null;
                
                //Dimensions of Orientations, HARDCODED
                var VERTICALHINT = new Array(218, 157);
                var HORIZONTALHINT    = new Array(235, 138);
-               
                var marginPercentage = 0.2;
-               
                var offsets = $(objPoint).offset();
                var objLeft = parseInt(offsets.left);
                var objTop = parseInt(offsets.top);
@@ -581,23 +560,16 @@ l*        HINT SYSTEM                                             |
                //Find the best orientation for the hint box
                if(objTop < $("body").height()/2)
                {
-                    if((objLeft+VERTICALHINT[0]/2)*parseInt(1+marginPercentage) > window.innerWidth)
-                         orientation = "right";
-                    else if(objLeft-VERTICALHINT[0]/2 < window.innerWidth*marginPercentage)
-                         orientation = "left";
-                    else
-                         orientation = "up";
+                    if((objLeft+VERTICALHINT[0]/2)*parseInt(1+marginPercentage) > window.innerWidth){orientation = "right";}
+                    else if(objLeft-VERTICALHINT[0]/2 < window.innerWidth*marginPercentage){orientation = "left";}
+                    else{orientation = "up";}
                }
                else
                {
-                    if((objLeft+VERTICALHINT[0]/2)*parseInt(1+marginPercentage) > window.innerWidth)
-                         orientation = "right";
-                    else if(objLeft-VERTICALHINT[0]/2 < window.innerWidth*marginPercentage)
-                         orientation = "left";
-                    else
-                         orientation = "down";
+                    if((objLeft+VERTICALHINT[0]/2)*parseInt(1+marginPercentage) > window.innerWidth){orientation = "right";}
+                    else if(objLeft-VERTICALHINT[0]/2 < window.innerWidth*marginPercentage){orientation = "left";}
+                    else{orientation = "down";}
                }
-               
                //Position the hint box
                switch(orientation)   
                {
@@ -622,52 +594,98 @@ l*        HINT SYSTEM                                             |
                          break;
                }
                $("#hintmsg")[0].className = orientation;
-               $("#hintmsg #description").html(description);
-               $("#hintmsg").css("left",objLeft+"px").css("top",objTop+"px").fadeIn(1200);
+               $("#hintmsg").css("left",objLeft+"px").css("top",objTop+"px");
           }
           
           function randomizeHints(array)
-          {try{
-               //Choose a random hint
-               var randomIndex = Math.floor(Math.random()*array.length+1)-1;
-               var hint = array[randomIndex];
-               var chosenIndex = Math.floor(Math.random()*101);
-         
-               //See if we display it based on the percentage probability
-               var probability = hint.percentage*100;
+          {
+               //Load cookie
+               var cookieVal = getCookieValue("TOOLTIP");
+               if(cookieVal != 0)       //Do not show any hints 
+               {
+                    //Choose a random hint
+                    var randomIndex = Math.floor(Math.random()*array.length+1)-1;
+                    var hint = array[randomIndex];
+                    var chosenIndex = Math.floor(Math.random()*101);
+                    //See if we display it based on the percentage probability
+                    var probability = hint.percentage*100;
+                    
+                    //See if user has disabled selected cookie
+                    var index = 0;
+                    if(cookieVal != -1 && cookieVal.indexOf("1|") == 0) //no cookie exists
+                    {
+                         var query = cookieVal.split("|");          
+                         while(query[index].indexOf(hint.page+"=") == -1 && index++ < query.length);
+                         var selectedValues = query.splice(index,1).toString().split("=")[1].split(",");
+                         var number = hint.page != "com" ? randomIndex : randomIndex - tempPageHint.length;
+                    }
+                    else{
+                         var selectedValues = new Array();
+                         
+                         //Build a default cookie
+                         var cookieQuery = "1";
+                         for(var page in hintArray)
+                         {
+                              if(page != "enable")
+                              {
+                                   cookieQuery += "|"+page +"=";
+                                   for(var i=0;i<hintArray[page].length;i++){cookieQuery += "1,";}
+                                   cookieQuery = cookieQuery.slice(0, -1);        //removes last comma                    
+                              }
+                         }
+                         writeCookie("TOOLTIP", cookieQuery);         //alert(cookieQuery);
+                    }
+                    
+                    //Show it
+                    if(selectedValues[number] != 0 && chosenIndex <= probability && hint.obj)   //also check if user blocked this hint
+                    {
+                         positionHint(hint.obj);                    
+                         $("#hintmsg #description").html(hint.text);
+                         $("#preventShowingChkbx").attr("page",hint.page);
+                         $("#preventShowingChkbx").attr("num", number);
+                         $("#hintmsg").fadeIn(1200);
+                         
+                         //Window Resizing and reposition
+                         $(window).bind("resize",function(){positionHint(hint.obj);});
+                    }
+               }
+          }
                
-               //Show it
-               if(chosenIndex <= probability && hint.obj)   //also check if user blocked this hint
-                    showHint(hint.text, hint.obj,1);
-               
-          }catch(e){alert(e)}}
-      
-          
-          //When the DOM is loaded
-          $(document).ready(function(){
-               //When CSS is loaded
-               cssReady(function(){
-                    //showHint(commonHintArray[0], $(".PSHYPERLINK a")[0],1);
-                    randomizeHints(commonHintArray);
-               });
+          //When CSS is loaded
+          cssReady(function(){
+               randomizeHints(tempPageHint.concat(hintArray["com"]));
           });
-          
-          //Hints for specific pages         
-          
+    
+          //Generate the Tooltip Settings page
+          var tooltipGenerated = "<div style='margin-bottom:15px;'><input id='enableTooltip' class='tooltipChkbx' type='checkbox'/>Enable Tooltips</div><table cellpadding='0' cellspacing='0'>";
+          var index=0;
+          for(var page in hintArray)
+          {
+               var arr = hintArray[page];
+               for(var i=0;i<arr.length;i++)
+               {
+                    tooltipGenerated += "<tr><td valign='top'><input id='toolChkbx"+(index++)+"' class='tooltipChkbx' page='"+page+"' num='"+i+"' type='checkbox'/></td><td class='details' valign='top'>"+arr[i].text+"<br/><br/></td></tr>";
+               }
+          }
+          tooltipGenerated += "</table>";
+          index = null;
 /*======================================*\
 l*        SETTINGS                                                  |
-\*======================================*/          
+\*======================================*/        
+          //Build the settings
           addSettingsItem("General",SETTINGS_GENERAL);
+          addSettingsItem("Tooltip",tooltipGenerated);
           
+          //Clicking the menu nav under settings
           $("#settingsNav a").click(function(){
                var name = $(this).html();
                $("#popupTitle").html(name+" Settings");
-               $("#settingsContent").children().each(function(){$(this).css("display","none");});
+               for(var i=0;i<$("#settingsContent")[0].childNodes.length;i++){$("#settingsContent")[0].childNodes[i].style.display='none';}     
                $("#settings_"+name.toLowerCase()).css("display","block");
           });
           
-          //Mainly only for settings
-          $("#saveSettings").click(function(){
+          function saveGeneralSettings()
+          {
                var autorefresh = $("#popupText").attr("value");
                if(autorefresh && autorefresh.search(/^[0-9]+(\.[0-9]+$)?/g) == -1){alert("Please make sure that the Auto Refresh Duration is a positive decimal or integer number (numbers and a period).");return;};
                var remove_load = $('#loadCheckbox').attr("checked");
@@ -680,6 +698,12 @@ l*        SETTINGS                                                  |
                writeCookie('HIDE_UPDATES', hideupdates ? 1 : 0);
                writeCookie('DEFAULT_PAGE', default_page);
                writeCookie('AUTO_REFRESH', autorefresh);
+          }
+          
+          //Mainly only for settings
+          $("#saveSettings").click(function(){
+               saveGeneralSettings();
+               saveTooltip();
                hidePopup();
                showLoadingPopup();
                window.location.href = window.location.href;
@@ -687,14 +711,21 @@ l*        SETTINGS                                                  |
           
           //Bind the change event listener to the checkbox
           $("#removeTimerChkbx").change(function(){toggleRemoveTimer(this);});
+          $("#enableTooltip").change(function(){toggleEnableTooltip(this);});
+          
+          /*
+           *   POPUP TOGGLES
+           */
+          //Toggle the tooltip enable
+          function toggleEnableTooltip(obj){
+               if(obj.checked){  $(obj.parentNode.nextSibling).removeClass("disabled").find("input").removeAttr("disabled").attr("checked","checked");}
+               else{$(obj.parentNode.nextSibling).addClass("disabled").find("input").attr("disabled","disabled");}
+          };
           
           //Shows the text description if checked
           function toggleRemoveTimer(obj){
-               if(obj.checked){                    
-                    $("#popupText").removeAttr("disabled").css("background-color","white").css("color","black").parent().prev().css("color","black").removeClass("disabled");
-               }else{
-                    $("#popupText").attr("disabled","disabled").css("background-color","#EEE").css("color","#CCC").parent().prev().addClass('disabled').css("color","#CCC");
-               }
+               if(obj.checked){    $("#popupText").removeAttr("disabled").css("background-color","white").css("color","black").parent().prev().css("color","black").removeClass("disabled");}
+               else{$("#popupText").attr("disabled","disabled").css("background-color","#EEE").css("color","#CCC").parent().prev().addClass('disabled').css("color","#CCC");}
           };
 /*======================================*\
 l*        POPUP SPECIFIC FUNCTIONS                         |
@@ -714,6 +745,7 @@ l*        POPUP SPECIFIC FUNCTIONS                         |
           {
                if($("#"+panelName))
                {
+                    for(var i=0;i<$("#panelWrapper")[0].childNodes.length;i++){$("#panelWrapper")[0].childNodes[i].style.display='none';}                      
                     $("#"+panelName).css("display","block");
                     $('#popupTitle').html(panelName);
                     $("#popupContainer").css("display","block");
@@ -722,15 +754,53 @@ l*        POPUP SPECIFIC FUNCTIONS                         |
                     //Resize
                     $("#popupContent").css("width",width+"px").css("height",height+"px").css("left",-width/2+"px").css("top",-height/2+"px");
                     
-                    //Custom to Panels
+                    //Load preferences from cookies
                     if(panelName == "Settings")  
-                    {    //Load all the settings from cookies
+                    {    //Load all the general settings from cookies
+                         $('#popupTitle').html("General Settings");
                          $("#popupSelect").attr("value",getCookieValue('DEFAULT_PAGE'));
                          $("#popupText").attr("value",(getCookieValue('AUTO_REFRESH') != -1 ? getCookieValue('AUTO_REFRESH') : 0));
                          $('#removeTimerChkbx').attr("checked",(getCookieValue('DISABLE_TIMER') == 1 ? true : false));  
                          $('#updateCheckbox').attr("checked",(getCookieValue('HIDE_UPDATES') == 1 ? true : false));  
                          $('#loadCheckbox').attr("checked",(getCookieValue('LOAD_SCREEN') == 1 ? true : false));  
+                         
+                         //Load all the tooltip settings from cookies
+                         var cookieVal = getCookieValue("TOOLTIP");
+                         var query = cookieVal == -1 ? new Array(0) : cookieVal.split("|");
+                         if(query.shift() != 0)        //is tooltips enabled?
+                         {
+                              $("#enableTooltip").attr("checked","checked").parent().next().removeClass("disabled").find("input").removeAttr("disabled");
+                              for(var page in hintArray)          //Each Page
+                              {
+                                   //Find the index we need and populate an array, if the hint has nothing in it, ignore it
+                                   if(hintArray[page].length > 0)     
+                                   {
+                                        if(query.length > 0){         //Does the page in the cookie exist?
+                                             var index = 0;
+                                             while(query[index].indexOf(page+"=") == -1 && index++ < query.length);     //Find the right array inside query
+                                             var savedValues = query.splice(index,1).toString().split("=")[1].split(",");
+                                        } 
+                                        else{savedValues = new Array();}
+                                        for(var i=0;i<hintArray[page].length;i++){         //Each value of that page
+                                             if(savedValues[i])       //is there any values in that page of the cookie?
+                                                  {$("#settings_tooltip table input[num='"+i+"'][page='"+page+"']")[0].checked = savedValues[i] != 0;}
+                                             else
+                                                  {$("#settings_tooltip table input[num='"+i+"'][page='"+page+"']")[0].checked = true;}
+                                        }
+                                   }
+                              }
+                         }
+                         else
+                         {
+                              $("#enableTooltip").removeAttr("checked");
+                              toggleEnableTooltip(document.getElementById("enableTooltip"));
+                         }
+                         
+                         //Set Toggles
                          toggleRemoveTimer(document.getElementById("removeTimerChkbx"));
+                         
+                         for(var i=0;i<$("#settingsContent")[0].childNodes.length;i++){$("#settingsContent")[0].childNodes[i].style.display='none';}     
+                         $("#settingsContent")[0].firstChild.style.display = "block";
                     }
                }
           }
@@ -742,14 +812,12 @@ l*        POPUP SPECIFIC FUNCTIONS                         |
           {
                $("a").click(function(){
                     if($(this).attr("target")!= "_blank" && $(this).attr("target") != "new" && $(this).attr("popup")!= "false" && $(this).parent().html().indexOf('onclick="return ') == -1  && $(this).attr('href').indexOf('mailto') == -1){
-                         $("#hintmsg").css("display","none");
                          showLoadingPopup();
                     }
                });
 
                $("input").click(function(){
                     if($(this).attr("type") == "button"){
-                         $("#hintmsg").css("display","none");
                          showLoadingPopup();
                     }
                });
@@ -796,8 +864,9 @@ l*        HIGHLIGHTING                                            |
                     case "student_app_summary":
                          tables.find("tr").find("td:first, th:first").remove();
                          tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);
-                         tables.find("tr:contains('Alternate')").find("td").css("background-color",MEDIOCRE);
+                         tables.find("tr:contains('Ranking Complete')").find("td").css("background-color",BAD);
                          tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);	
+                         tables.find("tr:contains('Alternate')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Employed')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Not Selected')").find("td").css("background-color",WORST);
@@ -834,9 +903,4 @@ l*        HIGHLIGHTING                                            |
                }
           }
      } 
-}catch(e){alert(e)}}  
-
-/*
- *   Start running code
- */
-startOperation();
+}
