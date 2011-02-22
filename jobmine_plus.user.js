@@ -2,7 +2,7 @@
 // @name           Jobmine Plus
 // @namespace      http://eatthis.iblogger.org/
 // @description    Makes jobmine even better and looks good too!
-// @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&
+// @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=*
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/*
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=*
 // @exclude        *IScript_ShowStuDocument*
@@ -15,21 +15,41 @@
 /*
  *   Constants
  */
-var CURRENT_VERSION=105;
+var CURRENT_VERSION=106;
 var UNSAFEWINDOWSUPPORT=unsafeWindow.toString().indexOf("[object Window]")!=-1;
 var SCRIPTSURL="https://jobmine-plus.googlecode.com/svn/trunk/scripts";
 var GLOBAL_TIMER = null;
 
 /*
+ * Handle Cookies
+ */
+ 
+function getCookieValue(name){//Able get cookies, -1 means it does not exist
+     var cookies = document.cookie;
+     var lookup = cookies.indexOf(name+'=');
+     if(lookup == -1){return -1;}
+
+     lookup += name.length + 1;
+     var end = cookies.indexOf(';',lookup);
+     if(end == -1){end = cookies.length}
+     var value = cookies.substring(lookup,end);
+     if(value != null){
+          return value;
+     }else{
+          return null;	
+     }
+}
+
+function writeCookie(name, value){
+     var date = new Date();
+     date.setTime(date.getTime()+(3*31*24*60*60*1000));     //3 months
+     document.cookie = name+'='+value+';expires='+date.toGMTString()+'; path/';
+}
+
+/*
  *   White Overlay
  */
-function white_overlay(text, fontSize, includeImg)
-{
-     var image = includeImg == false  ? "" : "<img alt='' style='position:relative;top:-125px;' src='"+SCRIPTSURL+"/images/loading.gif'/>"; 
-     fontSize = fontSize != null ? fontSize+"px" : "30px";
-     text = text != null ? text : "Jobmine has been programmed to load pages really slowly.";
-     return "<div id='popupWhiteContainer' style='display:none;'><div id='whiteOverlay' style='display:block;position:fixed;width:100%;height:100%;background-color:white;opacity:0.5;z-index:1;left:0px;top:125px;'></div><div id='popupWrapper' style='position:fixed;width:50%;height:50%;bottom:0px;right:0px;'><div id='popupWhiteContent' style='position:relative;width:450px; font-weight:bold; height:180px;top:-90px;font-size:"+fontSize+";left:-225px;z-index:49;font-family:Arial,Verdana;text-align:center;text-shadow:-2px -2px 5px #777, 2px 2px 5px #777;'><span style='font-size:50px;'>Please be Patient.</span><br/><div id='whitePopupMsg'>"+text+"</div><br/>"+image+"</div></div></div>";
-}
+function white_overlay(text, fontSize, includeImg){var image = includeImg == false  ? "" : "<img alt='' style='position:relative;top:-125px;' src='"+SCRIPTSURL+"/images/loading.gif'/>";fontSize = fontSize != null ? fontSize+"px" : "30px";text = text != null ? text : "Jobmine has been programmed to load pages really slowly.";return "<div id='popupWhiteContainer' style='display:none;'><div id='whiteOverlay' style='display:block;position:fixed;width:100%;height:100%;background-color:white;opacity:0.5;z-index:1;left:0px;top:125px;'></div><div id='popupWrapper' style='position:fixed;width:50%;height:50%;bottom:0px;right:0px;'><div id='popupWhiteContent' style='position:relative;width:450px; font-weight:bold; height:180px;top:-90px;font-size:"+fontSize+";left:-225px;z-index:49;font-family:Arial,Verdana;text-align:center;text-shadow:-2px -2px 5px #777, 2px 2px 5px #777;'><span style='font-size:50px;'>Please be Patient.</span><br/><div id='whitePopupMsg'>"+text+"</div><br/>"+image+"</div></div></div>";}
 
 /*
  *Pages 
@@ -46,14 +66,19 @@ var APPLICATION_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservle
 /*
  *   Redirects
  */
+function focusPass(){document.getElementById("userid").removeEventListener("focus",focusPass,false);document.getElementById('pwd').focus();}
 if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1){window.location.href = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";return;}
-else if(document.getElementById("search")){return;}
+else if(document.getElementById("search")){
+var user = getCookieValue('LASTUSER');if(user != -1 && document.getElementById("userid")){document.getElementById("userid").value = user;document.getElementById("userid").addEventListener("focus",focusPass,false);}
+return;
+}
 else if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&')
-{try{
-     document.getElementsByTagName("html")[0].innerHTML = "<body>"+white_overlay("Welcome to Jobmine Plus! No Jobmine Plus is not slower than Jobmine (well only by a bit since it does extra enhancements after), it is about the same timing. If you don't like this because it is slower, then you will miss out on all the great features. By the time you read this, the next page should have loaded.",21,false)+"</body>";	
+{
+     document.getElementsByTagName("html")[0].innerHTML = "<body>"+white_overlay("<div style='text-align:justify;'>Welcome to Jobmine Plus! No Jobmine Plus is not slower than Jobmine (well only by a bit since it does extra enhancements after), it is about the same timing. If you don't like this because it is slower, then you will miss out on all the great features. By the time you read this, the next page would have loaded.</div>",21,false)+"</body>";	
      document.getElementById('popupWhiteContainer').style.display = "block";
      document.getElementById('popupWhiteContent').style.top = "-130px";
      window.stop();
+     writeCookie("LASTUSER", getCookieValue("SignOnDefault").toLowerCase());
      setTimeout(function(){
           var default_page = getCookieValue('DEFAULT_PAGE');
           switch(default_page){
@@ -84,7 +109,7 @@ else if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/icli
           }
      },1);
      return;
-}catch(e){alert(e)}}
+}
 
 /*
  * jQuery JavaScript Library v1.3.2
@@ -114,27 +139,6 @@ l*        CONSTANTS                                               |
 l*        FUNCTIONS                                                |
 \*======================================*/
 
-//Able get cookies, -1 means it does not exist
-function getCookieValue(name){
-	var cookies = document.cookie;
-	var lookup = cookies.indexOf(name+'=');
-	if(lookup == -1){return -1;}
-	
-	lookup += name.length + 1;
-	var end = cookies.indexOf(';',lookup);
-	if(end == -1){end = cookies.length}
-	var value = cookies.substring(lookup,end);
-	if(value != null){
-		return value;
-	}else{
-		return null;	
-     }
-}
-function writeCookie(name, value){
-     var date = new Date();
-     date.setTime(date.getTime()+(3*31*24*60*60*1000));     //3 months
-     document.cookie = name+'='+value+';expires='+date.toGMTString()+'; path/';
-}
 function showLoadingPopup(){
      if($("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
 	$("#popupWhiteContainer").css("display","block");	
@@ -215,7 +219,6 @@ function addSettingsItem(name, html)
      }
 }
 
-
 /*======================================*\
 l*        ALTERNATIVE UNSAFEWINDOW FUCNTIONS      |
 \*======================================*/
@@ -232,7 +235,7 @@ function injectFunction(_function,bruteforce){
 l*        START OPERATION                                      |
 \*======================================*/                      
 function startOperation()
-{try{
+{
      //if(this page and do stuff)
      {
 /*======================================*\
@@ -336,13 +339,13 @@ l*        JOB SEARCH PAGE                                       |
                          if(num != 0)   //Avoid headers
                          {
                               var obj = $(this).children();
-                              var company = obj.eq(2).html();
-                              var location = obj.eq(4).html();
+                              var company = obj.eq(2).html().trim();
+                              var location = obj.eq(4).html().trim();
                               
                               //This is the Google search for the company
                               obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
                               //This is for google map the location
-                              obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
+                              obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+company.replace(/\s/g,"+")+"+"+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
                          }
                     });
                }
@@ -431,10 +434,10 @@ l*        JOB SHORT LIST PAGE                                  |
                          obj.prepend('<td align="center" height="19" class="PSLEVEL1GRIDODDROW"><input class="editChkbx" row="'+numOfChkbx+'" id=chkbx'+(numOfChkbx++)+' type="checkbox"></td>');
                          
                          //Add company and location href
-                         var company = child.eq(2).html();
-                         var location = child.eq(4).html();                         
+                         var company = child.eq(2).html().trim();
+                         var location = child.eq(4).html().trim();                         
                          child.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
-                         child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"'/>"); 
+                         child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+company.replace(/\s/g,"+")+"'/>"); 
                     }    
                });
                //Add invisible iframe
@@ -471,11 +474,13 @@ l*        JOB SHORT LIST PAGE                                  |
                     if(shiftDown && anchorChkbox != null && row != anchorChkbox)
                     {
                          if(anchorChkbox < row)        //Sees if you are going from down up or up down
-                              for(var i=anchorChkbox; i<=row;i++)
-                                   $("#chkbx"+i).attr("checked",obj.is(':checked'));
+                         {
+                              for(var i=anchorChkbox; i<=row;i++){$("#chkbx"+i).attr("checked",obj.is(':checked'));}
+                         }
                          else
-                              for(var i=anchorChkbox; i>row;i--)
-                                   $("#chkbx"+i).attr("checked",obj.is(':checked'));
+                         {
+                              for(var i=anchorChkbox; i>row;i--){$("#chkbx"+i).attr("checked",obj.is(':checked'));}
+                         }
                     }   
                     anchorChkbox = row;                   
                });
@@ -542,6 +547,7 @@ l*        APPLICATIONS PAGE                                    |
           {
                var tables = applyTableSorting("table table table.PSLEVEL1GRID");
                tables.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
+               tables.eq(0).find("td:contains('Ranking Completed')").html("Ranked/Offer");
                
                //Add company for google search
                $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(row){        
@@ -550,6 +556,96 @@ l*        APPLICATIONS PAGE                                    |
                          $(this).children().eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+$(this).children().eq(2).html().replace(/\s/g,"+")+"'/>");            
                     }    
                });
+          }
+/*======================================*\
+l*        Interview Page                                           |
+\*======================================*/
+          else if(pagetype == "student_interviews")
+          {  
+               //Parses an abrevation of a month into a number (1-12)
+               function parseMonth(givenMonth)
+               {
+                    var months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+                    var i = 0;
+                    while(months[i] && months[i].indexOf(givenMonth) == -1 && months[i++]);
+                    //If month cannot be found
+                    if(i == 12) return false;
+                    return (parseInt(i+1)+"").length < 2 ? "0"+parseInt(i+1) : parseInt(i+1);
+               }
+               
+               //Calculates how off we are from UTC/GMT
+               function calculateTimeZoneDiff()
+               {                    
+                    var date1 = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0);
+                    var temp = date1.toGMTString();
+                    var date3 = new Date(temp.substring(0, temp.lastIndexOf(" ")));
+                    return (date1 - date3) / (1000 * 60 * 60);
+               }
+               
+               //Add an extra column for google calendars
+               tableBody = $("table table table.PSLEVEL1GRID:eq(0) tr");
+               if(tableBody.length > 2)      //Must have something in the table
+               {
+                    tableBody.each(function(row){                                                
+                         var column = $(this).children();                         
+                         if(row == 0)   //Header
+                         {
+                              //Adds a changes column
+                              column.eq(12).after("<th class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Google Calendar</th>");
+                         }
+                         else      //Pull information and make the Google Calendars button
+                         {    
+                              //Parse the date
+                              var date = column.eq(4).html().trim().split(" ");
+                              var day = date[0];
+                              var month = parseMonth(date[1]);
+                              var year = date[2];
+                              
+                              //Parse the time
+                              var time = column.eq(7).html().trim().split(" ");
+                              var dateStr;
+                              if(time != "")
+                              {          
+                              //How long is the interview
+                                   var length = parseInt(column.eq(8).html().trim());        
+                              //Find start time
+                                   var sMin = time[0].split(":")[1];                                 
+                                   var sHour = time[0].split(":")[0];
+                                   sHour = parseInt(sHour[0] == "0" ? sHour.substring(1) : sHour);      //remove leading zeros
+                                   sHour +=  parseInt(-calculateTimeZoneDiff() + (time[1] == "pm" ? 12 : 0));
+                              //Find the ending time                                   
+                                   var eMin = parseInt(sMin) + length;
+                                   var eHour = sHour;
+                                   if(eMin >= 60)           //Overflow in time
+                                   {
+                                        eMin = ((eMin-60)+"").length < 2 ?  "0"+(eMin-60) : eMin-60;
+                                        eHour += 1;
+                                   }   
+                                   //Write the time string to be parsed by Google Calendar
+                                   dateStr = year + month + day + "T" + sHour + sMin + "00Z/" + year + month + day + "T" + eHour + eMin + "00Z";
+                              }
+                              
+                              //Other pieces of info
+                              var location = column.eq(9).html().replace(/&nbsp;/g," ").trim(); location = location != "" ? "Tatham Centre: Room "+location : "Offsite Location (check description)";
+                              var company = column.eq(2).html().trim();
+                              var type = column.eq(5).html().trim();
+                              var instructions = column.eq(10).html().replace(/&nbsp;/g," ").trim(); instructions = instructions != "" ? "\nExtra Information:\n"+instructions : "";
+                              var interviewer = column.eq(11).html().trim();
+                              var jobTitle = column.eq(3).find("a").html().trim();
+                              
+                              //Write the details
+                              var details = (type + " interview with " + company + " (" + interviewer + ")\nTitle: "+ jobTitle + "\n"+instructions).replace(/ /g,"%20").replace(/\n/g,"%0A").replace(/:/g,"%3A").replace(/,/g,"%2C").replace(/,/g,"%2C");
+                              
+                              //Check to see all fields are valid before we add the calendar, else leave it blank
+                              if(month && time != "" && type && jobTitle){
+                                   column.eq(12).after('<td title="Click to add to Google Calendar!" class="PSLEVEL1GRIDODDROW" align="left"><a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+company+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a></td>');
+                              }else{
+                                   column.eq(12).after('<td class="PSLEVEL1GRIDODDROW" align="left">&nbsp;</td>');
+                              }
+                         }         
+                    });
+               }
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
           }
           else
 /*======================================*\
@@ -569,23 +665,19 @@ l*        HINT SYSTEM                                             |
           hintArray["search"] = new Array();
          
           //Common hints for all pages
-          hintArray["com"].push({page: "com",percentage: 1,obj:$("#settings_nav")[0], text : "Check out the settings tab to customize your experience. You can remove the timer and set the default page Jobmine Plus loads."});
-          hintArray["com"].push({page: "com",percentage: 0.1,obj:$(".PSHYPERLINK a")[0], text : "Hint 1"});
-          hintArray["com"].push({page: "com",percentage: 0.3,obj:$(".PSHYPERLINK a")[1], text : "Hint 2"});
-          hintArray["com"].push({page: "com",percentage: 0.8,obj:$(".PSHYPERLINK a")[2], text : "Hint 3"});
-          hintArray["com"].push({page: "com",percentage: 1,obj:$(".PSHYPERLINK a")[0], text : "Hint 4"});
-          hintArray["com"].push({page: "com",percentage: 1,obj:$(".PSHYPERLINK a")[0], text : "Hint 5"});
+          hintArray["com"].push({page: "com",percentage: 0.4,obj:$("#settings_nav")[0], text : "Check out the settings tab to customize your experience. You can remove the timer and/or set the default page Jobmine Plus loads."});
+          hintArray["com"].push({page: "com",percentage: 0.3,obj:tables.find("th.PSLEVEL1GRIDCOLUMNHDR.header")[2], text : "Click the header a column to sort jobs and other information."});
           
           //Applications hints
-          hintArray["apps"].push({page: "apps",percentage: 0.5,obj:tables.find("a.googleSearch")[0], text : "You can now select the company name and Jobmine Plus will Google search it for you in a new tab."});
+          hintArray["apps"].push({page: "apps",percentage: 0.4,obj:tables.find("a.googleSearch")[0], text : "You can now select the company name and Jobmine Plus will Google search it for you in a new tab."});
           
           //Shortlist hints
-          hintArray["short"].push({page: "short",percentage: 0.3,obj:tables.find("input.editChkbx")[0], text : "You can delete multiple short list jobs with checkboxes. It also supports shift-click functionality."});
+          hintArray["short"].push({page: "short",percentage: 0.5,obj:tables.find("input.editChkbx")[0], text : "You can delete multiple short list jobs with checkboxes. It also supports shift-click functionality."});
           
           //Job Search hints
-          hintArray["search"].push({page: "search",percentage: 0.5,obj:tables.find("a.mapsSearch")[0], text : "You can now select the location and Jobmine Plus will Google Maps it for you."});
+          hintArray["search"].push({page: "search",percentage: 0.4,obj:tables.find("a.mapsSearch")[0], text : "You can now select the location and Jobmine Plus will Google Maps it for you."});
           hintArray["search"].push({page: "search",percentage: 0.3,obj:tables.find("th.PSLEVEL1GRIDCOLUMNHDR:contains('Hiring Chances*')")[0], text : "This is hiring changes. Note: you need to be skilled to get the job, I am not responsible for incorrect statistics."});
-
+          
           function saveTooltip()
           {               
               var cookieQuery = $("#enableTooltip")[0].checked ? 1 : 0;  
@@ -671,23 +763,16 @@ l*        HINT SYSTEM                                             |
                //Find the best orientation for the hint box
                if(objTop < $("body").height()/2)
                {
-                    if((objLeft+VERTICALHINT[0]/2)*parseInt(1+marginPercentage) > window.innerWidth)
-                         orientation = "right";
-                    else if(objLeft-VERTICALHINT[0]/2 < window.innerWidth*marginPercentage)
-                         orientation = "left";
-                    else
-                         orientation = "up";
+                    if((objLeft+VERTICALHINT[0]/2)*parseInt(1+marginPercentage) > window.innerWidth){orientation = "right";}
+                    else if(objLeft-VERTICALHINT[0]/2 < window.innerWidth*marginPercentage){orientation = "left";}
+                    else{orientation = "up";}
                }
                else
                {
-                    if((objLeft+VERTICALHINT[0]/2)*parseInt(1+marginPercentage) > window.innerWidth)
-                         orientation = "right";
-                    else if(objLeft-VERTICALHINT[0]/2 < window.innerWidth*marginPercentage)
-                         orientation = "left";
-                    else
-                         orientation = "down";
+                    if((objLeft+VERTICALHINT[0]/2)*parseInt(1+marginPercentage) > window.innerWidth){orientation = "right";}
+                    else if(objLeft-VERTICALHINT[0]/2 < window.innerWidth*marginPercentage){orientation = "left";}
+                    else{orientation = "down";}
                }
-               
                //Position the hint box
                switch(orientation)   
                {
@@ -716,7 +801,7 @@ l*        HINT SYSTEM                                             |
           }
           
           function randomizeHints(array)
-          {try{
+          {
                //Load cookie
                var cookieVal = getCookieValue("TOOLTIP");
                if(cookieVal != 0)       //Do not show any hints 
@@ -725,16 +810,34 @@ l*        HINT SYSTEM                                             |
                     var randomIndex = Math.floor(Math.random()*array.length+1)-1;
                     var hint = array[randomIndex];
                     var chosenIndex = Math.floor(Math.random()*101);
-               
                     //See if we display it based on the percentage probability
                     var probability = hint.percentage*100;
                     
                     //See if user has disabled selected cookie
                     var index = 0;
-                    var query = cookieVal.split("|");             
-                    while(query[index].indexOf(hint.page+"=") == -1 && index++ < query.length);
-                    var selectedValues = query.splice(index,1).toString().split("=")[1].split(",");
-                    var number = hint.page != "com" ? randomIndex : randomIndex - tempPageHint.length;
+                    if(cookieVal != -1 && cookieVal.indexOf("1|") == 0) //no cookie exists
+                    {
+                         var query = cookieVal.split("|");          
+                         while(query[index].indexOf(hint.page+"=") == -1 && index++ < query.length);
+                         var selectedValues = query.splice(index,1).toString().split("=")[1].split(",");
+                         var number = hint.page != "com" ? randomIndex : randomIndex - tempPageHint.length;
+                    }
+                    else{
+                         var selectedValues = new Array();
+                         
+                         //Build a default cookie
+                         var cookieQuery = "1";
+                         for(var page in hintArray)
+                         {
+                              if(page != "enable")
+                              {
+                                   cookieQuery += "|"+page +"=";
+                                   for(var i=0;i<hintArray[page].length;i++){cookieQuery += "1,";}
+                                   cookieQuery = cookieQuery.slice(0, -1);        //removes last comma                    
+                              }
+                         }
+                         writeCookie("TOOLTIP", cookieQuery);         //alert(cookieQuery);
+                    }
                     
                     //Show it
                     if(selectedValues[number] != 0 && chosenIndex <= probability && hint.obj)   //also check if user blocked this hint
@@ -749,7 +852,7 @@ l*        HINT SYSTEM                                             |
                          $(window).bind("resize",function(){positionHint(hint.obj);});
                     }
                }
-          }catch(e){alert(e)}}
+          }
                
           //When CSS is loaded
           cssReady(function(){
@@ -764,23 +867,24 @@ l*        HINT SYSTEM                                             |
                var arr = hintArray[page];
                for(var i=0;i<arr.length;i++)
                {
-                    tooltipGenerated += "<tr><td valign='top'><input id='toolChkbx"+(index++)+"' class='tooltipChkbx' page='"+page+"' num='"+i+"' type='checkbox'/></td><td class='details' valign='top'>"+arr[i].text+"<br/><br/></td></tr>"
+                    tooltipGenerated += "<tr><td valign='top'><input id='toolChkbx"+(index++)+"' class='tooltipChkbx' page='"+page+"' num='"+i+"' type='checkbox'/></td><td class='details' valign='top'>"+arr[i].text+"<br/><br/></td></tr>";
                }
           }
-          tooltipGenerated += "</table>"
+          tooltipGenerated += "</table>";
           index = null;
 /*======================================*\
 l*        SETTINGS                                                  |
-\*======================================*/                   
+\*======================================*/        
+          //Build the settings
           addSettingsItem("General",SETTINGS_GENERAL);
           addSettingsItem("Tooltip",tooltipGenerated);
           
+          //Clicking the menu nav under settings
           $("#settingsNav a").click(function(){
                var name = $(this).html();
                $("#popupTitle").html(name+" Settings");
                for(var i=0;i<$("#settingsContent")[0].childNodes.length;i++){$("#settingsContent")[0].childNodes[i].style.display='none';}     
                $("#settings_"+name.toLowerCase()).css("display","block");
-               
           });
           
           function saveGeneralSettings()
@@ -841,7 +945,7 @@ l*        POPUP SPECIFIC FUNCTIONS                         |
           
           //When the popup is shown, the panel is shown based off the name
           function showPanel(panelName, width, height)
-          {try{
+          {
                if($("#"+panelName))
                {
                     for(var i=0;i<$("#panelWrapper")[0].childNodes.length;i++){$("#panelWrapper")[0].childNodes[i].style.display='none';}                      
@@ -882,15 +986,16 @@ l*        POPUP SPECIFIC FUNCTIONS                         |
                                         else{savedValues = new Array();}
                                         for(var i=0;i<hintArray[page].length;i++){         //Each value of that page
                                              if(savedValues[i])       //is there any values in that page of the cookie?
-                                                  $("#settings_tooltip table input[num='"+i+"'][page='"+page+"']")[0].checked = savedValues[i] != 0; 
+                                                  {$("#settings_tooltip table input[num='"+i+"'][page='"+page+"']")[0].checked = savedValues[i] != 0;}
                                              else
-                                                  $("#settings_tooltip table input[num='"+i+"'][page='"+page+"']")[0].checked = true;
+                                                  {$("#settings_tooltip table input[num='"+i+"'][page='"+page+"']")[0].checked = true;}
                                         }
                                    }
                               }
                          }
                          else
                          {
+                              $("#enableTooltip").removeAttr("checked");
                               toggleEnableTooltip(document.getElementById("enableTooltip"));
                          }
                          
@@ -901,7 +1006,7 @@ l*        POPUP SPECIFIC FUNCTIONS                         |
                          $("#settingsContent")[0].firstChild.style.display = "block";
                     }
                }
-          }catch(e){alert(e)}}
+          }
           
           function hidePopup(){$("#popupContainer").css("display","none");$("body").css("overflow","auto");$("#panelWrapper").children().each(function(){$(this).css("display","none");});};
           
@@ -950,7 +1055,7 @@ l*        HIGHLIGHTING                                            |
 \*======================================*/         
           // Set syntax highlighting colours for various statuses
           var VERYGOOD = "#9f9";
-          var GOOD = "#96f0b1";
+          var GOOD = "#61efef";
           var MEDIOCRE = "#faf39a";
           var BAD = "#fdaaaa";
           var WORST = "#b5bbc1";
@@ -963,15 +1068,17 @@ l*        HIGHLIGHTING                                            |
                          tables.find("tr").find("td:first, th:first").remove();
                          tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Ranking Complete')").find("td").css("background-color",BAD);
+                         tables.find("tr:contains('Ranked/Offer')").find("td").css("background-color",GOOD);
                          tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);	
                          tables.find("tr:contains('Alternate')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Employed')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Not Selected')").find("td").css("background-color",WORST);
-                         tables.find("tr:contains('Cancelled')").find("td").css("background-color",BAD);
                          tables.find("tr:contains('Filled')").find("td").css("background-color",BAD);
                          tables.find("tr:contains('Not Ranked')").find("td").css("background-color",WORST);
                          tables.find("tr:contains('Approved')").find("td").css("background-color",BAD);
+                         tables.find("tr:contains('Applied')").find("td").css("background-color",'');
+                         tables.find("tr:contains('Cancelled')").find("td").css("background-color",BAD);
                          break;
                     case "student_sel.interview_schedule":
                          tables.find("tr:contains('Break')").find("td").css("background-color",MEDIOCRE);
@@ -984,6 +1091,7 @@ l*        HIGHLIGHTING                                            |
                     case "student_interviews":
                          tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);
+                         tables.find("tr:contains('Screened')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Filled')").find("td").css("background-color",WORST);
                          tables.find("tr:contains('Unfilled')").find("td").css("background-color",WORST);
@@ -1001,7 +1109,8 @@ l*        HIGHLIGHTING                                            |
                }
           }
      } 
-}catch(e){alert(e)}}  
+}
+
 
 /*
  *   Start running code

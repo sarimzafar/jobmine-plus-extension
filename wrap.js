@@ -38,6 +38,32 @@ var SCRIPTSURL="https://jobmine-plus.googlecode.com/svn/trunk/scripts";
 var GLOBAL_TIMER = null;
 
 /*
+ * Handle Cookies
+ */
+ 
+function getCookieValue(name){
+     var cookies = document.cookie;
+     var lookup = cookies.indexOf(name+'=');
+     if(lookup == -1){return -1;}
+
+     lookup += name.length + 1;
+     var end = cookies.indexOf(';',lookup);
+     if(end == -1){end = cookies.length}
+     var value = cookies.substring(lookup,end);
+     if(value != null){
+          return value;
+     }else{
+          return null;	
+     }
+}
+
+function writeCookie(name, value){
+     var date = new Date();
+     date.setTime(date.getTime()+(3*31*24*60*60*1000));     //3 months
+     document.cookie = name+'='+value+';expires='+date.toGMTString()+'; path/';
+}
+
+/*
  *   White Overlay
  */
 function white_overlay(text, fontSize, includeImg)
@@ -63,14 +89,33 @@ var APPLICATION_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservle
 /*
  *   Redirects
  */
-if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1){window.location.href = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";return;}
-else if(document.getElementById("search")){return;}
+function focusPass(){
+     document.getElementById("userid").removeEventListener("focus",focusPass,false);
+     document.getElementById('pwd').focus();
+}
+if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1)
+{
+     window.location.href = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";
+     return;
+}
+//Auto place the login username for the user and focus the password
+else if(document.getElementById("search"))
+{
+     var user = getCookieValue('LASTUSER');
+     if(user != -1 && document.getElementById("userid"))
+     {
+          document.getElementById("userid").value = user;
+          document.getElementById("userid").addEventListener("focus",focusPass,false);
+     }
+     return;
+}
 else if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&')
 {
      document.getElementsByTagName("html")[0].innerHTML = "<body>"+white_overlay("<div style='text-align:justify;'>Welcome to Jobmine Plus! No Jobmine Plus is not slower than Jobmine (well only by a bit since it does extra enhancements after), it is about the same timing. If you don't like this because it is slower, then you will miss out on all the great features. By the time you read this, the next page would have loaded.</div>",21,false)+"</body>";	
      document.getElementById('popupWhiteContainer').style.display = "block";
      document.getElementById('popupWhiteContent').style.top = "-130px";
      window.stop();
+     writeCookie("LASTUSER", getCookieValue("SignOnDefault").toLowerCase());
      setTimeout(function(){
           var default_page = getCookieValue('DEFAULT_PAGE');
           switch(default_page){

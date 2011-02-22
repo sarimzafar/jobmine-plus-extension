@@ -6,27 +6,6 @@ l*        CONSTANTS                                               |
 l*        FUNCTIONS                                                |
 \*======================================*/
 
-//Able get cookies, -1 means it does not exist
-function getCookieValue(name){
-	var cookies = document.cookie;
-	var lookup = cookies.indexOf(name+'=');
-	if(lookup == -1){return -1;}
-	
-	lookup += name.length + 1;
-	var end = cookies.indexOf(';',lookup);
-	if(end == -1){end = cookies.length}
-	var value = cookies.substring(lookup,end);
-	if(value != null){
-		return value;
-	}else{
-		return null;	
-     }
-}
-function writeCookie(name, value){
-     var date = new Date();
-     date.setTime(date.getTime()+(3*31*24*60*60*1000));     //3 months
-     document.cookie = name+'='+value+';expires='+date.toGMTString()+'; path/';
-}
 function showLoadingPopup(){
      if($("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
 	$("#popupWhiteContainer").css("display","block");	
@@ -227,13 +206,13 @@ l*        JOB SEARCH PAGE                                       |
                          if(num != 0)   //Avoid headers
                          {
                               var obj = $(this).children();
-                              var company = obj.eq(2).html();
-                              var location = obj.eq(4).html();
+                              var company = obj.eq(2).html().trim();
+                              var location = obj.eq(4).html().trim();
                               
                               //This is the Google search for the company
                               obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
                               //This is for google map the location
-                              obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
+                              obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+company.replace(/\s/g,"+")+"+"+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
                          }
                     });
                }
@@ -322,10 +301,10 @@ l*        JOB SHORT LIST PAGE                                  |
                          obj.prepend('<td align="center" height="19" class="PSLEVEL1GRIDODDROW"><input class="editChkbx" row="'+numOfChkbx+'" id=chkbx'+(numOfChkbx++)+' type="checkbox"></td>');
                          
                          //Add company and location href
-                         var company = child.eq(2).html();
-                         var location = child.eq(4).html();                         
+                         var company = child.eq(2).html().trim();
+                         var location = child.eq(4).html().trim();                         
                          child.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
-                         child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"'/>"); 
+                         child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+company.replace(/\s/g,"+")+"'/>"); 
                     }    
                });
                //Add invisible iframe
@@ -435,6 +414,7 @@ l*        APPLICATIONS PAGE                                    |
           {
                var tables = applyTableSorting("table table table.PSLEVEL1GRID");
                tables.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
+               tables.eq(0).find("td:contains('Ranking Completed')").html("Ranked/Offer");
                
                //Add company for google search
                $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(row){        
@@ -443,6 +423,96 @@ l*        APPLICATIONS PAGE                                    |
                          $(this).children().eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+$(this).children().eq(2).html().replace(/\s/g,"+")+"'/>");            
                     }    
                });
+          }
+/*======================================*\
+l*        Interview Page                                           |
+\*======================================*/
+          else if(pagetype == "student_interviews")
+          {  
+               //Parses an abrevation of a month into a number (1-12)
+               function parseMonth(givenMonth)
+               {
+                    var months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+                    var i = 0;
+                    while(months[i] && months[i].indexOf(givenMonth) == -1 && months[i++]);
+                    //If month cannot be found
+                    if(i == 12) return false;
+                    return (parseInt(i+1)+"").length < 2 ? "0"+parseInt(i+1) : parseInt(i+1);
+               }
+               
+               //Calculates how off we are from UTC/GMT
+               function calculateTimeZoneDiff()
+               {                    
+                    var date1 = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0);
+                    var temp = date1.toGMTString();
+                    var date3 = new Date(temp.substring(0, temp.lastIndexOf(" ")));
+                    return (date1 - date3) / (1000 * 60 * 60);
+               }
+               
+               //Add an extra column for google calendars
+               tableBody = $("table table table.PSLEVEL1GRID:eq(0) tr");
+               if(tableBody.length > 2)      //Must have something in the table
+               {
+                    tableBody.each(function(row){                                                
+                         var column = $(this).children();                         
+                         if(row == 0)   //Header
+                         {
+                              //Adds a changes column
+                              column.eq(12).after("<th class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Google Calendar</th>");
+                         }
+                         else      //Pull information and make the Google Calendars button
+                         {    
+                              //Parse the date
+                              var date = column.eq(4).html().trim().split(" ");
+                              var day = date[0];
+                              var month = parseMonth(date[1]);
+                              var year = date[2];
+                              
+                              //Parse the time
+                              var time = column.eq(7).html().trim().split(" ");
+                              var dateStr;
+                              if(time != "")
+                              {          
+                              //How long is the interview
+                                   var length = parseInt(column.eq(8).html().trim());        
+                              //Find start time
+                                   var sMin = time[0].split(":")[1];                                 
+                                   var sHour = time[0].split(":")[0];
+                                   sHour = parseInt(sHour[0] == "0" ? sHour.substring(1) : sHour);      //remove leading zeros
+                                   sHour +=  parseInt(-calculateTimeZoneDiff() + (time[1] == "pm" ? 12 : 0));
+                              //Find the ending time                                   
+                                   var eMin = parseInt(sMin) + length;
+                                   var eHour = sHour;
+                                   if(eMin >= 60)           //Overflow in time
+                                   {
+                                        eMin = ((eMin-60)+"").length < 2 ?  "0"+(eMin-60) : eMin-60;
+                                        eHour += 1;
+                                   }   
+                                   //Write the time string to be parsed by Google Calendar
+                                   dateStr = year + month + day + "T" + sHour + sMin + "00Z/" + year + month + day + "T" + eHour + eMin + "00Z";
+                              }
+                              
+                              //Other pieces of info
+                              var location = column.eq(9).html().replace(/&nbsp;/g," ").trim(); location = location != "" ? "Tatham Centre: Room "+location : "Offsite Location (check description)";
+                              var company = column.eq(2).html().trim();
+                              var type = column.eq(5).html().trim();
+                              var instructions = column.eq(10).html().replace(/&nbsp;/g," ").trim(); instructions = instructions != "" ? "\nExtra Information:\n"+instructions : "";
+                              var interviewer = column.eq(11).html().trim();
+                              var jobTitle = column.eq(3).find("a").html().trim();
+                              
+                              //Write the details
+                              var details = (type + " interview with " + company + " (" + interviewer + ")\nTitle: "+ jobTitle + "\n"+instructions).replace(/ /g,"%20").replace(/\n/g,"%0A").replace(/:/g,"%3A").replace(/,/g,"%2C").replace(/,/g,"%2C");
+                              
+                              //Check to see all fields are valid before we add the calendar, else leave it blank
+                              if(month && time != "" && type && jobTitle){
+                                   column.eq(12).after('<td title="Click to add to Google Calendar!" class="PSLEVEL1GRIDODDROW" align="left"><a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+company+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a></td>');
+                              }else{
+                                   column.eq(12).after('<td class="PSLEVEL1GRIDODDROW" align="left">&nbsp;</td>');
+                              }
+                         }         
+                    });
+               }
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
           }
           else
 /*======================================*\
@@ -865,15 +935,17 @@ l*        HIGHLIGHTING                                            |
                          tables.find("tr").find("td:first, th:first").remove();
                          tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Ranking Complete')").find("td").css("background-color",BAD);
+                         tables.find("tr:contains('Ranked/Offer')").find("td").css("background-color",GOOD);
                          tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);	
                          tables.find("tr:contains('Alternate')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Employed')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Not Selected')").find("td").css("background-color",WORST);
-                         tables.find("tr:contains('Cancelled')").find("td").css("background-color",BAD);
                          tables.find("tr:contains('Filled')").find("td").css("background-color",BAD);
                          tables.find("tr:contains('Not Ranked')").find("td").css("background-color",WORST);
                          tables.find("tr:contains('Approved')").find("td").css("background-color",BAD);
+                         tables.find("tr:contains('Applied')").find("td").css("background-color",'');
+                         tables.find("tr:contains('Cancelled')").find("td").css("background-color",BAD);
                          break;
                     case "student_sel.interview_schedule":
                          tables.find("tr:contains('Break')").find("td").css("background-color",MEDIOCRE);
@@ -886,6 +958,7 @@ l*        HIGHLIGHTING                                            |
                     case "student_interviews":
                          tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);
+                         tables.find("tr:contains('Screened')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);
                          tables.find("tr:contains('Filled')").find("td").css("background-color",WORST);
                          tables.find("tr:contains('Unfilled')").find("td").css("background-color",WORST);
