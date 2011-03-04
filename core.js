@@ -362,6 +362,7 @@ l*        JOB SHORT LIST PAGE                                  |
                     tables.find("input").each(function(){
                          if($(this).attr("checked")){iframeArray.push($(this).attr("row"));}
                     });
+                    iframeArray.sort(function(a,b){return a-b;});
                     var iframeCounter = iframeArray.length;
                     if(iframeCounter == 0){return false;}    //if nothing is selected
                     var answer = confirm (iframeCounter < 10 ? "Do you wish to delete the checked rows from this page? The page itself will refresh after the transaction is saved." : "Do you wish to delete the checked rows from this page? You have "+iframeCounter+" rows to delete and this may take a while. The page itself will refresh after the transaction is saved.");
@@ -911,7 +912,12 @@ l*        REMOVING THE TIMER                                  |
                     runJS("clearInterval(timeoutWarningID)");
                }
                if(getCookieValue('AUTO_REFRESH') <= 0  || getCookieValue('AUTO_REFRESH') > 19){
-                    setTimeout(function(){window.location = window.location;},19*60*1000);
+               //2nd setTimeout Fixes Chrome refresh after add shortlist from search
+                    setTimeout(function(){
+                         setTimeout(function(){
+                         window.location = window.location;
+                         }, 19 * 1000 * 60);
+                    },1);
                }else{
                     document.addEventListener('click',resetGlobalTimer,true);
                     resetGlobalTimer();

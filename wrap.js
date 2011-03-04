@@ -32,7 +32,7 @@ headID.appendChild(newScript);*/
 /*
  *   Constants
  */
-var CURRENT_VERSION=105;
+var CURRENT_VERSION=107;
 var UNSAFEWINDOWSUPPORT=unsafeWindow.toString().indexOf("[object Window]")!=-1;
 var SCRIPTSURL="https://jobmine-plus.googlecode.com/svn/trunk/scripts";
 var GLOBAL_TIMER = null;
@@ -89,23 +89,22 @@ var APPLICATION_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservle
 /*
  *   Redirects
  */
-function focusPass(){
-     document.getElementById("userid").removeEventListener("focus",focusPass,false);
-     document.getElementById('pwd').focus();
-}
-if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1)
-{
-     window.location.href = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";
-     return;
-}
-//Auto place the login username for the user and focus the password
-else if(document.getElementById("search"))
-{
+function focusPass(){document.getElementById("userid").removeEventListener("focus",focusPass,false);document.getElementById('pwd').focus();}
+if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1){window.location.href = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";return;}
+else if(document.getElementById("search")){
+     //input checkbox and add an eventlistener
+     var newNode = document.createElement("div");
+     newNode.style.left = "212px";
+     newNode.style.position = "relative";
+     newNode.innerHTML = "<input id='autoCheckID' type='checkbox' title='Click to auto input user ID next time. Cannot save password for security reasons.'/><span style='font-size:11px;'>Save User ID<span>";     
+     document.getElementById("pwd").parentNode.parentNode.parentNode.insertBefore(newNode,document.getElementById("pwd").parentNode.parentNode.nextSibling.nextSibling);
+     document.getElementById("autoCheckID").addEventListener("click",function(){writeCookie('LASTUSER', this.checked ? + "1|"+ getCookieValue('LASTUSER').split("|")[1] : 0);},false);
+     
      var user = getCookieValue('LASTUSER');
-     if(user != -1 && document.getElementById("userid"))
-     {
-          document.getElementById("userid").value = user;
+     if(user != "NaN" && user != -1 && user[0] != 0 && document.getElementById("userid")){
+          document.getElementById("userid").value = user.substr(2);
           document.getElementById("userid").addEventListener("focus",focusPass,false);
+          document.getElementById("autoCheckID").checked = "checked";
      }
      return;
 }
@@ -115,7 +114,9 @@ else if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/icli
      document.getElementById('popupWhiteContainer').style.display = "block";
      document.getElementById('popupWhiteContent').style.top = "-130px";
      window.stop();
-     writeCookie("LASTUSER", getCookieValue("SignOnDefault").toLowerCase());
+     
+     var user = getCookieValue('LASTUSER');
+     if (user[0] != 0 && user != -1){writeCookie("LASTUSER", "1|"+getCookieValue("SignOnDefault").toLowerCase());}
      setTimeout(function(){
           var default_page = getCookieValue('DEFAULT_PAGE');
           switch(default_page){

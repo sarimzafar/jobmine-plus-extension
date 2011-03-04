@@ -22,29 +22,8 @@ var GLOBAL_TIMER = null;
 
 /*
  * Handle Cookies
- */
- 
-function getCookieValue(name){//Able get cookies, -1 means it does not exist
-     var cookies = document.cookie;
-     var lookup = cookies.indexOf(name+'=');
-     if(lookup == -1){return -1;}
-
-     lookup += name.length + 1;
-     var end = cookies.indexOf(';',lookup);
-     if(end == -1){end = cookies.length}
-     var value = cookies.substring(lookup,end);
-     if(value != null){
-          return value;
-     }else{
-          return null;	
-     }
-}
-
-function writeCookie(name, value){
-     var date = new Date();
-     date.setTime(date.getTime()+(3*31*24*60*60*1000));     //3 months
-     document.cookie = name+'='+value+';expires='+date.toGMTString()+'; path/';
-}
+ */ 
+function getCookieValue(name){var cookies=document.cookie;var lookup=cookies.indexOf(name+'=');if(lookup==-1){return-1;}lookup+=name.length+1;var end=cookies.indexOf(';',lookup);if(end==-1){end=cookies.length}var value=cookies.substring(lookup,end);if(value!=null){return value;}else{return null;}}function writeCookie(name,value){var date=new Date();date.setTime(date.getTime()+(3*31*24*60*60*1000));document.cookie=name+'='+value+';expires='+date.toGMTString()+'; path/';}
 
 /*
  *   White Overlay
@@ -66,50 +45,7 @@ var APPLICATION_PAGE = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservle
 /*
  *   Redirects
  */
-function focusPass(){document.getElementById("userid").removeEventListener("focus",focusPass,false);document.getElementById('pwd').focus();}
-if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1){window.location.href = "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";return;}
-else if(document.getElementById("search")){
-var user = getCookieValue('LASTUSER');if(user != -1 && document.getElementById("userid")){document.getElementById("userid").value = user;document.getElementById("userid").addEventListener("focus",focusPass,false);}
-return;
-}
-else if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&')
-{
-     document.getElementsByTagName("html")[0].innerHTML = "<body>"+white_overlay("<div style='text-align:justify;'>Welcome to Jobmine Plus! No Jobmine Plus is not slower than Jobmine (well only by a bit since it does extra enhancements after), it is about the same timing. If you don't like this because it is slower, then you will miss out on all the great features. By the time you read this, the next page would have loaded.</div>",21,false)+"</body>";	
-     document.getElementById('popupWhiteContainer').style.display = "block";
-     document.getElementById('popupWhiteContent').style.top = "-130px";
-     window.stop();
-     writeCookie("LASTUSER", getCookieValue("SignOnDefault").toLowerCase());
-     setTimeout(function(){
-          var default_page = getCookieValue('DEFAULT_PAGE');
-          switch(default_page){
-               case 'in':
-                    window.location.href = INTERVIEW_PAGE;
-                    break;
-               case 'js':
-                    window.location.href = JOB_SEARCH_PAGE;
-                    break;
-               case 'dc':
-                    window.location.href = DOCUMENT_PAGE;
-                    break;
-               case 'jl':
-                    window.location.href = JOB_SHORT_PAGE;
-                    break;
-               case 'rk':
-                    window.location.href = RANKING_PAGE;
-                    break;
-               case 'pr':
-                    window.location.href = PROFILE_PAGE;
-                    break;
-               case 'wr':
-                    window.location.href = WORK_REPORT_PAGE;
-                    break;
-               default:
-                    window.location.href = APPLICATION_PAGE;
-                    break;
-          }
-     },1);
-     return;
-}
+function focusPass(){document.getElementById("userid").removeEventListener("focus",focusPass,false);document.getElementById('pwd').focus();}if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/")!=-1){window.location.href="https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=login";return;}else if(document.getElementById("search")){var newNode=document.createElement("div");newNode.style.left="212px";newNode.style.position="relative";newNode.innerHTML="<input id='autoCheckID' type='checkbox' title='Click to auto input user ID next time. Cannot save password for security reasons.'/><span style='font-size:11px;'>Save User ID<span>";document.getElementById("pwd").parentNode.parentNode.parentNode.insertBefore(newNode,document.getElementById("pwd").parentNode.parentNode.nextSibling.nextSibling);document.getElementById("autoCheckID").addEventListener("click",function(){writeCookie('LASTUSER',this.checked?+"1|"+getCookieValue('LASTUSER').split("|")[1]:0);},false);var user=getCookieValue('LASTUSER');if(user!="NaN"&&user!=-1&&user[0]!=0&&document.getElementById("userid")){document.getElementById("userid").value=user.substr(2);document.getElementById("userid").addEventListener("focus",focusPass,false);document.getElementById("autoCheckID").checked="checked";}return;}else if(window.location.href=='https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=start&'){document.getElementsByTagName("html")[0].innerHTML="<body>"+white_overlay("<div style='text-align:justify;'>Welcome to Jobmine Plus! No Jobmine Plus is not slower than Jobmine (well only by a bit since it does extra enhancements after), it is about the same timing. If you don't like this because it is slower, then you will miss out on all the great features. By the time you read this, the next page would have loaded.</div>",21,false)+"</body>";document.getElementById('popupWhiteContainer').style.display="block";document.getElementById('popupWhiteContent').style.top="-130px";window.stop();var user=getCookieValue('LASTUSER');if(user[0]!=0&&user!=-1){writeCookie("LASTUSER","1|"+getCookieValue("SignOnDefault").toLowerCase());}setTimeout(function(){var default_page=getCookieValue('DEFAULT_PAGE');switch(default_page){case'in':window.location.href=INTERVIEW_PAGE;break;case'js':window.location.href=JOB_SEARCH_PAGE;break;case'dc':window.location.href=DOCUMENT_PAGE;break;case'jl':window.location.href=JOB_SHORT_PAGE;break;case'rk':window.location.href=RANKING_PAGE;break;case'pr':window.location.href=PROFILE_PAGE;break;case'wr':window.location.href=WORK_REPORT_PAGE;break;default:window.location.href=APPLICATION_PAGE;break;}},1);return;}
 
 /*
  * jQuery JavaScript Library v1.3.2
@@ -495,6 +431,7 @@ l*        JOB SHORT LIST PAGE                                  |
                     tables.find("input").each(function(){
                          if($(this).attr("checked")){iframeArray.push($(this).attr("row"));}
                     });
+                    iframeArray.sort(function(a,b){return a-b;});
                     var iframeCounter = iframeArray.length;
                     if(iframeCounter == 0){return false;}    //if nothing is selected
                     var answer = confirm (iframeCounter < 10 ? "Do you wish to delete the checked rows from this page? The page itself will refresh after the transaction is saved." : "Do you wish to delete the checked rows from this page? You have "+iframeCounter+" rows to delete and this may take a while. The page itself will refresh after the transaction is saved.");
@@ -1044,7 +981,12 @@ l*        REMOVING THE TIMER                                  |
                     runJS("clearInterval(timeoutWarningID)");
                }
                if(getCookieValue('AUTO_REFRESH') <= 0  || getCookieValue('AUTO_REFRESH') > 19){
-                    setTimeout(function(){window.location = window.location;},19*60*1000);
+               //2nd setTimeout Fixes Chrome refresh after add shortlist from search
+                    setTimeout(function(){
+                         setTimeout(function(){
+                         window.location = window.location;
+                         }, 19 * 1000 * 60);
+                    },1);
                }else{
                     document.addEventListener('click',resetGlobalTimer,true);
                     resetGlobalTimer();

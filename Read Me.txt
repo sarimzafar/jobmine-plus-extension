@@ -1,6 +1,7 @@
 Issues:
 -chrome make job details appear in tabs like firefox
 - fix for smaller screens
+- On chrome, the search refreshes because of an error after shortlisting
 
 Optional Fixes:
 - add better sorting for dates
