@@ -98,7 +98,7 @@ else if(document.getElementById("search")){
      newNode.style.position = "relative";
      newNode.innerHTML = "<input id='autoCheckID' type='checkbox' title='Click to auto input user ID next time. Cannot save password for security reasons.'/><span style='font-size:11px;'>Save User ID<span>";     
      document.getElementById("pwd").parentNode.parentNode.parentNode.insertBefore(newNode,document.getElementById("pwd").parentNode.parentNode.nextSibling.nextSibling);
-     document.getElementById("autoCheckID").addEventListener("click",function(){writeCookie('LASTUSER', this.checked ? + "1|"+ getCookieValue('LASTUSER').split("|")[1] : 0);},false);
+     document.getElementById("autoCheckID").addEventListener("click",function(){writeCookie('LASTUSER', this.checked ? "1|"+ getCookieValue('LASTUSER').split("|")[1] : 0);},false);
      
      var user = getCookieValue('LASTUSER');
      if(user != "NaN" && user != -1 && user[0] != 0 && document.getElementById("userid")){
@@ -116,7 +116,7 @@ else if(window.location.href == 'https://jobmine.ccol.uwaterloo.ca/servlets/icli
      window.stop();
      
      var user = getCookieValue('LASTUSER');
-     if (user[0] != 0 && user != -1){writeCookie("LASTUSER", "1|"+getCookieValue("SignOnDefault").toLowerCase());}
+     if (user[0] != 0 || user != -1){writeCookie("LASTUSER", "1|"+getCookieValue("SignOnDefault").toLowerCase());}
      setTimeout(function(){
           var default_page = getCookieValue('DEFAULT_PAGE');
           switch(default_page){

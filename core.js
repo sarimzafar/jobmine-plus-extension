@@ -44,7 +44,7 @@ function insertCustomHeader(){
      header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
      header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
      header +=     '"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
-     header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:940px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
+     header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:950px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SEARCH_PAGE +'>Job Search</a> | ';
@@ -479,8 +479,8 @@ l*        Interview Page                                           |
                               //Find start time
                                    var sMin = time[0].split(":")[1];                                 
                                    var sHour = time[0].split(":")[0];
-                                   sHour = parseInt(sHour[0] == "0" ? sHour.substring(1) : sHour);      //remove leading zeros
-                                   sHour +=  parseInt(-calculateTimeZoneDiff() + (time[1] == "pm" ? 12 : 0));
+                                   sHour = parseInt(sHour[0] == "0" ? sHour.substring(1) : sHour);      //remove leading zeros                                   
+                                   sHour +=  parseInt(-calculateTimeZoneDiff() + (time[1] == "pm" && sHour != "12" ? 12 : 0));
                               //Find the ending time                                   
                                    var eMin = parseInt(sMin) + length;
                                    var eHour = sHour;
