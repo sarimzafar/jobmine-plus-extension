@@ -100,17 +100,17 @@ body:not(.job_search_component, .student_data) form table{
 /*
  *   Testing     
  */
-body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID tr td div a.PSHYPERLINK:visited 
+body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr td div a.PSHYPERLINK:visited 
 {
      color: pink;
 }
 
-body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID tr td
+body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr td
 {
      background-color: #96f0b1;
 }
 
-body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID tr.visited td
+body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr.visited td
 {
      background-color: white;
 }
