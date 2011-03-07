@@ -105,9 +105,14 @@ form table table td.tablepanel table.PSLEVEL1GRID tr td div a.PSHYPERLINK:visite
      color: pink;
 }
 
+form table table td.tablepanel table.PSLEVEL1GRID tr td
+{
+     background-color: #96f0b1;
+}
+
 form table table td.tablepanel table.PSLEVEL1GRID tr.visited td
 {
-     background-color: white !important;
+     background-color: white;
 }
 
 
