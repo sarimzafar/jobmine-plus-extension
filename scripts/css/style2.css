@@ -102,7 +102,7 @@ body:not(.job_search_component, .student_data) form table{
  */
 body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr td div a.PSHYPERLINK:visited 
 {
-     color: pink;
+     color: #0000FE;
 }
 
 body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr td
