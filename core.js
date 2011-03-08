@@ -1,7 +1,7 @@
 /*======================================*\
 l*        CONSTANTS                                               |
 \*======================================*/
- var SETTINGS_GENERAL = '<table cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><option value="wr">Work Report Evaluations</option></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" class="textField" id="popupText" type="text"></td></tr></tbody></table>';
+ var SETTINGS_GENERAL = '<table cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><!-- <option value="wr">Work Report Evaluations</option> --></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" class="textField" id="popupText" type="text"></td></tr></tbody></table>';
 /*======================================*\
 l*        FUNCTIONS                                                |
 \*======================================*/
@@ -34,7 +34,7 @@ function applyTableSorting(path){
 }
 
 //Runs the function when CSS is ready, very customized
-function cssReady(the_function){var style = window.getComputedStyle(document.getElementById('cssLoadTest'), null).getPropertyValue("display");if(window.getComputedStyle(document.getElementById('cssLoadTest'), null).getPropertyValue("display") == "none"){the_function();}else{setTimeout(function(){cssReady(the_function)},300);}}
+function cssReady(the_function, checkRate){checkRate = checkRate == null ? 250 : checkRate;var style = window.getComputedStyle(document.getElementById('cssLoadTest'), null).getPropertyValue("display");if(window.getComputedStyle(document.getElementById('cssLoadTest'), null).getPropertyValue("display") == "none"){the_function();}else{setTimeout(function(){cssReady(the_function)},checkRate);}}
 
 function insertCustomHeader(){
      var header = '<div id="updateInfo" style="display:none;background-color: #f1f8fe; width: 100%; text-align: center;"><a popup="false" href="http://userscripts.org/scripts/source/80771.user.js">There is a newer version of Jobmine Plus, click to install.</a></div>';
@@ -44,7 +44,7 @@ function insertCustomHeader(){
      header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
      header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
      header +=     '"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
-     header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:950px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
+     header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:820px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SEARCH_PAGE +'>Job Search</a> | ';
@@ -52,7 +52,7 @@ function insertCustomHeader(){
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+APPLICATION_PAGE+'>Applications</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+INTERVIEW_PAGE+'>Interviews</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+RANKING_PAGE+'>Rankings</a> | ';
-     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+WORK_REPORT_PAGE+'>Work Report Evalutions</a> | ';
+     //header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+WORK_REPORT_PAGE+'>Work Report Evalutions</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:void(0)" width="500" height="400" class="popupOpen" id="settings_nav" popup="false">Settings</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:void(0)" width="360" height="400" class="popupOpen" popup="false">About</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:saveWarning(\'main\',null,\'_top\',\'/servlets/iclientservlet/SS/?cmd=logout\')">Logout</a>';
@@ -117,7 +117,7 @@ l*        PAGE CLEAN UP                                           |
           
           // Add a CSS stylesheets
           var style = document.createElement( "style" ); 
-          style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
+          style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style2.css';") );
           if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
           document.getElementsByTagName( "body" ).item(0).appendChild( style );	
           
@@ -164,57 +164,108 @@ l*        JOB SEARCH PAGE                                       |
                     $('form > table > tbody > tr:last-child').remove();
                     $('table.PSGROUPBOX').parent().prev().attr("colspan",2).parent().prev().children(":first-child").attr("height","30");
                     $('form:last').append("<table id='searchTable' cellspacing='0' cellpadding='0'><tr><td>"+appsRemaining+"</td></tr>"+searchTable+"</table>").css("margin-bottom","30px");              //full width table
-                    
+               
                     //Playing with the table
                     tableBody = $("#searchTable tr tr:eq(1) td.tablepanel table.PSLEVEL1GRID tr");
                     if(tableBody.length > 2)
                     {
-                         tableBody.each(function(row){                                                
-                              var obj = $(this).children();                         
-                              if(row == 0)   //Header
+                         tableBody.each(function(row){ var obj = $(this).children();          
+                         //HEADER
+                              if(row == 0)   
                               {
-                                   //Adds a changes column
+                                   //Tells the table that the results are up
+                                   $(this).parent().parent().addClass("results");
+                                   
+                                   //Adds new columns (status and hiring)
+                                   obj.eq(0).before("<th class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Status</th>");
                                    obj.eq(8).after("<th title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Hiring Chances*</th>");
                               }
-                              else      //Body
+                         //CELLS
+                              else      
                               {
-                                   //Adds a changes column
+                                    /*
+                                    *   ADD THE STATUS COLUMN
+                                    */
+                                   var jobStatus = obj.eq(0);
+                                   jobStatus.before("<td class='PSLEVEL1GRIDODDROW' align='left'>"+(obj.eq(6).find("div:contains('Already Applied')").length == 0 ? "New" : "Applied")+"</td>");
+                               
+                                   /*
+                                    *   ADD THE HIRING CHANCES     
+                                    */                                      
                                    var numApps = obj.eq(8);
-                                  /*   Reading Purposes
+                                   /*   Reading Purposes
                                         var openings = parseInt(obj.eq(5).html());
                                         var applications = parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1));
                                    */
                                    numApps.after("<td title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+Math.round((parseInt(obj.eq(5).html())/parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1)))*10000)/100+"%</td>");
                                    
-                                   if(obj.eq(7).children().html().trim() == "&nbsp;")
-                                   {
+                                   if(obj.eq(7).children().html().trim() == "&nbsp;"){
                                         obj.eq(7).children().html("Not Able to Shortlist").attr("title","Jobmine has a thing where if you delete a job from shortlist, you cannot shortlist the job again. Sorry.");
                                    }
+                                   
+                                   /*
+                                    *   ADD THE GOOGLE MAPS AND SEARCHES
+                                    */ 
+                                   var company = obj.eq(2).html().trim();
+                                   var location = obj.eq(4).html().trim();
+                                   
+                                   //This is the Google search for the company
+                                   obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
+                                   //This is for google map the location
+                                   obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+company.replace(/\s/g,"+")+"+"+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
+                                   
+                                   /*
+                                    *   CHANGE JOB DESCRIPTIONS
+                                    */                  //Jobs appear as a tab now and it doesnt need to be refreshed                                  
+                                   obj.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+obj.eq(0).html().trim()).attr("target","_blank");
                               }         
                          });
                     }
+                    
+                    //Set the search visited when it ready
+                    function setReadyVisited()
+                    {
+                         var totalRows = tables.find("tr");
+                         if(totalRows.length > 2)           //Make sure the table isnt empty
+                         {
+                              //Each row
+                              totalRows.each(function(row){
+                                   if(row != 0)
+                                   {
+                                        /*
+                                         *        VISITED LINK
+                                         */
+                                        var jobDescLink = $(this).children().eq(2).find("a");
+                                        if(window.getComputedStyle(jobDescLink[0], null).getPropertyValue("color") == "rgb(255, 192, 203)")
+                                        {
+                                             //Change the color of the text and the 
+                                             jobDescLink.css("color","#0000FF").parent().parent().parent().addClass("visited");
+                                             
+                                             //If you have not applied for the job, change the status
+                                             if(jobDescLink.parent().parent().parent().find("td:first-child").html() != "Applied")
+                                             {
+                                                  jobDescLink.parent().parent().parent().find("td:first-child").html("Viewed");                                             
+                                             }
+                                        }
+                                        /*
+                                         *        NEW/UNVISITED LINK
+                                         */
+                                        else{
+                                             jobDescLink.click(function(){
+                                                  $(this).css("color","#0000FF").parent().parent().parent().addClass("visited").find("td:first-child").html("Viewed");
+                                                  tables.trigger("update");                                             
+                                             });
+                                        }
+                                        tables.trigger("update");
+                                   }
+                              });
+                         }
+                    }
+                    
                     var tables = applyTableSorting("table table table.PSLEVEL1GRID");
                     $("body > form > table").css("width","auto");
                }else{
                     $("form").css("margin-bottom","20px");
-               }
-              
-               //Alter the tables by column and row, there needs to be at least 1 result
-               if(tableBody && tableBody.length > 2)
-               {
-                    tableBody.each(function(num){
-                         if(num != 0)   //Avoid headers
-                         {
-                              var obj = $(this).children();
-                              var company = obj.eq(2).html().trim();
-                              var location = obj.eq(4).html().trim();
-                              
-                              //This is the Google search for the company
-                              obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
-                              //This is for google map the location
-                              obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+company.replace(/\s/g,"+")+"+"+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
-                         }
-                    });
                }
           }
 /*======================================*\
@@ -721,12 +772,7 @@ l*        HINT SYSTEM                                             |
                     }
                }
           }
-               
-          //When CSS is loaded
-          cssReady(function(){
-               randomizeHints(tempPageHint.concat(hintArray["com"]));
-          });
-    
+          
           //Generate the Tooltip Settings page
           var tooltipGenerated = "<div style='margin-bottom:15px;'><input id='enableTooltip' class='tooltipChkbx' type='checkbox'/>Enable Tooltips</div><table cellpadding='0' cellspacing='0'>";
           var index=0;
@@ -924,14 +970,28 @@ l*        REMOVING THE TIMER                                  |
                }
           }
 /*======================================*\
+l*        CSS READY LOAD                                        |
+\*======================================*/  
+          cssReady(function(){
+               try{
+               
+               randomizeHints(tempPageHint.concat(hintArray["com"]));
+               
+               //If we are at jobs, we can run the visited highlighting and sorting
+               if(pagetype == "job_search_component"){ setReadyVisited(); }
+               
+               
+               }catch(e){alert(e)}
+          });
+/*======================================*\
 l*        HIGHLIGHTING                                            |
 \*======================================*/         
           // Set syntax highlighting colours for various statuses
-          var VERYGOOD = "#9f9";
-          var GOOD = "#96f0b1";
-          var MEDIOCRE = "#faf39a";
-          var BAD = "#fdaaaa";
-          var WORST = "#b5bbc1";
+          var VERYGOOD   = "#9f9";
+          var GOOD          = "#96f0b1";
+          var MEDIOCRE    = "#faf39a";
+          var BAD             = "#fdaaaa";
+          var WORST        = "#b5bbc1";
           
           if(tables)
           {
@@ -977,7 +1037,7 @@ l*        HIGHLIGHTING                                            |
                     case 'job_search_component':
                          tables.find("tr:contains('On Short List')").find("td").css("background-color",WORST);
                          tables.find("tr:contains('Not Able to Shortlist')").find("td").css("background-color",WORST);
-                         tables.find("tr:contains('Have Already Applied')").find("td").css("background-color",WORST);
+                         tables.find("tr:contains('Already Applied')").find("td").css("background-color",WORST);
                          break;
                }
           }
