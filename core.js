@@ -21,13 +21,65 @@ function resetGlobalTimer(){
         	clearTimeout(GLOBAL_TIMER);        	
      GLOBAL_TIMER  = setTimeout(function(){window.location.href = window.location.href;},getCookieValue('AUTO_REFRESH')*60*1000);
 }
-function applyTableSorting(path){
+
+//Parses an abrevation of a month into a number (1-12)
+function parseMonth(givenMonth)
+{
+     var months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+     var i = 0;
+     while(months[i] && months[i].indexOf(givenMonth) == -1 && months[i++]);
+     //If month cannot be found
+     if(i == 12) return false;
+     return (parseInt(i+1)+"").length < 2 ? "0"+parseInt(i+1) : parseInt(i+1);
+}
+
+
+/*
+ *        APPLIES CORRECTED DATE SORTING FOR JOBMINE
+ */ 
+$.tablesorter.addParser({ 
+     id: 'jobmineDates', 
+     is: function(s) { 
+          return false; 
+     }, 
+     format: function(s) { 
+          //Parse Jobmines dates
+          s = s.trim();
+          if(s == "")         //Empty
+               return 0;
+          var date = s[2] == " " ? s.split(" ") : s.split("-");
+          var month = parseMonth(date[1]);
+          var day =    date[0];
+          var year =   date[2];     
+          return Date.UTC(year, month, day) ;
+     }, 
+     type: 'numeric' 
+}); 
+
+function applyTableSorting(path, pagetype){
      var tables = $(path);
      if (tables.size()) {
           $("table:not('.PSGROUPBOX')").css("width","100%");
           tables.each(function() {$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));	});
           tables.addClass("tablesorter");
-          tables.tablesorter();
+          
+          //Applies the sorting dependent on the page
+          //CHANGE THIS IF YOU ARE ADDING MORE COLUMNS
+          switch(pagetype)
+          {
+               case "student_app_summary":
+                    tables.tablesorter( {headers: {8: { sorter: 'jobmineDates' } } } );   break;
+               case "student_interviews":
+                    tables.tablesorter( {headers: {4: { sorter: 'jobmineDates' } } } );   break;
+               case "job_short_list":
+                    tables.tablesorter( {headers: {7: { sorter: 'jobmineDates' } } } );   break;
+               case 'job_search_component':
+                    tables.tablesorter( {headers: {11: { sorter: 'jobmineDates' } } } );   break;
+               case 'student_ranking_open':
+                    tables.tablesorter( {headers: {7: { sorter: 'jobmineDates' }, 9: { sorter: 'jobmineDates' } } } );   break;
+               default:
+                    tables.tablesorter();   break;
+          }
           tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");
      }
      return tables;
@@ -77,6 +129,7 @@ function insertCustomHeader(){
      $("body").prepend(header);    
 }
 
+//Adds a new settings item under settings
 function addSettingsItem(name, html)
 {
      if(!document.getElementById("general_"+name.toLowerCase()))
@@ -236,7 +289,8 @@ l*        JOB SEARCH PAGE                                       |
                                          *        VISITED LINK
                                          */
                                         var jobDescLink = $(this).children().eq(2).find("a");
-                                        if(window.getComputedStyle(jobDescLink[0], null).getPropertyValue("color") == "rgb(255, 192, 203)")
+                                        
+                                        if(window.getComputedStyle(jobDescLink[0], null).getPropertyValue("color") == "rgb(0, 0, 254)")
                                         {
                                              //Change the color of the text and the 
                                              jobDescLink.css("color","#0000FF").parent().parent().parent().addClass("visited");
@@ -262,7 +316,7 @@ l*        JOB SEARCH PAGE                                       |
                          }
                     }
                     
-                    var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+                    var tables = applyTableSorting("table table table.PSLEVEL1GRID",pagetype);
                     $("body > form > table").css("width","auto");
                }else{
                     $("form").css("margin-bottom","20px");
@@ -273,7 +327,7 @@ l*        PROFILE PAGE                                            |
 \*======================================*/
           else if(pagetype == "student_data" && $("form > table:last-child").html()) 
           {
-               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID" , pagetype);
                var bottomNav = $("form > table:last-child").html();
                /*======================================*\
                l*        TERM CARDS                                              |
@@ -324,7 +378,7 @@ l*        DOCUMENTS PAGE                                       |
                var resumeTable = $("form table tr:eq(5)").remove().children().eq(1).html();
                $("form:last").append(resumeTable);
 
-               var tables = applyTableSorting("table table.PSLEVEL1GRID");
+               var tables = applyTableSorting("table table.PSLEVEL1GRID" , pagetype);
                $("body > form > table").eq(0).css("width","auto");
           }
 /*======================================*\
@@ -356,6 +410,9 @@ l*        JOB SHORT LIST PAGE                                  |
                          var location = child.eq(4).html().trim();                         
                          child.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
                          child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+company.replace(/\s/g,"+")+"'/>"); 
+                         
+                         //Change the hyperlink for the job descriptions
+                         child.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+child.eq(0).html().trim()).attr("target","_blank");
                     }    
                });
                //Add invisible iframe
@@ -365,7 +422,7 @@ l*        JOB SHORT LIST PAGE                                  |
                //Add the buttons that auto select/deselect the checkboxes
                $("#UW_CO_JSLIST_VW_").parent().parent().html("<td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return false'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td>");
                $("form > table > tbody > tr").eq(7).after("<tr><td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return false'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td></tr>");
-               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID" , pagetype);
                
                /*======================================*\
                l*        MULTISELECT CHECKBOXES                           |
@@ -464,7 +521,7 @@ l*        APPLICATIONS PAGE                                    |
 \*======================================*/
           else if(pagetype == "student_app_summary")
           {
-               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID" , pagetype);
                tables.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
                tables.eq(0).find("td:contains('Ranking Completed')").html("Ranked/Offer");
                
@@ -481,26 +538,6 @@ l*        Interview Page                                           |
 \*======================================*/
           else if(pagetype == "student_interviews")
           {  
-               //Parses an abrevation of a month into a number (1-12)
-               function parseMonth(givenMonth)
-               {
-                    var months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-                    var i = 0;
-                    while(months[i] && months[i].indexOf(givenMonth) == -1 && months[i++]);
-                    //If month cannot be found
-                    if(i == 12) return false;
-                    return (parseInt(i+1)+"").length < 2 ? "0"+parseInt(i+1) : parseInt(i+1);
-               }
-               
-               //Calculates how off we are from UTC/GMT
-               function calculateTimeZoneDiff()
-               {                    
-                    var date1 = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0);
-                    var temp = date1.toGMTString();
-                    var date3 = new Date(temp.substring(0, temp.lastIndexOf(" ")));
-                    return (date1 - date3) / (1000 * 60 * 60);
-               }
-               
                //Add an extra column for google calendars
                tableBody = $("table table table.PSLEVEL1GRID:eq(0) tr");
                if(tableBody.length > 2)      //Must have something in the table
@@ -514,6 +551,9 @@ l*        Interview Page                                           |
                          }
                          else      //Pull information and make the Google Calendars button
                          {    
+                              //Change the hyperlink for the job descriptions
+                              column.eq(3).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+column.eq(1).html().trim()).attr("target","_blank");
+                         
                               //Parse the date
                               var date = column.eq(4).html().trim().split(" ");
                               var day = date[0];
@@ -531,7 +571,7 @@ l*        Interview Page                                           |
                                    var sMin = time[0].split(":")[1];                                 
                                    var sHour = time[0].split(":")[0];
                                    sHour = parseInt(sHour[0] == "0" ? sHour.substring(1) : sHour);      //remove leading zeros                                   
-                                   sHour +=  parseInt(-calculateTimeZoneDiff() + (time[1] == "pm" && sHour != "12" ? 12 : 0));
+                                   sHour +=  parseInt(new Date().getTimezoneOffset()/60 + (time[1] == "pm" && sHour != "12" ? 12 : 0));
                               //Find the ending time                                   
                                    var eMin = parseInt(sMin) + length;
                                    var eHour = sHour;
@@ -564,14 +604,14 @@ l*        Interview Page                                           |
                          }         
                     });
                }
-               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID" , pagetype);
           }
           else
 /*======================================*\
 l*        OTHER PAGES                                             |
 \*======================================*/
           {
-               var tables = applyTableSorting("table table table.PSLEVEL1GRID");
+               var tables = applyTableSorting("table table table.PSLEVEL1GRID" , pagetype);
           }
 /*======================================*\
 l*        HINT SYSTEM                                             |
@@ -982,13 +1022,13 @@ l*        CSS READY LOAD                                        |
                
                
                }catch(e){alert(e)}
-          });
+          },200);
 /*======================================*\
 l*        HIGHLIGHTING                                            |
 \*======================================*/         
           // Set syntax highlighting colours for various statuses
           var VERYGOOD   = "#9f9";
-          var GOOD          = "#96f0b1";
+          var GOOD          = "#61efef";
           var MEDIOCRE    = "#faf39a";
           var BAD             = "#fdaaaa";
           var WORST        = "#b5bbc1";
