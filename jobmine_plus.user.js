@@ -209,7 +209,7 @@ if(true){try{
           alertCookie.addEventListener("click",function(){try{var value = debugDD.value; debugDD.innerHTML = refreshDD(); dOutput.innerHTML = fields[value];document.getElementById(value).setAttribute("selected","true");}catch(e){alert(e)}},false);
      }
    
-}catch(e){alert(e)}
+}catch(e){alert("Debug: "+e)}
 }
 
 
@@ -300,9 +300,7 @@ else if(IS_IN_IFRAME && document.title == "Job Details" )
                }
           }
           //We found it, if we haven't then it is Jobmine's fault, we now can make a new tab
-          if(foundJobID != 0){
-               window.open("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=" + foundJobID);
-          }else{
+          if(foundJobID == 0){
                alert("CANNOT FIND ID");
                return;
           }
@@ -315,9 +313,7 @@ else if(IS_IN_IFRAME && document.title == "Job Details" )
           foundJobID = document.getElementsByTagName("div")[6].firstChild.nodeValue;             //6 is the location of the jobID, jobmine loads this as a template, it will hopefully never change
           
           //Make sure it is a number
-          if(isNumeric( foundJobID )){
-               window.open("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=" + foundJobID);
-          }else{
+          if(!isNumeric( foundJobID )){
                alert("GRABBED THE WRONG THING: you got "+ foundJobID);
                return;
           }
@@ -918,14 +914,47 @@ l*        APPLICATIONS PAGE                                    |
                var tables = applyTableSorting("table table table.PSLEVEL1GRID" , pagetype);
                tables.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
                tables.eq(0).find("td:contains('Ranking Completed')").html("Ranked or Offer").parent().attr("title","This means that the company you had an interview with has either ranked or offered you a job.");
+
+               //Append a button to give the user options not to crawl
+               var allowSearchID = true;
+               SCRIPTSURL
+               $("form table table").eq(0).parent().prepend("<div style='margin: 10px 0px;font-size:12px;'><span style='font-size: 13px; font-weight: bold;'>Grabbing Job IDs</span><button onclick='return false;' class='PSPUSHBUTTON' id='appIDGrabber' style='margin: 0pt 10px; width: 130px;'>Continue Grabbing</button><img src='"+SCRIPTSURL+"/images/loading_small.gif' id='appIDGrabberLoading' style='display: none; height: 15px;'><br/><br/>This allows the script to find urls for job descriptions below and store them in your browser so that when you access the job descriptions again, they will load quickly in a new tab.<br/>The first time you click a job description, it may be slow but after you have accessed it once, it will load quicker the next time.</div>");
+               $("#appIDGrabber").click(function(){   
+                    //Invert the boolean to toggle
+                    setAllowIDGrabbing(!allowSearchID);
+               });
                
+               //Set a timer to start to crawl all the jobs for IDs
+               function startDelayGrabbing(){
+                    setTimeout(function(){                                        
+                         autoSeekJobID();
+                    }, autoSeekingDelay);
+               }
+               
+               function setAllowIDGrabbing(state)
+               {
+                    allowSearchID = state;
+                    if(allowSearchID){
+                         $("#appIDGrabberLoading").css("display","inline");
+                         $("#appIDGrabber").html("Stop Grabbing");
+                         startDelayGrabbing();
+                    }else{
+                         $("#appIDGrabberLoading").css("display","none");
+                         $("#appIDGrabber").html("Continue Grabbing");
+                    }
+               }
+               setAllowIDGrabbing(true);
+
                /*======================================*\
                l*        JOB ID STORAGE SYSTEM                             |
                \*======================================*/
                //SemiGlobal Variables, holds the important values to push in storage
                var company = "";
+               var autoSeekingDelay = 5000;
                var jobDescription = "";
                var clickedElement = {};
+               var linkElements = [];
+               var userWaitingTab = false;
                
                //Check to see if we can use storage
                if(localStorage == null) {
@@ -954,14 +983,11 @@ l*        APPLICATIONS PAGE                                    |
                     addID:         function(key, value){    try{
                          //If it doesnt exist, put it into the array as well right our new list of keys
                          if( !this.IDExists(key) ){
-                              this.idKeys.push(key);             alert("Adding "+key);
-                              try{      //Try to update our list of keys
-                                   localStorage.setItem(this.KEYNAME_APP, this.idKeys.join(" ") );          //Put a string of name delimited by a space
-                              }catch(e){
-                                   alert("Failed to write to storage:\n"+e);  return false;
-                              }
+                              this.idKeys.push(key);             
+                              //alert("Adding "+key);
+                              this.updateKeys();
                          }
-                    //Try to store the item
+                         //Try to store the item
                          try{
                               localStorage.setItem(key, value);
                          }catch(e){
@@ -970,13 +996,12 @@ l*        APPLICATIONS PAGE                                    |
                          return true;
                     }catch(e){alert("add:\n"+e)}       },
                     
-                    //Read an ID or return false if not found
+               //Read an ID or return false if not found
                     readID:         function(key){          try{
                          var value = localStorage.getItem(key);
-                         return value != null ? value : false;
+                         return value != null && value != "" ? value : false;
                     }catch(e){alert("read:\n"+e)}         },
-                    
-                    //Removes a value, returns the value if it worked, if not then it returns false
+               //Removes a value, returns the value if it worked, if not then it returns false
                     removeID:     function(key){       try{
                          var value;
                          if(value = this.readID(key))
@@ -985,17 +1010,30 @@ l*        APPLICATIONS PAGE                                    |
                               return value;
                          }
                          return false;
-                    }catch(e){alert("remove:\n"+e)}     }
+                    }catch(e){alert("remove:\n"+e)}     },
+               //Push keys and updates the database
+                    updateKeys:      function(){
+                         try{      //Try to update our list of keys
+                              localStorage.setItem(this.KEYNAME_APP, this.idKeys.join(" ") );          //Put a string of name delimited by a space
+                         }catch(e){
+                              alert("Failed to write to storage:\n"+e);  return false;
+                         }
+                    }
                };
                appJobIdStorage.init();
                
                //Once a user clicks a job without an ID, this runs the hyperlink in the iframe
-               function lookupJobID(evt)
+               function lookupJobID(evt, obj)
                {
+                    //Removing seeking functionality if someone has clicked
+                    if(obj == null){
+                         userWaitingTab = true;
+                    }
+                    
                     //Write these into the variables of the parent scope
-                    clickedElement = $(this);
+                    clickedElement = obj ? obj : $(this);
                     company = clickedElement.attr("company");
-                    jobDescription = clickedElement.html().trim().replace(/\xA0/g, " ");
+                    jobDescription = clickedElement.text().trim().replace(/\xA0/g, " ");
                     
                     var _company      = encodeURIComponent(company);
                     var _description   = encodeURIComponent(jobDescription);
@@ -1006,6 +1044,15 @@ l*        APPLICATIONS PAGE                                    |
                     );
                }
                
+               //Auto seeks searches for the jobIDs without making a new tab 
+               function autoSeekJobID()
+               {    
+                    if(allowSearchID === true && userWaitingTab === false && linkElements.length > 0)
+                    {
+                         //Seach the last ones first so there would be less loops
+                         lookupJobID(null, linkElements[linkElements.length-1]);                         
+                    }
+               }
                //Create a temporary Array to hold all our keys
                var keyIndex = [];
                for(var i=0; i<appJobIdStorage.idKeys.length; i++)
@@ -1013,11 +1060,12 @@ l*        APPLICATIONS PAGE                                    |
                     var item = appJobIdStorage.idKeys[i];
                     var keyCompanyName =  item.substring(0, item.lastIndexOf("|")).replace(/_/g, " ");
                     var keyDescription      =  item.substr(item.lastIndexOf("|")+1).replace(/_/g, " ");
-                    var keyValue              = appJobIdStorage.readID(item);
+                    var keyValue             = appJobIdStorage.readID(item);
                     //If value is false, that means it does not exist in the storage
                     if(keyValue === false){alert("Something broke"); return;}
                     
-                    keyIndex[keyCompanyName] = new Array(keyDescription, keyValue);
+                    //KeyIndex[company][0-3]: 0 - description, 1 - id number, 2 - item or the original string, 3 - was it ever used
+                    keyIndex[item] = new Array(keyDescription, keyValue, false);
                }
                
                //Add company for google search
@@ -1026,26 +1074,48 @@ l*        APPLICATIONS PAGE                                    |
                     var row = $(this).children();
                     if(row[0].nodeName.toUpperCase() != "TH")   
                     {
-                         var companyName = row.eq(2).html().trim().replace(/\xA0/g, " ");           //Break the nbps; back to a space
+                         var companyName = row.eq(2).text().trim().replace(/\xA0/g, " ");           //Break the nbps; back to a space
                          var linkCol1Obj = row.eq(1).find("a");
+                                               
+                         var itemName = companyName.replace(/\s/g,"_") +"|"+ linkCol1Obj.text().trim().replace(/\xA0|\s/g, "_");
                          
-                        
-                         if(  keyIndex[companyName] != null                                                                  //Do we have this job id in storage
-                         && linkCol1Obj.html().trim().replace(/\xA0/g, " ") == keyIndex[companyName][0]       //Are the job descriptions the same?
+                         if(  keyIndex[itemName] != null                                                                  //Do we have this job id in storage
+                        // && linkCol1Obj.text().trim().replace(/\xA0|\s/g, "_") == keyIndex[companyName][0]       //Are the job descriptions the same?
                          //If the above conditions are true, then we have the link to this object
                          ){
-                              linkCol1Obj.css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+keyIndex[companyName][1]).attr("target","_blank");
+                              linkCol1Obj.addClass("idExists").css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+keyIndex[itemName][1]).attr("target","_blank");
+                              keyIndex[itemName][2] = true;        //mark down that we have used this
                          }
                          //Give the links an eventlistener to find the links
                          else
                          {
-                              linkCol1Obj.attr("href","javascript:void").attr("popup","false").attr("company", companyName).bind("click", lookupJobID);
+                              linkCol1Obj.attr("href","javascript:void").attr("company", companyName).bind("click", lookupJobID);
+                              linkElements.push(linkCol1Obj);
                          }
                          
                          //Add the Google Search for company names
                          row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+companyName.replace(/\s/g,"+")+"'/>");  
+                         
                     }
                });
+               
+               //Now we can remove the ids that are not being used
+               var newArr = [];
+               for(var itemName in keyIndex)
+               {
+                    //check to see if this company was ever used
+                    if(keyIndex[itemName][2])  {    
+                         newArr.push(itemName);
+                    }else{
+                    //This company was never used, lets remove it
+                         appJobIdStorage.removeID(itemName);
+                    }
+               }
+               appJobIdStorage.idKeys = newArr;
+               appJobIdStorage.updateKeys();
+               
+               //We are done with this array, we can remove it
+               keyIndex = null;
                
                //Make an invisible iframe to handle links
                $("body").append('<iframe width="100%" height="35%" src="" id="hiddenIframe" name="hiddenIframe" style="display: none;position:fixed;bottom:0px;"></iframe>');     
@@ -1057,12 +1127,40 @@ l*        APPLICATIONS PAGE                                    |
                     //If there is a location in the iframe and if the jobid is value
                     if( $(this).attr("src") != "" && jobID != -1)
                     {
-                         hideLoadingPopup();
+                         //We are not seeking, this came from someone clicking a job
+                         if(userWaitingTab === true){    
+                         //Open new tab with the jobID
+                              window.open("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=" + jobID);
+                              userWaitingTab = false;
+                              startDelayGrabbing();
+                              //Remove popup
+                              hideLoadingPopup();
+                         }
+                         else{
+                         //This is auto seeking, we can call the function to seek another one
+                              autoSeekJobID();
+                         }
+                         
                          //Add the id:  name|description = value
                          appJobIdStorage.addID( company.replace(/\s/g, "_")+"|"+jobDescription.replace(/\s/g, "_") , jobID);
                          
+                         //Find all the links that correspond to the company name, there should be max 2
+                         var index = 0;
+                         var changeCounters = 0;
+                         while(linkElements[index] && changeCounters < 2)
+                         {
+                              var eachLink = linkElements[index];
+                              if(eachLink.attr("company") == company && eachLink.text().trim().replace(/\xA0/g, " ") == jobDescription){
+                                   eachLink.addClass("idExists").unbind().css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
+                                   linkElements.splice(index, 1);
+                                   changeCounters++;
+                              }
+                              else{
+                                   index++;
+                              }
+                         }
+                         
                          //Give that link we clicked the new link
-                         clickedElement.unbind().css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
                          writeCookie("APP_LAST_ID", "-1");            //we have read the id, we dont need it anymore
                     }
                     

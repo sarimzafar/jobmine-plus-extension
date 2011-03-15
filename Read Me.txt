@@ -13,8 +13,10 @@ Features:
 
 
 Added in this release (1.07)
-- Google calendar
-- Auto puts the username and focuses the password
+- changed the password to save and user name
+- fixed all (ones i can find) date sorting
+- added viewed/new and colouring to the fields
+- made all job descriptions as tabs -> applications now have a grabbing mechanism
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html

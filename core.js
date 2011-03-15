@@ -1,3 +1,4 @@
+
 /*======================================*\
 l*        CONSTANTS                                               |
 \*======================================*/
@@ -13,6 +14,11 @@ function showLoadingPopup(){
      $("#hintmsg").css("display","none");
      $("#popupContainer").css("visibility","hidden");
 }
+function hideLoadingPopup(){
+     $("#whiteOverlay").css("top","125px");
+     $("#popupWhiteContainer").css("display","none");
+     $("body").css("overflow","auto");
+}
 function loadPopupMsg(msg){
 	$("#whitePopupMsg").html(msg);
 }
@@ -20,17 +26,6 @@ function resetGlobalTimer(){
 	if(GLOBAL_TIMER)
         	clearTimeout(GLOBAL_TIMER);        	
      GLOBAL_TIMER  = setTimeout(function(){window.location.href = window.location.href;},getCookieValue('AUTO_REFRESH')*60*1000);
-}
-
-//Parses an abrevation of a month into a number (1-12)
-function parseMonth(givenMonth)
-{
-     var months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-     var i = 0;
-     while(months[i] && months[i].indexOf(givenMonth) == -1 && months[i++]);
-     //If month cannot be found
-     if(i == 12) return false;
-     return (parseInt(i+1)+"").length < 2 ? "0"+parseInt(i+1) : parseInt(i+1);
 }
 
 
@@ -95,7 +90,7 @@ function insertCustomHeader(){
      header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
      header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
      header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
-     header +=     '"><tr><td valign="top"><div style="width:208px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
+     header +=     '"><tr><td valign="top"><div style="width:228px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
      header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:820px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
@@ -106,7 +101,7 @@ function insertCustomHeader(){
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+RANKING_PAGE+'>Rankings</a> | ';
      //header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+WORK_REPORT_PAGE+'>Work Report Evalutions</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:void(0)" width="500" height="400" class="popupOpen" id="settings_nav" popup="false">Settings</a> | ';
-     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:void(0)" width="360" height="400" class="popupOpen" popup="false">About</a> | ';
+     header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:void(0)" width="360" height="400" class="popupOpen" id="about_nav" popup="false">About</a> | ';
      header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href="javascript:saveWarning(\'main\',null,\'_top\',\'/servlets/iclientservlet/SS/?cmd=logout\')">Logout</a>';
      header +=     '</div></td><td width="100%" valign="top"><img style="float:right;" alt="" src="'+SCRIPTSURL+'/images/waterloo_logo.png"/></td></tr></table></div>';
      
@@ -116,7 +111,7 @@ function insertCustomHeader(){
      header +=      '</div><button class="button PSPUSHBUTTON" id="saveSettings">Save and Refresh</button><button style="float: right;" class="button PSPUSHBUTTON closePopup">Cancel</button></td></tr></table></div>';
      
      //About Popup
-     header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>Any problems/issues/wanted features email me at <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
+     header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>Any problems/issues/wanted features email me at:<br/><span class='details'>Email: <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
      
      header +=     "</span></div></div></div>";
      
@@ -191,11 +186,16 @@ l*        PAGE CLEAN UP                                           |
 
           if(pagetype != "student_data" ){$(".PSACTIVETAB").parents().eq(2).remove();}
           
+          //For iframes! :D
+          $("body").append("<script language='javascript'>function runIframeFunction(name,_function){window.frames[name].eval(_function);}</script>");
 /*======================================*\
 l*        JOB SEARCH PAGE                                       |
 \*======================================*/
           if(pagetype == "job_search_component")            
           {
+               //Write the current term in cookies if it is specified  
+               if($("#UW_CO_JOBSRCH_UW_CO_WT_SESSION")[0].value.trim() != ""){ writeCookie("CURTERM", $("#UW_CO_JOBSRCH_UW_CO_WT_SESSION")[0].value.trim());}
+               
                var tableBody = null;
                if(!$("form > span").html() || $("form > span").html().search(/Lookup/i) == -1)
                {
@@ -354,7 +354,7 @@ l*        PROFILE PAGE                                            |
                     $("form table td.tablepanel table").css("margin","0 auto").css("width","auto");
                     $("body form table").eq(-2).css("text-align","center");
                     $("textarea").css("width","100%").attr("cols","").parent().append("<br/><br/>");
-                    if(UNSAFEWINDOWSUPPORT){
+                    if(ISFIREFOX){
                          $("form table td.tablepanel").attr("colspan",20);
                     }else{
                          $("body > form:last > table > tbody > tr").eq('11').children(':last').attr("colspan","14");
@@ -416,8 +416,7 @@ l*        JOB SHORT LIST PAGE                                  |
                     }    
                });
                //Add invisible iframe
-               $("body").append("<iframe style='display:none;' name='hiddenIframe' id='hiddenIframe' width='100%' height='400' src=''></iframe>");     		
-               $("body").append("<script language='javascript'>function runIframeFunction(name,_function){window.frames[name].eval(_function);}</script>");
+               $("body").append("<iframe style='display:none;' name='hiddenIframe' id='hiddenIframe' width='100%' height='400' src=''></iframe>");  
                
                //Add the buttons that auto select/deselect the checkboxes
                $("#UW_CO_JSLIST_VW_").parent().parent().html("<td valign='top' height='30' colspan='13'><button class='deleteSelectedButton PSPUSHBUTTON' total='"+numOfChkbx+"' onclick='return false'>Delete Selected</button><button onclick='return selectAllChkbx(false,"+numOfChkbx+")' class='PSPUSHBUTTON'>Unselected All</button><button onclick='return selectAllChkbx(true,"+numOfChkbx+")' class='PSPUSHBUTTON'>Select All</button></td>");
@@ -487,7 +486,7 @@ l*        JOB SHORT LIST PAGE                                  |
                               var progress = (iframeCounter - iframeArray.length+1)+"/"+iframeCounter;
                               $("title").html("Job Short List | Removing: "+progress);
                               loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness.<br/><span style='color:blue;font-size:20px;'>*Refresh to Cancel*</span><br/>Progress: "+progress);
-                              if(UNSAFEWINDOWSUPPORT){
+                              if(ISFIREFOX){
                                    unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0','UW_CO_STUJOBLST$delete$"+(iframeArray.pop())+"$$0')");				
                               }else{
                                    runJS('runIframeFunction("hiddenIframe","submitAction_main0(document.main0,\'UW_CO_STUJOBLST$delete$'+(iframeArray.pop())+'$$0\')")');	
@@ -497,7 +496,7 @@ l*        JOB SHORT LIST PAGE                                  |
                               loadPopupMsg("Each job removed needs to be refreshed, this will take a while because of Jobmine slowness. <br/><span style='color:red'>Saving now... Do not refresh.</span>");
                               $("title").html("Job Short List | Saving...");
                               iframeCounter = -1;      // go to next step
-                              if(UNSAFEWINDOWSUPPORT){
+                              if(ISFIREFOX){
                                    unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main0(document,'main0', '#ICSave')");
                               }else{
                                    runJS('runIframeFunction("hiddenIframe","submitAction_main0(document.main0, \'#ICSave\')")');
@@ -510,7 +509,7 @@ l*        JOB SHORT LIST PAGE                                  |
                     return false;
                });
                //Functions for the buttons to do stuff     		
-               if(UNSAFEWINDOWSUPPORT){
+               if(ISFIREFOX){
                     unsafeWindow.selectAllChkbx = function(flag,numChkbx){for(var i=0;i<numChkbx;i++){$("#chkbx"+i).attr("checked",flag);}return false;};
                }else{
                     injectFunction("selectAllChkbx(flag,numChkbx){for(var i=0;i<numChkbx;i++){document.getElementById('chkbx'+i).checked = flag;}return false;}");
@@ -521,16 +520,263 @@ l*        APPLICATIONS PAGE                                    |
 \*======================================*/
           else if(pagetype == "student_app_summary")
           {
+               /*======================================*\
+               l*        INITIAL CONTENT CHANGES                          |
+               \*======================================*/
                var tables = applyTableSorting("table table table.PSLEVEL1GRID" , pagetype);
                tables.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
-               tables.eq(0).find("td:contains('Ranking Completed')").html("Ranked/Offer");
+               tables.eq(0).find("td:contains('Ranking Completed')").html("Ranked or Offer").parent().attr("title","This means that the company you had an interview with has either ranked or offered you a job.");
+
+               //Append a button to give the user options not to crawl
+               var allowSearchID = true;
+               SCRIPTSURL
+               $("form table table").eq(0).parent().prepend("<div style='margin: 10px 0px;font-size:12px;'><span style='font-size: 13px; font-weight: bold;'>Grabbing Job IDs</span><button onclick='return false;' class='PSPUSHBUTTON' id='appIDGrabber' style='margin: 0pt 10px; width: 130px;'>Continue Grabbing</button><img src='"+SCRIPTSURL+"/images/loading_small.gif' id='appIDGrabberLoading' style='display: none; height: 15px;'><br/><br/>This allows the script to find urls for job descriptions below and store them in your browser so that when you access the job descriptions again, they will load quickly in a new tab.<br/>The first time you click a job description, it may be slow but after you have accessed it once, it will load quicker the next time.</div>");
+               $("#appIDGrabber").click(function(){   
+                    //Invert the boolean to toggle
+                    setAllowIDGrabbing(!allowSearchID);
+               });
+               
+               //Set a timer to start to crawl all the jobs for IDs
+               function startDelayGrabbing(){
+                    setTimeout(function(){                                        
+                         autoSeekJobID();
+                    }, autoSeekingDelay);
+               }
+               
+               function setAllowIDGrabbing(state)
+               {
+                    allowSearchID = state;
+                    if(allowSearchID){
+                         $("#appIDGrabberLoading").css("display","inline");
+                         $("#appIDGrabber").html("Stop Grabbing");
+                         startDelayGrabbing();
+                    }else{
+                         $("#appIDGrabberLoading").css("display","none");
+                         $("#appIDGrabber").html("Continue Grabbing");
+                    }
+               }
+               setAllowIDGrabbing(true);
+
+               /*======================================*\
+               l*        JOB ID STORAGE SYSTEM                             |
+               \*======================================*/
+               //SemiGlobal Variables, holds the important values to push in storage
+               var company = "";
+               var autoSeekingDelay = 5000;
+               var jobDescription = "";
+               var clickedElement = {};
+               var linkElements = [];
+               var userWaitingTab = false;
+               
+               //Check to see if we can use storage
+               if(localStorage == null) {
+                    alert("Sorry, storage (html5) not supported by the browser, please use a new version of the browser.");
+                    return;
+               }
+               
+               //Object that manages the storage of keys and jobs ids
+               var appJobIdStorage = {
+               //Variables
+                    idKeys              : [],                                                  //holds the arrays of all the stuff
+                    KEYNAME_APP   : "KEYBASE_NAME_APPLICATION",           //constant that holds the name of the key to access all the job keys
+               //Inits the storage by getting all the id's
+                    init:            function(){       try{
+                         var keys = [];             
+                         if( (keys = this.readID(this.KEYNAME_APP) ) !== false)
+                         {    //Read the key if it exists
+                              this.idKeys = keys.split(" ");
+                         }    
+                    }catch(e){alert("Init:\n"+e)}  },
+               //Returns if the key exists
+                    IDExists:      function(key){    
+                         return this.readID(key) != false;
+                    },
+               //Sets the Job ID in storage, returns true if it works and false if it failed
+                    addID:         function(key, value){    try{
+                         //If it doesnt exist, put it into the array as well right our new list of keys
+                         if( !this.IDExists(key) ){
+                              this.idKeys.push(key);             
+                              //alert("Adding "+key);
+                              this.updateKeys();
+                         }
+                         //Try to store the item
+                         try{
+                              localStorage.setItem(key, value);
+                         }catch(e){
+                              alert("Failed to write to storage:\n"+e); return false;
+                         }
+                         return true;
+                    }catch(e){alert("add:\n"+e)}       },
+                    
+               //Read an ID or return false if not found
+                    readID:         function(key){          try{
+                         var value = localStorage.getItem(key);
+                         return value != null && value != "" ? value : false;
+                    }catch(e){alert("read:\n"+e)}         },
+               //Removes a value, returns the value if it worked, if not then it returns false
+                    removeID:     function(key){       try{
+                         var value;
+                         if(value = this.readID(key))
+                         {
+                              localStorage.removeItem(key);
+                              return value;
+                         }
+                         return false;
+                    }catch(e){alert("remove:\n"+e)}     },
+               //Push keys and updates the database
+                    updateKeys:      function(){
+                         try{      //Try to update our list of keys
+                              localStorage.setItem(this.KEYNAME_APP, this.idKeys.join(" ") );          //Put a string of name delimited by a space
+                         }catch(e){
+                              alert("Failed to write to storage:\n"+e);  return false;
+                         }
+                    }
+               };
+               appJobIdStorage.init();
+               
+               //Once a user clicks a job without an ID, this runs the hyperlink in the iframe
+               function lookupJobID(evt, obj)
+               {
+                    //Removing seeking functionality if someone has clicked
+                    if(obj == null){
+                         userWaitingTab = true;
+                    }
+                    
+                    //Write these into the variables of the parent scope
+                    clickedElement = obj ? obj : $(this);
+                    company = clickedElement.attr("company");
+                    jobDescription = clickedElement.text().trim().replace(/\xA0/g, " ");
+                    
+                    var _company      = encodeURIComponent(company);
+                    var _description   = encodeURIComponent(jobDescription);
+                    
+                    //Set the source for the iframe
+                    $("#hiddenIframe").attr("src",
+                         "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE="+_description+"&UW_CO_PARENT_NAME="+_company
+                    );
+               }
+               
+               //Auto seeks searches for the jobIDs without making a new tab 
+               function autoSeekJobID()
+               {    
+                    if(allowSearchID === true && userWaitingTab === false && linkElements.length > 0)
+                    {
+                         //Seach the last ones first so there would be less loops
+                         lookupJobID(null, linkElements[linkElements.length-1]);                         
+                    }
+               }
+               //Create a temporary Array to hold all our keys
+               var keyIndex = [];
+               for(var i=0; i<appJobIdStorage.idKeys.length; i++)
+               {
+                    var item = appJobIdStorage.idKeys[i];
+                    var keyCompanyName =  item.substring(0, item.lastIndexOf("|")).replace(/_/g, " ");
+                    var keyDescription      =  item.substr(item.lastIndexOf("|")+1).replace(/_/g, " ");
+                    var keyValue             = appJobIdStorage.readID(item);
+                    //If value is false, that means it does not exist in the storage
+                    if(keyValue === false){alert("Something broke"); return;}
+                    
+                    //KeyIndex[company][0-3]: 0 - description, 1 - id number, 2 - item or the original string, 3 - was it ever used
+                    keyIndex[item] = new Array(keyDescription, keyValue, false);
+               }
                
                //Add company for google search
-               $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(row){        
-                    if(row > 0)   //Header
+               $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
+                    //Do something on each row
+                    var row = $(this).children();
+                    if(row[0].nodeName.toUpperCase() != "TH")   
                     {
-                         $(this).children().eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+$(this).children().eq(2).html().replace(/\s/g,"+")+"'/>");            
-                    }    
+                         var companyName = row.eq(2).text().trim().replace(/\xA0/g, " ");           //Break the nbps; back to a space
+                         var linkCol1Obj = row.eq(1).find("a");
+                                               
+                         var itemName = companyName.replace(/\s/g,"_") +"|"+ linkCol1Obj.text().trim().replace(/\xA0|\s/g, "_");
+                         
+                         if(  keyIndex[itemName] != null                                                                  //Do we have this job id in storage
+                        // && linkCol1Obj.text().trim().replace(/\xA0|\s/g, "_") == keyIndex[companyName][0]       //Are the job descriptions the same?
+                         //If the above conditions are true, then we have the link to this object
+                         ){
+                              linkCol1Obj.addClass("idExists").css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+keyIndex[itemName][1]).attr("target","_blank");
+                              keyIndex[itemName][2] = true;        //mark down that we have used this
+                         }
+                         //Give the links an eventlistener to find the links
+                         else
+                         {
+                              linkCol1Obj.attr("href","javascript:void").attr("company", companyName).bind("click", lookupJobID);
+                              linkElements.push(linkCol1Obj);
+                         }
+                         
+                         //Add the Google Search for company names
+                         row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+companyName.replace(/\s/g,"+")+"'/>");  
+                         
+                    }
+               });
+               
+               //Now we can remove the ids that are not being used
+               var newArr = [];
+               for(var itemName in keyIndex)
+               {
+                    //check to see if this company was ever used
+                    if(keyIndex[itemName][2])  {    
+                         newArr.push(itemName);
+                    }else{
+                    //This company was never used, lets remove it
+                         appJobIdStorage.removeID(itemName);
+                    }
+               }
+               appJobIdStorage.idKeys = newArr;
+               appJobIdStorage.updateKeys();
+               
+               //We are done with this array, we can remove it
+               keyIndex = null;
+               
+               //Make an invisible iframe to handle links
+               $("body").append('<iframe width="100%" height="35%" src="" id="hiddenIframe" name="hiddenIframe" style="display: none;position:fixed;bottom:0px;"></iframe>');     
+               
+               //Runs when the application form loads, this is where we can manipulate the id          
+               $("#hiddenIframe").load(function(){try{
+                    var jobID = getCookieValue("APP_LAST_ID");
+                    
+                    //If there is a location in the iframe and if the jobid is value
+                    if( $(this).attr("src") != "" && jobID != -1)
+                    {
+                         //We are not seeking, this came from someone clicking a job
+                         if(userWaitingTab === true){    
+                         //Open new tab with the jobID
+                              window.open("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=" + jobID);
+                              userWaitingTab = false;
+                              startDelayGrabbing();
+                              //Remove popup
+                              hideLoadingPopup();
+                         }
+                         else{
+                         //This is auto seeking, we can call the function to seek another one
+                              autoSeekJobID();
+                         }
+                         
+                         //Add the id:  name|description = value
+                         appJobIdStorage.addID( company.replace(/\s/g, "_")+"|"+jobDescription.replace(/\s/g, "_") , jobID);
+                         
+                         //Find all the links that correspond to the company name, there should be max 2
+                         var index = 0;
+                         var changeCounters = 0;
+                         while(linkElements[index] && changeCounters < 2)
+                         {
+                              var eachLink = linkElements[index];
+                              if(eachLink.attr("company") == company && eachLink.text().trim().replace(/\xA0/g, " ") == jobDescription){
+                                   eachLink.addClass("idExists").unbind().css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
+                                   linkElements.splice(index, 1);
+                                   changeCounters++;
+                              }
+                              else{
+                                   index++;
+                              }
+                         }
+                         
+                         //Give that link we clicked the new link
+                         writeCookie("APP_LAST_ID", "-1");            //we have read the id, we dont need it anymore
+                    }
+                    
+                    }catch(e){alert(e)}
                });
           }
 /*======================================*\
@@ -542,31 +788,31 @@ l*        Interview Page                                           |
                tableBody = $("table table table.PSLEVEL1GRID:eq(0) tr");
                if(tableBody.length > 2)      //Must have something in the table
                {
-                    tableBody.each(function(row){                                                
-                         var column = $(this).children();                         
-                         if(row == 0)   //Header
+                    tableBody.each(function(rowNum){                                                
+                         var row = $(this).children();                         
+                         if(rowNum == 0)   //Header
                          {
-                              //Adds a changes column
-                              column.eq(12).after("<th class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Google Calendar</th>");
+                              //Adds a changes row
+                              row.eq(12).after("<th class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Google Calendar</th>");
                          }
                          else      //Pull information and make the Google Calendars button
                          {    
                               //Change the hyperlink for the job descriptions
-                              column.eq(3).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+column.eq(1).html().trim()).attr("target","_blank");
+                              row.eq(3).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+row.eq(1).html().trim()).attr("target","_blank");
                          
                               //Parse the date
-                              var date = column.eq(4).html().trim().split(" ");
+                              var date = row.eq(4).html().trim().split(" ");
                               var day = date[0];
                               var month = parseMonth(date[1]);
                               var year = date[2];
                               
                               //Parse the time
-                              var time = column.eq(7).html().trim().split(" ");
+                              var time = row.eq(7).html().trim().split(" ");
                               var dateStr;
                               if(time != "")
                               {          
                               //How long is the interview
-                                   var length = parseInt(column.eq(8).html().trim());        
+                                   var length = parseInt(row.eq(8).html().trim());        
                               //Find start time
                                    var sMin = time[0].split(":")[1];                                 
                                    var sHour = time[0].split(":")[0];
@@ -585,21 +831,21 @@ l*        Interview Page                                           |
                               }
                               
                               //Other pieces of info
-                              var location = column.eq(9).html().replace(/&nbsp;/g," ").trim(); location = location != "" ? "Tatham Centre: Room "+location : "Offsite Location (check description)";
-                              var company = column.eq(2).html().trim();
-                              var type = column.eq(5).html().trim();
-                              var instructions = column.eq(10).html().replace(/&nbsp;/g," ").trim(); instructions = instructions != "" ? "\nExtra Information:\n"+instructions : "";
-                              var interviewer = column.eq(11).html().trim();
-                              var jobTitle = column.eq(3).find("a").html().trim();
+                              var location = row.eq(9).html().replace(/&nbsp;/g," ").trim(); location = location != "" ? "Tatham Centre: Room "+location : "Offsite Location (check description)";
+                              var company = row.eq(2).html().trim();
+                              var type = row.eq(5).html().trim();
+                              var instructions = row.eq(10).html().replace(/&nbsp;/g," ").trim(); instructions = instructions != "" ? "\nExtra Information:\n"+instructions : "";
+                              var interviewer = row.eq(11).html().trim();
+                              var jobTitle = row.eq(3).find("a").html().trim();
                               
                               //Write the details
                               var details = (type + " interview with " + company + " (" + interviewer + ")\nTitle: "+ jobTitle + "\n"+instructions).replace(/ /g,"%20").replace(/\n/g,"%0A").replace(/:/g,"%3A").replace(/,/g,"%2C").replace(/,/g,"%2C");
                               
                               //Check to see all fields are valid before we add the calendar, else leave it blank
                               if(month && time != "" && type && jobTitle){
-                                   column.eq(12).after('<td title="Click to add to Google Calendar!" class="PSLEVEL1GRIDODDROW" align="left"><a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+company+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a></td>');
+                                   row.eq(12).after('<td title="Click to add to Google Calendar!" class="PSLEVEL1GRIDODDROW" align="left"><a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+company+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a></td>');
                               }else{
-                                   column.eq(12).after('<td class="PSLEVEL1GRIDODDROW" align="left">&nbsp;</td>');
+                                   row.eq(12).after('<td class="PSLEVEL1GRIDODDROW" align="left">&nbsp;</td>');
                               }
                          }         
                     });
@@ -626,6 +872,7 @@ l*        HINT SYSTEM                                             |
           //Common hints for all pages
           hintArray["com"].push({page: "com",percentage: 0.4,obj:$("#settings_nav")[0], text : "Check out the settings tab to customize your experience. You can remove the timer and/or set the default page Jobmine Plus loads."});
           hintArray["com"].push({page: "com",percentage: 0.3,obj:tables.find("th.PSLEVEL1GRIDCOLUMNHDR.header")[2], text : "Click the header a column to sort jobs and other information."});
+          hintArray["com"].push({page: "com",percentage: 0.4,obj:$("#about_nav")[0], text : "Send me an email if you have any questions, concerns or wanted features."});
           
           //Applications hints
           hintArray["apps"].push({page: "apps",percentage: 0.4,obj:tables.find("a.googleSearch")[0], text : "You can now select the company name and Jobmine Plus will Google search it for you in a new tab."});
@@ -987,7 +1234,7 @@ l*        POPUP SPECIFIC FUNCTIONS                         |
 l*        REMOVING THE TIMER                                  |
 \*======================================*/       
           if(getCookieValue('DISABLE_TIMER') == 1){    
-               if(UNSAFEWINDOWSUPPORT){
+               if(ISFIREFOX){
                     unsafeWindow.setupTimeout = function(){return false;};
                     unsafeWindow.displayTimeoutMsg = function(){return false;};
                     unsafeWindow.displayTimeoutWarningMsg = function(){return false;};
@@ -1041,7 +1288,7 @@ l*        HIGHLIGHTING                                            |
                          tables.find("tr").find("td:first, th:first").remove();
                          tables.find("tr:contains('Ranking')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Ranking Complete')").find("td").css("background-color",BAD);
-                         tables.find("tr:contains('Ranked/Offer')").find("td").css("background-color",GOOD);
+                         tables.find("tr:contains('Ranked or Offer')").find("td").css("background-color",GOOD);
                          tables.find("tr:contains('Selected')").find("td").css("background-color",VERYGOOD);	
                          tables.find("tr:contains('Alternate')").find("td").css("background-color",MEDIOCRE);
                          tables.find("tr:contains('Scheduled')").find("td").css("background-color",VERYGOOD);
@@ -1049,8 +1296,8 @@ l*        HIGHLIGHTING                                            |
                          tables.find("tr:contains('Not Selected')").find("td").css("background-color",WORST);
                          tables.find("tr:contains('Filled')").find("td").css("background-color",BAD);
                          tables.find("tr:contains('Not Ranked')").find("td").css("background-color",WORST);
-                         tables.find("tr:contains('Approved')").find("td").css("background-color",BAD);
                          tables.find("tr:contains('Applied')").find("td").css("background-color",'');
+                         tables.find("tr:contains('Approved')").find("td").css("background-color",BAD);
                          tables.find("tr:contains('Cancelled')").find("td").css("background-color",BAD);
                          break;
                     case "student_sel.interview_schedule":
