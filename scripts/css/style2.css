@@ -238,7 +238,7 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
      background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hintbox.png");
 }
 
-#hintmsg a{    
+#hintmsg a.close{    
      width:10px;
      height:10px;
      display:block;
@@ -246,7 +246,7 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
      background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hint_close.png");
      float:right;     
 }
-#hintmsg a:hover{  
+#hintmsg a.close:hover{  
      opacity:0.7;
 }
 
