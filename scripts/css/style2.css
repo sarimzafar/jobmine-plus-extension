@@ -238,13 +238,21 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
      background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hintbox.png");
 }
 
+#hintmsg a{
+   color: blue;
+   text-decoration: underline;
+   cursor: hand;
+}
+
 #hintmsg a.close{    
      width:10px;
      height:10px;
      display:block;
      outline:none;
      background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hint_close.png");
-     float:right;     
+     float:right;   
+     color: black;
+     text-decoration: none;
 }
 #hintmsg a.close:hover{  
      opacity:0.7;
