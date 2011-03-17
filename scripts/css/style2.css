@@ -105,17 +105,6 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
      color: #0000FE;
 }
 
-body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr td
-{
-     background-color: #faf39a;
-}
-
-body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr.visited td
-{
-     background-color: white;
-}
-
-
 /*Black Overlay*/
 #overlay{
      position:fixed;
