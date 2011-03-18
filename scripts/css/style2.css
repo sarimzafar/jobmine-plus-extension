@@ -105,6 +105,81 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
      color: #0000FE;
 }
 
+/* Job Description Page*/
+body.job_details #comments{
+   margin-top:10px;
+}
+
+body.job_details hr{  
+   color:#6c6cbd;
+   margin:10px 0;
+}
+               
+body.job_details .jobDescriptionArea .category{
+   font-weight:bold;
+   padding-right:10px;
+   white-space:nowrap;   
+   width:10px;
+}
+body.job_details .important{
+   color:red;
+}
+
+body.job_details input.button{
+   float:right;
+}
+
+body.job_details .page{
+   width:760px;
+   margin: 0 auto;
+   margin-top: 40px;
+   margin-bottom: 40px;
+   -moz-box-shadow: 0 0 1em black;
+   -webkit-box-shadow: 0 0 1em black;
+
+   background-color: #f6f6f6;
+   padding: 35px 20px;
+   font-family: Arial, Verdana, san-serif;
+   font-size:12px;
+}
+
+body.job_details .jobDescriptionArea td, #comments td{
+   font-size:14px;
+}
+
+body.job_details .jobDescriptionArea a.location{
+   color: #3333cc;
+   text-decoration: none;
+}
+
+body.job_details #comments .category{
+   font-weight:bold;
+   padding-right:30px;
+}
+
+body.job_details .body{
+   margin: 15px 0px;
+}
+
+body.job_details .jobDescriptionArea .left{
+   width:100%;
+}
+
+
+body.job_details .jobDescriptionArea .right td{
+   white-space:nowrap;     
+}
+
+body.job_details #jobDetails .title{
+   font-size:19px;                    
+   color: #4b4bb4 !important;                   
+   font-weight: bold;
+}
+body.job_details #jobDetails .title a{
+   font-weight: normal;
+   margin-left:10px;
+}
+
 /*Black Overlay*/
 #overlay{
      position:fixed;
