@@ -6,10 +6,6 @@ input.button{
      color:red;
 }
 
-.jobDescriptionArea{
-     width:100%;
-}
-
 .jobDescriptionArea td, #comments td{
      font-size:14px;
 }
@@ -43,6 +39,3 @@ input.button{
      padding-right:30px;
 }
 
-.body{
-     margin: 15px 0px;
-}

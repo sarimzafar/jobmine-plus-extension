@@ -1,0 +1,312 @@
+<html>
+   <head>
+      <!-- <link href="style.css" type="TEXT/CSS" rel="STYLESHEET"> -->
+      <style> 
+      #jobDetails.page{
+         width:760px;
+         height:950px;
+         min-height:950px;
+         margin: 50px auto;
+         -moz-box-shadow: 0 0 1em black;
+         -webkit-box-shadow: 0 0 1em black;
+         background-color: #f6f6f6;
+         padding: 35px 20px;
+         font-family: Arial, Verdana, san-serif;
+         font-size:12px;
+      }
+      
+      html, body{
+         margin:0;
+         padding:0;
+      }
+      
+      input.button{
+         float:right;
+      }
+
+      .important{
+         color:red;
+      }
+
+      .jobDescriptionArea td, #comments td{
+         font-size:14px;
+      }
+
+      .jobDescriptionArea .left{
+         width:100%;
+      }
+
+      .jobDescriptionArea .right td{
+         white-space:nowrap;     
+      }
+
+      .jobDescriptionArea a.location{
+         color: #3333cc;
+         text-decoration: none;
+      }
+
+      .jobDescriptionArea .category{
+         font-weight:bold;
+         padding-right:10px;
+         white-space:nowrap;   
+         width:10px;
+      }
+
+      #comments{
+         margin-top:10px;
+      }
+
+      #comments .category{
+         font-weight:bold;
+         padding-right:30px;
+      }
+
+      hr{  
+         color:#6c6cbd;
+         margin:10px 0;
+      }
+
+
+      #content .body{
+         margin: 15px 0px;
+      }
+
+      #jobDetails .title{
+         font-size:19px;                    
+         color: #4b4bb4 !important;                   
+         font-weight: bold;
+      }
+      #jobDetails .title a{
+         font-weight: normal;
+         margin-left:10px;
+      }          
+
+      #content{   
+         height:100%;
+      }
+
+      #footer{
+         max-height:110px;
+      }
+      
+      /*Popup Close*/
+      #popupContainer input.button{
+         position:absolute;
+         top:15px;
+         right:10px;
+      }
+      
+      /*Toolbar*/
+      #toolbar{
+         background-color: rgba(0,0,0,0.6);
+         color: white;
+         width:100%;
+         position:fixed;
+         text-align:center;
+         top:0;
+         left:0;
+         padding: 5px 20px;
+         font-family:Arial;
+         font-size:12px;
+      }
+      
+      #toolbar a{
+         color: white;
+      }
+      
+      #toolbar a:hover{
+         color: #CCC;
+      }
+      
+      /*Printing*/
+      @media print{
+         a{
+            color: black !important;
+            text-decoration: none;
+         }
+         hr{
+            color:black;
+         }
+         
+         .printHide{
+            display:none !important;
+         }
+         #jobDetails .title{  
+            color: black !important;
+         }
+         
+         body, #jobDetails.page{
+            width: 100%;
+            padding:0px;
+            margin:0px;
+            -moz-box-shadow: none;
+           -webkit-box-shadow: none;
+           background-color:white;
+         }
+         
+      }
+      </style>
+   </head>
+   <body>
+      <div id='toolbar' class='printHide'>
+         Don't like this look for your job descriptions? <a href='#'>Click here to change it back</a>
+      </div>
+      
+      
+      <div id='popupContainer' class='printHide' style='display:none;'>
+           <link type="text/css" rel="stylesheet" href="popup.css"/>
+           <div id='overlay'><!-- --></div>
+           <div id='popupWrapper'>
+                <div id='popupContent' class="dsds">             
+                  <input type='button' class='button'  value='Close' onclick='document.getElementById("popupContainer").style.display = "none";document.body.style.overflow = "auto"'/>
+                  <iframe src='test.html' frameborder='0' width='100%' height='100%'></iframe>
+                </div>
+           </div>
+      </div>
+      
+	   <table class='page' id='jobDetails' cellspacing='0' cellpadding='0'>
+		   <tr>
+		   <td valign='top' id='header'>
+			   <span class='title'>Employer: <a href='#'>Research In Motion Limited</a></span>
+			   <input class='button printHide' onclick='window.print();' type='button' value='Print Job Description'/>
+			   <br/>
+			   <br/>
+			   <table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>
+				   <tr>
+				   <td valign='top' class='left'>
+					   <table cellspacing='0' cellpadding='0'>
+						   <tr>
+							   <td valign='top' class='category'>Job Title:</td>
+							   <td valign='top'>Software Testing - Waterloo</td>
+						   </tr>
+						   <tr>
+							   <td valign='top' class='category'>Work Location:</td>
+							   <td valign='top'><a href='#' class='location'>Waterloo</a></td>
+						   </tr>
+						   <tr>
+							   <td valign='top' class='category'>Available Openings:</td>
+							   <td valign='top'>20</td>
+						   </tr>
+					   </table>
+				   </td>
+				   <td valign='top' class='right'>
+					   <table cellspacing='0' cellpadding='0'>
+						   <tr>
+							   <td valign='top' class='category'>Levels:</td>
+							   <td valign='top'>Junior, Intermediate, Senior</td>
+						   </tr>
+						   <tr>
+							   <td valign='top' class='category'>Grades:</td>
+							   <td valign='top'>Required</td>
+						   </tr>
+					   </table>
+					   <input style='margin-top:10px;' class='button printHide' onclick='document.getElementById("popupContainer").style.display = "block";document.body.style.overflow = "hidden"' type='button' value='View Employer Profile'/>
+				   </td>
+				   </tr>
+			   </table>
+			   <br/>
+			   <table id='comments' cellspacing='0' cellpadding='0'>
+				   <tr>
+					   <td class='category' valign='top'>Comments:</td>
+					   <td class='important' valign='top'>TO BE CONSIDERED FOR THIS POSITION APPLY TO www.RIM.COM/UW AND ON JOBMINE.<br/>INCLUDE TRANSCRIPT AND CO-OP HISTORY</td>
+				   </tr>
+			   </table> 
+			   <hr/> 
+		   </td></tr>
+		   <tr><td valign='top' id='content'>
+			   <div class='title'>Description</div>
+			   <div class='body'>
+				   Research in Motion will be hosting an Information Session on Wed May 19, 2010, 5:00pm to 7:00pm at Tatham Centre - 2218 A and B. 
+				   Please plan to attend. Visit www.cecs.uwaterloo.ca/students/sessions.php to RSVP.
+				   <br/><br/>
+				   Job Description
+				   Research In Motion LimitedR (RIM) R is a world leader in the mobile communications market and has a history of developing 
+				   breakthrough wireless solutions. RIM's portfolio of award-winning products, services and embedded technologies is used by 
+				   thousands of organizations around the world and includes the BlackBerryR wireless platform, the RIM Wireless Handheld product 
+				   line, software development tools and software/hardware licensing agreements. RIM is seeking driven individuals who can take our 
+				   wireless data products to the next level in the global wireless market. Are you ready to make a difference in the world of mobile 
+				   communications with RIM?
+				   <br/><br/>
+				   POSITION SUMMARY
+				   <br/><br/>
+				   As a software tester, you will utilize your creativity to design and execute various types of tests such as regression, performance, 
+				   capacity, GUI, integration and functional tests. You may have the opportunity to support tools used to identify issues in the field or 
+				   during testing and may also perform exploratory testing and create your own test cases as needed. The successful candidate will be 
+				   able to will track and ensure issues are dealt with throughout the software lifecycle, from discovery to closure. Collaboration with 
+				   multiple teams may also be necessary in order to find ways for improvement of our processes.
+				   <br/><br/>
+				   Qualifications
+				   ESSENTIAL SKILLS
+				   *  Currently enrolled in Computer Science, Engineering or a related program at the Junior, Intermediate or Senior level with the Internship option<br/>
+				   *  Proficient in C, C++, C# development or other object oriented development<br/>
+				   *  Knowledge of Java<br/>
+				   *  Experience with testing environments<br/>
+				   *  Experience with Manual Test methods<br/>
+				   *  Experience with Automated Test methods<br/>
+				   *  Ability to produce creative, yet effective solutions to problems<br/>
+				   *  Excellent communication skills<br/>
+				   *  Previous development or debugging experience<br/>
+				   *  Adept at detecting and diagnosing software defects<br/>
+				   *  A copy of your transcript is required as part of your application for this position
+				   <br/><br/>
+				   ADDITIONAL ASSETS
+				   *  Familiar with wireless protocols (GSM/UMTS, GPRS, CDMA/EVDO Wi-Fi, EDGE), operating systems and drivers<br/>
+				   *  Experience with MS SQL, Oracle, DB2<br/>
+				   *  Experience with Python, Perl, PHP, Tcl/Tkl<br/>
+				   *  Familiarity with web services
+				   <br/><br/>
+				   If you're driven to take wireless technologies to the next level, it's time you join the team at RIM. We offer a challenging environment 
+				   that fosters creativity and rewards excellence. Employees also have use of our award winning BlackBerry!
+				   <br/><br/>
+				   c 2010 Research In Motion Limited. All Rights Reserved. The BlackBerry and RIM families of related marks, images and symbols are 
+				   the exclusive properties of Research In Motion Limited. RIM, BlackBerry, "Always On, Always Connected" and the "envelope in 
+				   motion" symbol are registered with the U.S. Patent and Trademark Office and may be pending or registered in other countries.
+				   <br/><br/>
+				   Research In Motion is an Equal Opportunity Employer.
+				   <br/><br/>
+				   URL for candidates to apply:<br/>
+				   https://rim.taleo.net/careersection/rimcampus/jobdetail.ftl?lang=en&job=1003200
+			   </div>
+		   </td></tr>
+		   <tr><td valign='top' id='footer'>
+			   <hr/>
+			   <table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>
+				   <tr>
+					   <td valign='top' class='left'>
+					   <table cellspacing='0' cellpadding='0'>
+						   <tr>
+							   <td valign='top' class='category'>Posting Open Date:</td>
+							   <td valign='top'>07 JUL 2010</td>
+						   </tr>
+						   <tr>
+							   <td valign='top' class='category'>CECS Field Co-ordinator:</td>
+							   <td valign='top'>Anderson, John</td>
+						   </tr>
+						   <tr>
+							   <td colspan='2'>
+								   <br/>
+								   <table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>
+									   <tr>
+										   <td valign='top' class='category'>Disciplines:</td>
+										   <td valign='top'>MATH-Computer Science, ENG-Computer, ENG-Electrical, ENG-Software Engineering, ENG-Systems Design</td>
+									   </tr>
+								   </table>
+							   </td>
+						   </tr>
+					   </table>
+					   </td>
+					   <td valign='top' class='right'>
+						   <table cellspacing='0' cellpadding='0'>
+							   <tr>
+								   <td valign='top' class='category'>Last Day to Apply:</td>
+								   <td valign='top'>11 JUL 2010</td>
+							   </tr>
+						   </table>
+					   </td>
+				   </tr>
+			   </table> 
+			   <hr class='printHide'/>
+		   </td></tr>
+	   </table>
+   </body>
+</html>
