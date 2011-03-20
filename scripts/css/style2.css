@@ -203,6 +203,29 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
      overflow:auto;
 }
 
+#popupContent div table.cell{
+   padding: 0 10px;
+   font-size:13px;
+}
+#popupContent div table.cell td.label{
+   width:70%;
+   padding-top:10px;
+}
+#popupContent div table.cell td.field{
+   width:30%;
+   padding-top:10px;
+}
+#popupContent div table.cell td{
+   text-align:left;
+}
+
+#popupContent div table.cell td.field input, #settingsContent div table.cell td.field select{
+   width:auto;
+   margin:0px;
+   margin-top:2px;
+}
+
+
 /* TOOLTIP */ 
 #popupContent input.tooltipChkbx{
      width:auto;
