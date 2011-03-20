@@ -168,7 +168,7 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
      -moz-box-shadow:2px 0 10px #333333;
      -webkit-box-shadow:2px 0 10px #333333;
      height:100%;
-     padding:15px;
+     padding:10px;
 }
 #popupContent #settingsRight{
      width:350px;
@@ -183,7 +183,7 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
 #popupContent #settingsNav a{
      text-align:left;
      font-family:Verdana,Arial;
-     font-size:20px;
+     font-size:18px;
      text-shadow: #777777 -0 0  10px;
      text-decoration:none;
      font-weight: bold; 
