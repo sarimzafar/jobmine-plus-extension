@@ -210,6 +210,7 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
 #popupContent div table.cell td.label{
    width:70%;
    padding-top:5px;
+   color:#444;
 }
 #popupContent div table.cell td.field{
    width:30%;
