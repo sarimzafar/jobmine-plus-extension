@@ -154,7 +154,7 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
 
 #popupContent .details{
      font-size:11px;
-     margin-left:5px;
+     margin: 0 5px;
      display:block;
      color:#555555;
 }
