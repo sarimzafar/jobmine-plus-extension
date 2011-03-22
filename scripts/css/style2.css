@@ -104,6 +104,7 @@ body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.resu
 {
     /* color: #0000FE;*/
     color: red;
+    font-weight:bold;
 }
 
 /*Black Overlay*/
