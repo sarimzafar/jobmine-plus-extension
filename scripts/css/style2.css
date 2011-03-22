@@ -102,10 +102,18 @@ body:not(.job_search_component, .student_data) form table{
  */
 body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr td div a.PSHYPERLINK:visited 
 {
-     color: #0000FE;
+     color: red !important;
+     /*color: #0000FE;*/
      font-family:Times New Romans !important;
      font-size: 40px !important;
      
+}
+
+body.job_search_component a.PSHYPERLINK:visited
+{
+    color:  red !important;
+     font-family:Times New Romans !important;
+     font-size: 40px !important;
 }
 
 /*Black Overlay*/
