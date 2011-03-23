@@ -5,6 +5,8 @@
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=*
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/*
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE=*
+// @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=*
+// @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Market=GBL&Page=UW_CO_STU_JOBDTLS&Action=U&target=Transfer*
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=*
 // @exclude        *IScript_ShowStuDocument*
 // @exclude        *FieldFormula.IScript_ShowAllDocuments*
@@ -31,6 +33,7 @@
  *    _JQUERY_FUNCTION
  *    _REDIRECTION
  *    _PAGE_CLEAN_UP
+ *    _JOB_DESCRIPTION
  *    _JOB_SEARCH_PAGE
  *    _PROFILE_PAGE
  *    _DOCUMENTS_PAGE
@@ -43,10 +46,23 @@
  *    _POPUP_PANEL
  *    _REMOVING_THE_TIMER
  *    _HIGHLIGHTING
+ 
+ 
+ ERRORS - What to fix
+ --------
+ //General
+ - google searching, need to encodeURL and then replace space
+ - remove all trailing non-word characters for job details for links
+ 
+ //Chrome
+ - Applications do not crawl or work under chrome
+ - cannot run any iframe under chrome, please fix
+ - does not see visited under job search
+ 
+ 
  */
 
-
- //Check to see if we can use storage
+//Check to see if we can use storage
 if(localStorage == null) {
    alert("Sorry, storage (html5) not supported by the browser, please update your browser.");
    return;
@@ -85,7 +101,8 @@ l*        _CONSTANTS                     |
  *    Settings Layout
  */   
    var SETTINGS_GENERAL = '<table cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><!-- <option value="wr">Work Report Evaluations</option> --></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" class="textField" id="popupText" type="text"></td></tr></tbody></table>';
-
+   
+   var SETTINGS_PAGES   = "<span class='heading'>Applications Page</span><table class='cell' cellpadding='0' cellspacing='0'><tr><td class='label' v-align='top'>Disable ID Grabbing</td><td class='field' v-align='top'><input id='page_app_idGrabbingChkbx' type='checkbox'></td></tr></table><br/><span class='heading'>Job Details Page</span><table class='cell' cellpadding='0' cellspacing='0'><tr><td class='label' v-align='top'>Show Old Job Details Page</td><td class='field' v-align='top'><input id='detail_dtl_showOldPage' type='checkbox'></td></tr></table>";
 /*======================================*\
 l*        _FUNCTIONS                     |
 \*======================================*/
@@ -123,6 +140,45 @@ l*        _FUNCTIONS                     |
 /*
  *    _UTILITIES_
  */
+ 
+   //Only runs this once; cleans up the html of common pages
+   function init()
+   {
+      //Get page type and add a class to body
+      $("body").addClass(PAGE_TYPE);
+
+      // Insert navigation header at the top and overlays when not at these pages
+      if( PAGE_TYPE != "jobmine_|_university_of_waterloo" && PAGE_TYPE != "job_details"){ insertCustomHeader();}
+
+      // Add a CSS stylesheets
+      var style = document.createElement( "style" ); 
+      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style2.css';") );
+      
+      //Update CSS Stylesheet
+      if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
+      document.getElementsByTagName( "body" ).item(0).appendChild( style );	
+
+      //Adds current version to the body class
+      $('body').addClass("v"+CURRENT_VERSION);
+
+      //Removing useless parts
+      $("#WAIT_main0").remove();
+      $("#WAIT_main").remove();
+
+      //Makes all View buttons to the next tab
+      $("a.PSHYPERLINK:contains('View')").attr("target","_blank");
+
+      //SPECIFIC PAGE LAYOUTS
+      $(".PSLEVEL1GRID.tablesorter").attr("cellpadding",0);
+      $('.PSLEVEL1GRID').parent().addClass("tablepanel");
+      $("table a.PTBREADCRUMB").parents("table").remove();
+
+      //Student data Clean up
+      if(PAGE_TYPE != "student_data" ){$(".PSACTIVETAB").parents().eq(2).remove();}
+
+      //For iframes! :D
+      $("body").append("<script language='javascript'>function runIframeFunction(name,_function){window.frames[name].eval(_function);}</script>");
+   }
    
    // Set syntax highlighting colours for various text in tables
    function updateTableHighlighting()
@@ -149,9 +205,9 @@ l*        _FUNCTIONS                     |
                TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
                TABLES_OBJ.find("tr:contains('Employed')"          ).find("td").css("background-color",VERYGOOD );
                TABLES_OBJ.find("tr:contains('Not Selected')"      ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",BAD      );
                TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
                TABLES_OBJ.find("tr:contains('Applied')"           ).find("td").css("background-color",NORMAL   );
+               TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",BAD      );
                TABLES_OBJ.find("tr:contains('Approved')"          ).find("td").css("background-color",BAD      );
                TABLES_OBJ.find("tr:contains('Cancelled')"         ).find("td").css("background-color",BAD      );
                break;
@@ -269,7 +325,17 @@ l*        _FUNCTIONS                     |
    function injectFunction(_function,bruteforce){
       $('body').append('<script language="javascript">function '+_function+'</script>');
    }
+   
+   //Returns true or false if the current page's url contains specific text
+   function doesUrlContain(string)
+   {
+      return window.location.href.indexOf(string) != -1;
+   }
 
+   function refresh()
+   {
+      window.location.href = window.location.href;
+   }
    
 /*
  *    _LOADING_POPUP_
@@ -278,7 +344,7 @@ l*        _FUNCTIONS                     |
    //Shows the loading Popup
    function showLoadingPopup(){
       if($("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
-   $("#popupWhiteContainer").css("display","block");	
+      $("#popupWhiteContainer").css("display","block");	
       $("body").css("overflow","hidden");
       $("#hintmsg").css("display","none");
       $("#popupContainer").css("visibility","hidden");
@@ -286,6 +352,7 @@ l*        _FUNCTIONS                     |
    
    //Hides the Loading Popup if it was shown before
    function hideLoadingPopup(){
+      $("#popupContainer").css("visibility", "visible");
       $("#whiteOverlay").css("top","125px");
       $("#popupWhiteContainer").css("display","none");
       $("body").css("overflow","auto");
@@ -325,8 +392,35 @@ l*        _FUNCTIONS                     |
          clearTimeout(GLOBAL_TIMER);        	
       }
       GLOBAL_TIMER  = setTimeout(function(){
-         window.location.href = window.location.href;
+         refresh();
       },getCookieValue('AUTO_REFRESH')*60*1000); 
+   }
+   
+   function removeTimer()
+   {
+      if(getCookieValue('DISABLE_TIMER') == 1){    
+         if(ISFIREFOX){
+            unsafeWindow.setupTimeout = function(){return false;};
+            unsafeWindow.displayTimeoutMsg = function(){return false;};
+            unsafeWindow.displayTimeoutWarningMsg = function(){return false;};
+         }else{
+            injectFunction('displayTimeoutMsg(){return false;}');
+            injectFunction('displayTimeoutWarningMsg(){return false;}');
+            runJS("clearInterval(timeoutID)");
+            runJS("clearInterval(timeoutWarningID)");
+         }
+         if(getCookieValue('AUTO_REFRESH') <= 0  || getCookieValue('AUTO_REFRESH') > 19){
+            //2nd setTimeout Fixes Chrome refresh after add shortlist from search
+            setTimeout(function(){
+               setTimeout(function(){
+                  refresh();
+               }, 19 * 1000 * 60);
+            },1);
+         }else{
+            document.addEventListener('click',resetGlobalTimer,true);
+            resetGlobalTimer();
+         }
+      } 
    }
    
 /* 
@@ -407,10 +501,21 @@ l*        _FUNCTIONS                     |
       writeCookie('AUTO_REFRESH',   autorefresh    );
    }
    
+   //Saves settings for the pages nav
+   function savePageSettings()
+   {
+      var disable_grabId   = $("#page_app_idGrabbingChkbx") .attr("checked");
+      var show_oldDtlPage  = $("#detail_dtl_showOldPage")   .attr("checked");
+      
+      //Write Cookies
+      writeCookie('DISABLE_ID_GRAB' , disable_grabId ? 1 : 0);
+      writeCookie('SHOW_OLD_DETAILS', show_oldDtlPage ? 1 : 0);
+   }
+   
 /*
  *    _HINTS_TOOLTIP_
  */
-   function saveTooltip()
+   function saveTooltipSettings()
    {               
      var cookieQuery = $("#enableTooltip")[0].checked ? 1 : 0;  
       if(cookieQuery != 0)               //is tooltips enabled?           
@@ -604,7 +709,9 @@ l*        _FUNCTIONS                     |
           *    Settings Panel
           */
          if(panelName == "Settings")  
-         {  //Get general settings cookies
+         {  /*
+             *    Get general settings cookies
+             */
             $('#popupTitle')        .html("General Settings");
             $("#popupSelect")       .attr("value",    getCookieValue('DEFAULT_PAGE'));
             $("#popupText")         .attr("value",    (getCookieValue('AUTO_REFRESH')  != -1? getCookieValue('AUTO_REFRESH') : 0));
@@ -612,11 +719,13 @@ l*        _FUNCTIONS                     |
             $('#updateCheckbox')    .attr("checked",  (getCookieValue('HIDE_UPDATES')  ==  1 ? true : false));  
             $('#loadCheckbox')      .attr("checked",  (getCookieValue('LOAD_SCREEN')   ==  1 ? true : false));  
 
+            
+            /*
+             *    Get tooltip settings cookies
+             */
             //Load all the tooltip settings from cookies
             var cookieVal  = getCookieValue("TOOLTIP");
             var query      = cookieVal == -1 ? new Array(0) : cookieVal.split("|");
-            
-            //Tooltips are enabled from cookies
             if(query.shift() != 0)        
             {
                $("#enableTooltip").attr("checked","checked").parent().next().removeClass("disabled").find("input").removeAttr("disabled");
@@ -647,8 +756,16 @@ l*        _FUNCTIONS                     |
             $("#enableTooltip").removeAttr("checked");
                toggleEnableTooltip(document.getElementById("enableTooltip"));
             }
-
-            //Set Initial Toggles
+            
+            /*
+             *    Get pages settings cookies
+             */
+            $("#page_app_idGrabbingChkbx").attr("checked",  (getCookieValue('DISABLE_ID_GRAB')  ==  1 ? true : false)); 
+            $("#detail_dtl_showOldPage")  .attr("checked",  (getCookieValue('SHOW_OLD_DETAILS') ==  1 ? true : false)); 
+          
+            /*
+             *    Set toggles for settings panel
+             */
             toggleRemoveTimer(document.getElementById("removeTimerChkbx"));
             
             //Make sure you make all other setting panels are invisible and only set the general settings on
@@ -758,7 +875,7 @@ l*        _DEBUG_UNIT                    |
          alertCookie.addEventListener("click",function(){try{var value = debugDD.value; debugDD.innerHTML = refreshDD(); dOutput.innerHTML = fields[value];document.getElementById(value).setAttribute("selected","true");}catch(e){alert(e)}},false);
       }
 
-   }catch(e){alert("Debug: "+e)}
+   }catch(e){/*alert("Debug: "+e)*/}
    }
 
 /*======================================*\
@@ -775,7 +892,13 @@ l*        _JQUERY_PLUGINS                |
    (function($){$.extend({tablesorter:new
    function(){var parsers=[],widgets=[];this.defaults={cssHeader:"header",cssAsc:"headerSortUp",cssDesc:"headerSortDown",cssChildRow:"expand-child",sortInitialOrder:"asc",sortMultiSortKey:"shiftKey",sortForce:null,sortAppend:null,sortLocaleCompare:true,textExtraction:"simple",parsers:{},widgets:[],widgetZebra:{css:["even","odd"]},headers:{},widthFixed:false,cancelSelection:true,sortList:[],headerList:[],dateFormat:"us",decimal:'/\.|\,/g',onRenderHeader:null,selectorHeaders:'thead th',debug:false};function benchmark(s,d){log(s+","+(new Date().getTime()-d.getTime())+"ms");}this.benchmark=benchmark;function log(s){if(typeof console!="undefined"&&typeof console.debug!="undefined"){console.log(s);}else{alert(s);}}function buildParserCache(table,$headers){if(table.config.debug){var parsersDebug="";}if(table.tBodies.length==0)return;var rows=table.tBodies[0].rows;if(rows[0]){var list=[],cells=rows[0].cells,l=cells.length;for(var i=0;i<l;i++){var p=false;if($.metadata&&($($headers[i]).metadata()&&$($headers[i]).metadata().sorter)){p=getParserById($($headers[i]).metadata().sorter);}else if((table.config.headers[i]&&table.config.headers[i].sorter)){p=getParserById(table.config.headers[i].sorter);}if(!p){p=detectParserForColumn(table,rows,-1,i);}if(table.config.debug){parsersDebug+="column:"+i+" parser:"+p.id+"\n";}list.push(p);}}if(table.config.debug){log(parsersDebug);}return list;};function detectParserForColumn(table,rows,rowIndex,cellIndex){var l=parsers.length,node=false,nodeValue=false,keepLooking=true;while(nodeValue==''&&keepLooking){rowIndex++;if(rows[rowIndex]){node=getNodeFromRowAndCellIndex(rows,rowIndex,cellIndex);nodeValue=trimAndGetNodeText(table.config,node);if(table.config.debug){log('Checking if value was empty on row:'+rowIndex);}}else{keepLooking=false;}}for(var i=1;i<l;i++){if(parsers[i].is(nodeValue,table,node)){return parsers[i];}}return parsers[0];}function getNodeFromRowAndCellIndex(rows,rowIndex,cellIndex){return rows[rowIndex].cells[cellIndex];}function trimAndGetNodeText(config,node){return $.trim(getElementText(config,node));}function getParserById(name){var l=parsers.length;for(var i=0;i<l;i++){if(parsers[i].id.toLowerCase()==name.toLowerCase()){return parsers[i];}}return false;}function buildCache(table){if(table.config.debug){var cacheTime=new Date();}var totalRows=(table.tBodies[0]&&table.tBodies[0].rows.length)||0,totalCells=(table.tBodies[0].rows[0]&&table.tBodies[0].rows[0].cells.length)||0,parsers=table.config.parsers,cache={row:[],normalized:[]};for(var i=0;i<totalRows;++i){var c=$(table.tBodies[0].rows[i]),cols=[];if(c.hasClass(table.config.cssChildRow)){cache.row[cache.row.length-1]=cache.row[cache.row.length-1].add(c);continue;}cache.row.push(c);for(var j=0;j<totalCells;++j){cols.push(parsers[j].format(getElementText(table.config,c[0].cells[j]),table,c[0].cells[j]));}cols.push(cache.normalized.length);cache.normalized.push(cols);cols=null;};if(table.config.debug){benchmark("Building cache for "+totalRows+" rows:",cacheTime);}return cache;};function getElementText(config,node){var text="";if(!node)return"";if(!config.supportsTextContent)config.supportsTextContent=node.textContent||false;if(config.textExtraction=="simple"){if(config.supportsTextContent){text=node.textContent;}else{if(node.childNodes[0]&&node.childNodes[0].hasChildNodes()){text=node.childNodes[0].innerHTML;}else{text=node.innerHTML;}}}else{if(typeof(config.textExtraction)=="function"){text=config.textExtraction(node);}else{text=$(node).text();}}return text;}function appendToTable(table,cache){if(table.config.debug){var appendTime=new Date()}var c=cache,r=c.row,n=c.normalized,totalRows=n.length,checkCell=(n[0].length-1),tableBody=$(table.tBodies[0]),rows=[];for(var i=0;i<totalRows;i++){var pos=n[i][checkCell];rows.push(r[pos]);if(!table.config.appender){var l=r[pos].length;for(var j=0;j<l;j++){tableBody[0].appendChild(r[pos][j]);}}}if(table.config.appender){table.config.appender(table,rows);}rows=null;if(table.config.debug){benchmark("Rebuilt table:",appendTime);}applyWidget(table);setTimeout(function(){$(table).trigger("sortEnd");},0);};function buildHeaders(table){if(table.config.debug){var time=new Date();}var meta=($.metadata)?true:false;var header_index=computeTableHeaderCellIndexes(table);$tableHeaders=$(table.config.selectorHeaders,table).each(function(index){this.column=header_index[this.parentNode.rowIndex+"-"+this.cellIndex];this.order=formatSortingOrder(table.config.sortInitialOrder);this.count=this.order;if(checkHeaderMetadata(this)||checkHeaderOptions(table,index))this.sortDisabled=true;if(checkHeaderOptionsSortingLocked(table,index))this.order=this.lockedOrder=checkHeaderOptionsSortingLocked(table,index);if(!this.sortDisabled){var $th=$(this).addClass(table.config.cssHeader);if(table.config.onRenderHeader)table.config.onRenderHeader.apply($th);}table.config.headerList[index]=this;});if(table.config.debug){benchmark("Built headers:",time);log($tableHeaders);}return $tableHeaders;};function computeTableHeaderCellIndexes(t){var matrix=[];var lookup={};var thead=t.getElementsByTagName('THEAD')[0];var trs=thead.getElementsByTagName('TR');for(var i=0;i<trs.length;i++){var cells=trs[i].cells;for(var j=0;j<cells.length;j++){var c=cells[j];var rowIndex=c.parentNode.rowIndex;var cellId=rowIndex+"-"+c.cellIndex;var rowSpan=c.rowSpan||1;var colSpan=c.colSpan||1
    var firstAvailCol;if(typeof(matrix[rowIndex])=="undefined"){matrix[rowIndex]=[];}for(var k=0;k<matrix[rowIndex].length+1;k++){if(typeof(matrix[rowIndex][k])=="undefined"){firstAvailCol=k;break;}}lookup[cellId]=firstAvailCol;for(var k=rowIndex;k<rowIndex+rowSpan;k++){if(typeof(matrix[k])=="undefined"){matrix[k]=[];}var matrixrow=matrix[k];for(var l=firstAvailCol;l<firstAvailCol+colSpan;l++){matrixrow[l]="x";}}}}return lookup;}function checkCellColSpan(table,rows,row){var arr=[],r=table.tHead.rows,c=r[row].cells;for(var i=0;i<c.length;i++){var cell=c[i];if(cell.colSpan>1){arr=arr.concat(checkCellColSpan(table,headerArr,row++));}else{if(table.tHead.length==1||(cell.rowSpan>1||!r[row+1])){arr.push(cell);}}}return arr;};function checkHeaderMetadata(cell){if(($.metadata)&&($(cell).metadata().sorter===false)){return true;};return false;}function checkHeaderOptions(table,i){if((table.config.headers[i])&&(table.config.headers[i].sorter===false)){return true;};return false;}function checkHeaderOptionsSortingLocked(table,i){if((table.config.headers[i])&&(table.config.headers[i].lockedOrder))return table.config.headers[i].lockedOrder;return false;}function applyWidget(table){var c=table.config.widgets;var l=c.length;for(var i=0;i<l;i++){getWidgetById(c[i]).format(table);}}function getWidgetById(name){var l=widgets.length;for(var i=0;i<l;i++){if(widgets[i].id.toLowerCase()==name.toLowerCase()){return widgets[i];}}};function formatSortingOrder(v){if(typeof(v)!="Number"){return(v.toLowerCase()=="desc")?1:0;}else{return(v==1)?1:0;}}function isValueInArray(v,a){var l=a.length;for(var i=0;i<l;i++){if(a[i][0]==v){return true;}}return false;}function setHeadersCss(table,$headers,list,css){$headers.removeClass(css[0]).removeClass(css[1]);var h=[];$headers.each(function(offset){if(!this.sortDisabled){h[this.column]=$(this);}});var l=list.length;for(var i=0;i<l;i++){h[list[i][0]].addClass(css[list[i][1]]);}}function fixColumnWidth(table,$headers){var c=table.config;if(c.widthFixed){var colgroup=$('<colgroup>');$("tr:first td",table.tBodies[0]).each(function(){colgroup.append($('<col>').css('width',$(this).width()));});$(table).prepend(colgroup);};}function updateHeaderSortCount(table,sortList){var c=table.config,l=sortList.length;for(var i=0;i<l;i++){var s=sortList[i],o=c.headerList[s[0]];o.count=s[1];o.count++;}}function multisort(table,sortList,cache){if(table.config.debug){var sortTime=new Date();}var dynamicExp="var sortWrapper = function(a,b) {",l=sortList.length;for(var i=0;i<l;i++){var c=sortList[i][0];var order=sortList[i][1];var s=(table.config.parsers[c].type=="text")?((order==0)?makeSortFunction("text","asc",c):makeSortFunction("text","desc",c)):((order==0)?makeSortFunction("numeric","asc",c):makeSortFunction("numeric","desc",c));var e="e"+i;dynamicExp+="var "+e+" = "+s;dynamicExp+="if("+e+") { return "+e+"; } ";dynamicExp+="else { ";}var orgOrderCol=cache.normalized[0].length-1;dynamicExp+="return a["+orgOrderCol+"]-b["+orgOrderCol+"];";for(var i=0;i<l;i++){dynamicExp+="}; ";}dynamicExp+="return 0; ";dynamicExp+="}; ";if(table.config.debug){benchmark("Evaling expression:"+dynamicExp,new Date());}eval(dynamicExp);cache.normalized.sort(sortWrapper);if(table.config.debug){benchmark("Sorting on "+sortList.toString()+" and dir "+order+" time:",sortTime);}return cache;};function makeSortFunction(type,direction,index){var a="a["+index+"]",b="b["+index+"]";if(type=='text'&&direction=='asc'){return"("+a+" == "+b+" ? 0 : ("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : ("+a+" < "+b+") ? -1 : 1 )));";}else if(type=='text'&&direction=='desc'){return"("+a+" == "+b+" ? 0 : ("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : ("+b+" < "+a+") ? -1 : 1 )));";}else if(type=='numeric'&&direction=='asc'){return"("+a+" === null && "+b+" === null) ? 0 :("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : "+a+" - "+b+"));";}else if(type=='numeric'&&direction=='desc'){return"("+a+" === null && "+b+" === null) ? 0 :("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : "+b+" - "+a+"));";}};function makeSortText(i){return"((a["+i+"] < b["+i+"]) ? -1 : ((a["+i+"] > b["+i+"]) ? 1 : 0));";};function makeSortTextDesc(i){return"((b["+i+"] < a["+i+"]) ? -1 : ((b["+i+"] > a["+i+"]) ? 1 : 0));";};function makeSortNumeric(i){return"a["+i+"]-b["+i+"];";};function makeSortNumericDesc(i){return"b["+i+"]-a["+i+"];";};function sortText(a,b){if(table.config.sortLocaleCompare)return a.localeCompare(b);return((a<b)?-1:((a>b)?1:0));};function sortTextDesc(a,b){if(table.config.sortLocaleCompare)return b.localeCompare(a);return((b<a)?-1:((b>a)?1:0));};function sortNumeric(a,b){return a-b;};function sortNumericDesc(a,b){return b-a;};function getCachedSortType(parsers,i){return parsers[i].type;};this.construct=function(settings){return this.each(function(){if(!this.tHead||!this.tBodies)return;var $this,$document,$headers,cache,config,shiftDown=0,sortOrder;this.config={};config=$.extend(this.config,$.tablesorter.defaults,settings);$this=$(this);$.data(this,"tablesorter",config);$headers=buildHeaders(this);this.config.parsers=buildParserCache(this,$headers);cache=buildCache(this);var sortCSS=[config.cssDesc,config.cssAsc];fixColumnWidth(this);$headers.click(function(e){var totalRows=($this[0].tBodies[0]&&$this[0].tBodies[0].rows.length)||0;if(!this.sortDisabled&&totalRows>0){$this.trigger("sortStart");var $cell=$(this);var i=this.column;this.order=this.count++%2;if(this.lockedOrder)this.order=this.lockedOrder;if(!e[config.sortMultiSortKey]){config.sortList=[];if(config.sortForce!=null){var a=config.sortForce;for(var j=0;j<a.length;j++){if(a[j][0]!=i){config.sortList.push(a[j]);}}}config.sortList.push([i,this.order]);}else{if(isValueInArray(i,config.sortList)){for(var j=0;j<config.sortList.length;j++){var s=config.sortList[j],o=config.headerList[s[0]];if(s[0]==i){o.count=s[1];o.count++;s[1]=o.count%2;}}}else{config.sortList.push([i,this.order]);}};setTimeout(function(){setHeadersCss($this[0],$headers,config.sortList,sortCSS);appendToTable($this[0],multisort($this[0],config.sortList,cache));},1);return false;}}).mousedown(function(){if(config.cancelSelection){this.onselectstart=function(){return false};return false;}});$this.bind("update",function(){var me=this;setTimeout(function(){me.config.parsers=buildParserCache(me,$headers);cache=buildCache(me);},1);}).bind("updateCell",function(e,cell){var config=this.config;var pos=[(cell.parentNode.rowIndex-1),cell.cellIndex];cache.normalized[pos[0]][pos[1]]=config.parsers[pos[1]].format(getElementText(config,cell),cell);}).bind("sorton",function(e,list){$(this).trigger("sortStart");config.sortList=list;var sortList=config.sortList;updateHeaderSortCount(this,sortList);setHeadersCss(this,$headers,sortList,sortCSS);appendToTable(this,multisort(this,sortList,cache));}).bind("appendCache",function(){appendToTable(this,cache);}).bind("applyWidgetId",function(e,id){getWidgetById(id).format(this);}).bind("applyWidgets",function(){applyWidget(this);});if($.metadata&&($(this).metadata()&&$(this).metadata().sortlist)){config.sortList=$(this).metadata().sortlist;}if(config.sortList.length>0){$this.trigger("sorton",[config.sortList]);}applyWidget(this);});};this.addParser=function(parser){var l=parsers.length,a=true;for(var i=0;i<l;i++){if(parsers[i].id.toLowerCase()==parser.id.toLowerCase()){a=false;}}if(a){parsers.push(parser);};};this.addWidget=function(widget){widgets.push(widget);};this.formatFloat=function(s){var i=parseFloat(s);return(isNaN(i))?0:i;};this.formatInt=function(s){var i=parseInt(s);return(isNaN(i))?0:i;};this.isDigit=function(s,config){return/^[-+]?\d*$/.test($.trim(s.replace(/[,.']/g,'')));};this.clearTableBody=function(table){if($.browser.msie){function empty(){while(this.firstChild)this.removeChild(this.firstChild);}empty.apply(table.tBodies[0]);}else{table.tBodies[0].innerHTML="";}};}});$.fn.extend({tablesorter:$.tablesorter.construct});var ts=$.tablesorter;ts.addParser({id:"text",is:function(s){return true;},format:function(s){return $.trim(s.toLocaleLowerCase());},type:"text"});ts.addParser({id:"digit",is:function(s,table){var c=table.config;return $.tablesorter.isDigit(s,c);},format:function(s){return $.tablesorter.formatFloat(s);},type:"numeric"});ts.addParser({id:"currency",is:function(s){return/^[A￡$a?￢?.]/.test(s);},format:function(s){return $.tablesorter.formatFloat(s.replace(new RegExp(/[A￡$a?￢]/g),""));},type:"numeric"});ts.addParser({id:"ipAddress",is:function(s){return/^\d{2,3}[\.]\d{2,3}[\.]\d{2,3}[\.]\d{2,3}$/.test(s);},format:function(s){var a=s.split("."),r="",l=a.length;for(var i=0;i<l;i++){var item=a[i];if(item.length==2){r+="0"+item;}else{r+=item;}}return $.tablesorter.formatFloat(r);},type:"numeric"});ts.addParser({id:"url",is:function(s){return/^(https?|ftp|file):\/\/$/.test(s);},format:function(s){return jQuery.trim(s.replace(new RegExp(/(https?|ftp|file):\/\//),''));},type:"text"});ts.addParser({id:"isoDate",is:function(s){return/^\d{4}[\/-]\d{1,2}[\/-]\d{1,2}$/.test(s);},format:function(s){return $.tablesorter.formatFloat((s!="")?new Date(s.replace(new RegExp(/-/g),"/")).getTime():"0");},type:"numeric"});ts.addParser({id:"percent",is:function(s){return/\%$/.test($.trim(s));},format:function(s){return $.tablesorter.formatFloat(s.replace(new RegExp(/%/g),""));},type:"numeric"});ts.addParser({id:"usLongDate",is:function(s){return s.match(new RegExp(/^[A-Za-z]{3,10}\.? [0-9]{1,2}, ([0-9]{4}|'?[0-9]{2}) (([0-2]?[0-9]:[0-5][0-9])|([0-1]?[0-9]:[0-5][0-9]\s(AM|PM)))$/));},format:function(s){return $.tablesorter.formatFloat(new Date(s).getTime());},type:"numeric"});ts.addParser({id:"shortDate",is:function(s){return/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(s);},format:function(s,table){var c=table.config;s=s.replace(/\-/g,"/");if(c.dateFormat=="us"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,"$3/$1/$2");}else if(c.dateFormat=="uk"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,"$3/$2/$1");}else if(c.dateFormat=="dd/mm/yy"||c.dateFormat=="dd-mm-yy"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})/,"$1/$2/$3");}return $.tablesorter.formatFloat(new Date(s).getTime());},type:"numeric"});ts.addParser({id:"time",is:function(s){return/^(([0-2]?[0-9]:[0-5][0-9])|([0-1]?[0-9]:[0-5][0-9]\s(am|pm)))$/.test(s);},format:function(s){return $.tablesorter.formatFloat(new Date("2000/01/01 "+s).getTime());},type:"numeric"});ts.addParser({id:"metadata",is:function(s){return false;},format:function(s,table,cell){var c=table.config,p=(!c.parserMetadataName)?'sortValue':c.parserMetadataName;return $(cell).metadata()[p];},type:"numeric"});ts.addWidget({id:"zebra",format:function(table){if(table.config.debug){var time=new Date();}var $tr,row=-1,odd;$("tr:visible",table.tBodies[0]).each(function(i){$tr=$(this);if(!$tr.hasClass(table.config.cssChildRow))row++;odd=(row%2==0);$tr.removeClass(table.config.widgetZebra.css[odd?0:1]).addClass(table.config.widgetZebra.css[odd?1:0])});if(table.config.debug){$.tablesorter.benchmark("Applying Zebra widget",time);}}});})(jQuery);
-
+   
+   //Simple function to get the text of something: .plainText();
+   (function($){
+      $.fn.plainText = function() {
+         return this.text().trim().replace(/\xA0/g, " ");
+      };
+   })(jQuery);
 /*======================================*\
 l*        _JQUERY_FUNCTION               |
 \*======================================*/
@@ -838,7 +961,7 @@ l*        _REDIRECTION                   |
 /*
  *    Redirect all ES's to SS
  */
-   if(window.location.href.indexOf("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/") != -1){
+   if(doesUrlContain("jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/")){
       window.location.href = LOGIN_PAGE;
       return;
    }
@@ -887,9 +1010,9 @@ l*        _REDIRECTION                   |
       var foundJobID = 0;                                                   //Holds the id if found on the page, if not it is 0
 
       //We hit the search page and we want to hurry and press the button
-      if(window.location.href.indexOf("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE=") != -1){
+      if(doesUrlContain("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE=")){
          //Firefox or Chrome?
-         window.location = ISFIREFOX ? "javascript:submitAction_main(document,'main', '#ICSearch')" : "submitAction_main(document.main, '#ICSearch')";
+         window.location = ISFIREFOX ? "javascript:submitAction_main(document,'main', '#ICSearch')" : "javascript:submitAction_main(document.main, '#ICSearch')";
          return;
          //After this it will run one of the two if else statements below
       }
@@ -909,7 +1032,7 @@ l*        _REDIRECTION                   |
             if(nodes[index].firstChild && term == nodes[index].firstChild.nodeValue){
                //Grab the job Title
                var jobTitle = nodes[index+1].firstChild.nodeValue;
-
+               
                //If the next row has the same term and job title, then the first one is a template version
                if(  nodes[index+6] && nodes[index+6].firstChild && jobTitle == nodes[index+6].firstChild.nodeValue         //Check if the job titles are the same     
                   &&nodes[index+5] && term == nodes[index+5].firstChild.nodeValue)                                         //Then check if the terms are the same
@@ -932,7 +1055,7 @@ l*        _REDIRECTION                   |
       /*
        *    2. This is when the search for the lookup jobs loads a description instead of a list of indexes
        */
-      else if(window.location.href.indexOf("?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOBDTLS") != -1)
+      else if(doesUrlContain("?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOBDTLS"))
       {                                  
          //This page is the job details page with a specific url, we grab the job ID and run
          foundJobID = document.getElementsByTagName("div")[6].firstChild.nodeValue;             //6 is the location of the jobID, jobmine loads this as a template, it will hopefully never change
@@ -997,46 +1120,194 @@ l*        _REDIRECTION                   |
 /*======================================*\
 l*        _PAGE_CLEAN_UP                 |
 \*======================================*/
-
-   //Get page type and add a class to body
-   $("body").addClass(PAGE_TYPE);
-
-   // Insert navigation header at the top and overlays
-   if(PAGE_TYPE != "jobmine_|_university_of_waterloo"){insertCustomHeader();}
-
-   // Add a CSS stylesheets
-   var style = document.createElement( "style" ); 
-   style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style2.css';") );
+   //Does not run on the old job details page
+   if(PAGE_TYPE != "job_details" || getCookieValue('SHOW_OLD_DETAILS') != 1)     
+   {
+      init();
+   }
    
-   //Update CSS Stylesheet
-   if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
-   document.getElementsByTagName( "body" ).item(0).appendChild( style );	
+/*======================================*\
+l*        _JOB_DESCRIPTION               |
+\*======================================*/
+   if( ( doesUrlContain("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=")    //Does it include this url
+      || doesUrlContain("SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Market=GBL&Page=UW_CO_STU_JOBDTLS&Action=U&target=Transfer"))                //or this one?   
+      && !IS_IN_IFRAME                                                                                                                                //Also must not be in an iframe   
+   ){
+      //Should we show the old details page? SHOW_OLD_DETAILS => 1: show old, 0|-1: show new
+      if(getCookieValue('SHOW_OLD_DETAILS') != 1)
+      {
+         //Data that needs to be extracted from the page, this object holds it all
+         var jobDescriptionData = {
+            employerName   : "",
+            position       : "",
+            location       : "",
+            openings       : "",
+            jobLevels      : "",
+            grades         : "",
+            comments       : "",
+            description    : "",
+            openDate       : "",
+            cecsCoord      : "",
+            disciplines    : "",
+            closeDate      : ""
+         };
+         
+          //The normal way of getting to the page has an offset of 1, which means it has an extra div.
+         var offset = 0;
+         if(doesUrlContain("SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Market=GBL&Page=UW_CO_STU_JOBDTLS&Action=U&target=Transfer"))
+         {offset = 1;}
+         
+         //Extract data from page
+         $("div").each(function(index){
+            var text = $(this).html().replace(/&nbsp;/, " ").trim();
+            if(text != "")
+            {
+               switch(index-offset)
+               {
+                  case 1:
+                     jobDescriptionData.openDate      = text;        break;
+                  case 2:
+                     jobDescriptionData.closeDate     = text;        break;
+                  case 5:
+                     jobDescriptionData.employerName  = text;        break;
+                  case 6:
+                     jobDescriptionData.position      = text;        break;
+                  case 7:
+                     jobDescriptionData.grades        = text;        break;
+                  case 8:
+                     jobDescriptionData.location      = text;        break;
+                  case 9:
+                     jobDescriptionData.openings      = text;        break;
+                  case 10:
+                     jobDescriptionData.disciplines   = text+", ";   break;
+                  case 11:
+                     jobDescriptionData.disciplines  += text;        break;
+                  case 12:
+                     jobDescriptionData.jobLevels     = text;        break;
+                  case 13:
+                     jobDescriptionData.cecsCoord     = text;        break;
+                  case 14:
+                     jobDescriptionData.comments      = text;        break;
+                  case 16:
+                     jobDescriptionData.description   = text;        break;
+               }
+            }
+         });
+         
+         //Add url a-href to most of the links on page
+         jobDescriptionData.description = jobDescriptionData.description.replace(/((http:|https:|www.)[^\s]+)/gi, function(item){
+            item = item.replace(/&nbsp;/, "");        //usually this appears at the end of the link
+            
+            //Removes random punctuation at the end of the link
+            var endPunctuation = "";
+            if(endPunctuation = item[item.length-1].match(/\W/)){ item = item.slice(0, -1);  }
+            
+            item = item.toUpperCase().indexOf('HTTP') == 0 ? item : "http://"+item;         
+            return "<a href='"+item+"' target='_blank'>"+item+"</a>" + (endPunctuation ? endPunctuation : "");
+         });
+         
+         //Append CSS and some HTML to display the new job description page
+         var jobDescCSS = "<style>.printshow{display:none;}iframe{overflow-x:hidden;overflow-y:scroll;}.jobmineButton{font-family: 'Arial','sans-serif';font-size: 9pt;font-weight: normal;font-Style: normal;font-variant: normal;color: rgb(0,0,0);background-color: rgb(255,255,153);}#jobDetails.page{width:760px;height:950px;min-height:950px;margin: 50px auto;-moz-box-shadow: 0 0 1em black;-webkit-box-shadow: 0 0 1em black;background-color: #f6f6f6;padding: 35px 20px;font-family: Arial, Verdana, san-serif;font-size:12px;}html, body{margin:0;padding:0;}input.button{float:right;}.important{color:red;}.jobDescriptionArea td, #comments td{font-size:14px;}.jobDescriptionArea .left{width:100%;}.jobDescriptionArea .right td{white-space:nowrap;}.jobDescriptionArea a.location{color: #3333cc;text-decoration: none;}.jobDescriptionArea .category{font-weight:bold;padding-right:10px;white-space:nowrap;width:10px;}#comments{margin-top:10px;display:"+(jobDescriptionData.comments == " " ? "none" : "block")+";}#comments .category{font-weight:bold;padding-right:30px;}hr{color:#6c6cbd;margin:10px 0;}#content .body{margin: 15px 0px;}.title{font-size:19px;color: #4b4bb4 !important;font-weight: bold;}#jobDetails .title a:visited{font-size:19px;color: #4b4bb4 !important;}#jobDetails .title a{font-weight: normal;margin-left:10px;}#content{height:100%;}#footer{max-height:110px;}/*Popup Close*/#popupContainer input.button{position:absolute;top:15px;right:10px;}/*Toolbar*/#toolbar{background-color: rgba(0,0,0,0.6);color: white;width:100%;position:fixed;text-align:center;top:0;left:0;padding: 5px 20px;font-family:Arial;font-size:12px;}#toolbar a{color: white;}#toolbar a:hover{color: #CCC;}/*Printing*/@media print{a{color: black !important;text-decoration: none;}hr{color:black;}.printHide{display:none !important;}#jobDetails .title{color: black !important;}body, #jobDetails.page{width: 100%;padding:0px;margin:0px;-moz-box-shadow: none;-webkit-box-shadow: none;background-color:white;}.printshow{display:inline !important;}}</style>"
+         var popupCSS   = "<style>#popupContainer{position:fixed;z-index:200;top:0px;left: 0px;height:100%;width:100%;}#overlay{opacity:0.6;height:100%;width:100%;filter: alpha(opacity = 70);filter:progid:DXImageTransform.Microsoft.Alpha(opacity=70);background-color:black;}#popupWrapper{left:0px;top:0px;position:absolute;width:100%;}#popupContent{position:relative;margin:0 auto;min-height:400px;height:400px;top:150px;width:510px;padding:10px;background-color:white;-moz-box-shadow: 0 0 1em black;-webkit-box-shadow: 0 0 1em black;background:no-repeat url('https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/loading_small.gif') white 50%;}#popupContent .title{font-weight:bold;font-size:18px;display:block; margin-top:5px;}</style>"
+         
+         var toolbar = "<div id='toolbar' class='printHide'>Don't like this look for your job descriptions? <a id='showOldDetailsBtn' href='#'>Click here to change it back</a></div>";
+         
+         var popup = "<div id='popupContainer' class='printHide' style='display:none;'><link type='text/css' rel='stylesheet' href='popup.css'/><div id='overlay'><!-- --></div><div id='popupWrapper'><div id='popupContent'><input type='button' class='button jobmineButton' value='Close' onclick='document.body.style.marginRight = \"0\";document.getElementById(\"popupContainer\").style.display = \"none\";document.body.style.overflow = \"auto\"'/><span class='title'>Employer Profile</span><iframe id='hiddenIframe' style='margin-top:10px;' name='hiddenIframe' src='test.html' frameborder='0' width='100%' height='360px'></iframe></div></div></div>";
+         
+         var newBody =  "<table class='page' id='jobDetails' cellspacing='0' cellpadding='0'><tr><td valign='top' id='header'><span class='title'>Employer: <a class='printHide' target='_blank' title='Google search "+jobDescriptionData.employerName+"' href='http://www.google.ca/#hl=en&q="+jobDescriptionData.employerName.replace(/\s/g,"+")+"'>"+(jobDescriptionData.employerName.length > 48 ? jobDescriptionData.employerName.substring(0,48)+"..." : jobDescriptionData.employerName)+"</a><a class='printshow' href='#'>"+jobDescriptionData.employerName+"</a></span>"+
+                        "<input class='button printHide' onclick='window.print();' type='button' value='Print Job Description'/><br/><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>"+
+                        "<tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Job Title:</td><td valign='top'>"+jobDescriptionData.position+"</td></tr><tr>"+
+                        "<td valign='top' class='category'>Work Location:</td><td valign='top'><a target='_blank' href='http://maps.google.ca/maps?hl=en&q="+jobDescriptionData.employerName.replace(/\s/g,"+")+"+"+jobDescriptionData.location.replace(/\s/g,"+")+"' title='Search location' class='location'>"+jobDescriptionData.location+"</a></td></tr><tr>"+
+                        "<td valign='top' class='category'>Available Openings:</td><td valign='top'>"+jobDescriptionData.openings+"</td></tr></table></td><td valign='top' class='right'>"+
+                        "<table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Levels:</td><td valign='top'>"+jobDescriptionData.jobLevels+"</td></tr><tr>"+
+                        "<td valign='top' class='category'>Grades:</td><td valign='top'>"+jobDescriptionData.grades+"</td></tr></table>"+
+                        "<input style='margin-top:10px;' class='button printHide' onclick='document.getElementById(\"popupContainer\").style.display = \"block\";document.body.style.marginRight = \"17px\";document.body.style.overflow = \"hidden\"' type='button' value='View Employer Profile'/>"+
+                        "</td></tr></table><br/><table id='comments' cellspacing='0' cellpadding='0'><tr><td class='category' valign='top'>Comments:</td><td class='important' valign='top'>"+jobDescriptionData.comments+"</td>"+
+                        "</tr></table><hr/></td></tr><tr><td valign='top' id='content'><div class='title'>Description</div><div class='body'>"+jobDescriptionData.description+"</div>"+
+                        "</td></tr><tr><td valign='top' id='footer'><hr/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>"+
+                        "Posting Open Date:</td><td valign='top'>"+jobDescriptionData.openDate+"</td></tr><tr><td valign='top' class='category'>CECS Field Co-ordinator:</td><td valign='top'>"+jobDescriptionData.cecsCoord+"</td></tr>"+
+                        "<tr><td colspan='2'><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Disciplines:</td><td valign='top'>"+jobDescriptionData.disciplines+"</td></tr></table></td></tr>"+
+                        "</table></td><td valign='top' class='right'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Last Day to Apply:</td><td valign='top'>"+jobDescriptionData.closeDate+"</td></tr></table></td>"+
+                        "</tr></table><hr class='printHide'/></td></tr></table>";
+         
+         //Append everything on the page
+         $("head").append(popupCSS).append(jobDescCSS);
+         $("body").html(newBody).append(toolbar).append(popup);
+         //Chrome doesnt find this element that fast
+         setTimeout(function(){
+            $("#showOldDetailsBtn").click(function(){
+               writeCookie('SHOW_OLD_DETAILS', 1);     
+               refresh();}
+         )}, 0);
 
-   //Adds current version to the body class
-   $('body').addClass("v"+CURRENT_VERSION);
+         
+         /*
+          *    Iframe employer profile page 
+          */      
+         function goToEmployerProfile()
+         {
+            //First Load
+            if(this.getAttribute("src") == "test.html")
+            {
+               $(this).css("display","none");
+               this.src = window.location.href.substr(window.location.href.indexOf("servlets/"));
+               $(this).attr("status", "loading");
+            }
+            //Second load, we are the orginal job description page
+            else if( $(this).attr("status") == "loading" )
+            {
+               //Write status so it doesnt run this a billion times XD
+               $(this).attr("status", "almostdone");
+               if(ISFIREFOX){
+                  unsafeWindow.runIframeFunction("hiddenIframe","submitAction_main(document,'main', '#ICPanel1')");		               	
+               }else{
+                  runJS('runIframeFunction("hiddenIframe","submitAction_main(document.main , \'#ICPanel1\')")');	
+               }
+            }
+            //Third and final load; we now have the employer profile
+            else if( $(this).attr("status") == "almostdone" )
+            {
+               //$(this).fadeIn();
+               $(this).css("display","block");
+               $(this).attr("status", "done");
 
-   //Removing useless parts
-   $("#WAIT_main0").remove();
-   $("#WAIT_main").remove();
-
-   //Makes all View buttons to the next tab
-   $("a.PSHYPERLINK:contains('View')").attr("target","_blank");
-
-   //SPECIFIC PAGE LAYOUTS
-   $(".PSLEVEL1GRID.tablesorter").attr("cellpadding",0);
-   $('.PSLEVEL1GRID').parent().addClass("tablepanel");
-   $("table a.PTBREADCRUMB").parents("table").remove();
-
-   //Student data Clean up
-   if(PAGE_TYPE != "student_data" ){$(".PSACTIVETAB").parents().eq(2).remove();}
-
-   //For iframes! :D
-   $("body").append("<script language='javascript'>function runIframeFunction(name,_function){window.frames[name].eval(_function);}</script>");
-   
+               if(ISFIREFOX){
+                  unsafeWindow.runIframeFunction("hiddenIframe","var grabbedHTML = document.getElementsByTagName('table')[2].innerHTML;document.body.innerHTML = '<table id=\"newTable\" cellpadding=\"0\" cellspacing=\"0\">'+grabbedHTML+'</table>';document.body.style.marginLeft='-15px';document.body.style.marginTop='-10px';var header = document.getElementById('newTable').getElementsByTagName('tr')[1]; header.parentNode.removeChild(header);");
+               }else{
+                  var runInIframe = "var grabbedHTML = document.getElementsByTagName('table')[2].innerHTML;document.body.innerHTML = '<table id=newTable cellpadding=0 cellspacing=0>'+grabbedHTML+'</table>';document.body.style.marginLeft='-15px';document.body.style.marginTop='-10px';var header = document.getElementById('newTable').getElementsByTagName('tr')[1]; header.parentNode.removeChild(header);";
+                  runJS('runIframeFunction("hiddenIframe","'+runInIframe+'")');	
+               }            
+               this.removeEventListener("load", goToEmployerProfile, false);
+            }
+         }
+         document.getElementById("hiddenIframe").addEventListener("load", goToEmployerProfile, false);
+         //Avoid the stupid resend
+         $(window).unload( refresh   );
+         
+         jobDescriptionData = null;
+      }
+      //Old version of the job descriptions
+      else
+      {
+         var toolbar    = "<div id='toolbar' class='printHide'>Want to see the Jobmine Plus version of job descriptions? <a id='showNewDetailsBtn' href='#'>Click here to change it</a></div>";
+         var cssStyles  = "<style>.PSPAGE{margin-top:30px;}@media print{.PSPAGE{margin-top:1px;}.printHide{display:none;}}/*Toolbar*/#toolbar{background-color: rgba(0,0,0,0.6);color: white;width:100%;position:fixed;text-align:center;top:0;left:0;padding: 5px 20px;font-family:Arial;font-size:12px;}#toolbar a{color: white;}#toolbar a:hover{color: #CCC;}</style>";
+         $("body").append(toolbar).append(cssStyles);
+         
+         //Clicking the link would tell it to look at the old one
+         $("#showNewDetailsBtn").click(function(){
+            writeCookie('SHOW_OLD_DETAILS', 0);     
+            refresh();
+         });
+      }
+      
+      //Remove timer and end the script
+      removeTimer();
+      return;
+   }
 /*======================================*\
 l*        _JOB_SEARCH_PAGE               |
 \*======================================*/
-   if(PAGE_TYPE == "job_search_component")            
+   else if(PAGE_TYPE == "job_search_component")            
    {
       //Write the current term in cookies if it is specified  
       if($("#UW_CO_JOBSRCH_UW_CO_WT_SESSION")[0].value.trim() != ""){ writeCookie("CURTERM", $("#UW_CO_JOBSRCH_UW_CO_WT_SESSION")[0].value.trim());}
@@ -1407,256 +1678,280 @@ l*        _APPLICATIONS_PAGE             |
       /*
        *    JOB ID STORAGE SYSTEM                          
        */
-      var company          = "";
-      var autoSeekingDelay = 5000;
-      var jobDescription   = "";
-      var clickedElement   = {};
-      var linkElements     = [];
-      var userWaitingTab   = false;
-      
-      //Object that manages the storage of keys and jobs ids
-      var appJobIdStorage = {
-         //Variables
-         idKeys              : [],                                                  //holds the arrays of all the stuff
-         KEYNAME_APP   : "KEYBASE_NAME_APPLICATION",           //constant that holds the name of the key to access all the job keys
-         
-         //Inits the storage by getting all the id's
-         init:            function(){      
-            var keys = [];             
-            if( (keys = this.readID(this.KEYNAME_APP) ) !== false)
-            {    //Read the key if it exists
-               this.idKeys = keys.split(" ");
-            }    
-         },
-         
-         //Returns if the key exists
-         IDExists:      function(key){    
-            return this.readID(key) != false;
-         },
-         
-         //Sets the Job ID in storage, returns true if it works and false if it failed
-         addID:         function(key, value){   
-            //If it doesnt exist, put it into the array as well right our new list of keys
-            if( !this.IDExists(key) ){
-               this.idKeys.push(key);             
-               this.updateKeys();
-            }
-            //Try to store the item
-            try{
-               localStorage.setItem(key, value);
-            }catch(e){
-               alert("Failed to write to storage:\n"+e); return false;
-            }
-            return true;
-         },
-
-         //Read an ID or return false if not found
-         readID:         function(key){          
-            var value = localStorage.getItem(key);
-            return value != null && value != "" ? value : false;
-         },
-         
-         //Removes a value, returns the value if it worked, if not then it returns false
-         removeID:     function(key){   
-            var value;
-            if(value = this.readID(key))
-            {
-               localStorage.removeItem(key);
-               return value;
-            }
-            return false;
-         },
-         
-         //Push keys and updates the database
-         updateKeys:      function(){
-            try{      //Try to update our list of keys
-               localStorage.setItem(this.KEYNAME_APP, this.idKeys.join(" ") );          //Put a string of name delimited by a space
-            }catch(e){
-               alert("Failed to write to storage:\n"+e);  return false;
-            }
-         }
-      };
-      appJobIdStorage.init();
-
-      //Once a user clicks a job without an ID, this runs the hyperlink in the iframe
-      function lookupJobID(evt, obj)
+      //If not disabled, 1=disabled, -1,0=enabled
+      if(getCookieValue("DISABLE_ID_GRAB") != 1)
       {
-         //Removing seeking functionality if someone has clicked
-         if(obj == null){ userWaitingTab = true; }
-
-         //Write these into the variables of the parent scope
-         clickedElement = obj ? obj : $(this);
-         company        = clickedElement.attr("company");
-         jobDescription = clickedElement.text().trim().replace(/\xA0/g, " ");
-
-         var _company      = encodeURIComponent(company);
-         var _description  = encodeURIComponent(jobDescription);
-
-         //Set the source for the iframe
-         $("#hiddenIframe").attr("src",
-            "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE="+_description+"&UW_CO_PARENT_NAME="+_company
-         );
-      }
-
-      //Auto seeks searches for the jobIDs without making a new tab 
-      function autoSeekJobID()
-      {    
-         if(allowSearchID === true && userWaitingTab === false && linkElements.length > 0)
-         {
-            //Seach the last ones first so there would be less loops
-            lookupJobID(null, linkElements[linkElements.length-1]);                         
-         }
-         //No more grabbing
-         else if(linkElements.length == 0)
-         {
-            setAllowIDGrabbing(false);
-         }
-      }
-      //Create a temporary Array to hold all our keys
-      var keyIndex = [];
-      for(var i=0; i<appJobIdStorage.idKeys.length; i++)
-      {
-         var item             = appJobIdStorage.idKeys[i];
-         var keyCompanyName   = item.substring(0, item.lastIndexOf("|")).replace(/_/g, " ");
-         var keyDescription   = item.substr(item.lastIndexOf("|")+1).replace(/_/g, " ");
-         var keyValue         = appJobIdStorage.readID(item);
-         //If value is false, that means it does not exist in the storage
-         if(keyValue === false){alert("Something broke"); return;}
-
-         //KeyIndex[company][0-3]: 0 - description, 1 - id number, 2 - item or the original string, 3 - was it ever used
-         keyIndex[item] = new Array(keyDescription, keyValue, false);
-      }
-
-      //Add company for google search
-      $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
-         //Do something on each row
-         var row = $(this).children();
-         if(row[0].nodeName.toUpperCase() != "TH")   
-         {
-            var companyName = row.eq(2).text().trim().replace(/\xA0/g, " ");           //Break the nbps; back to a space
-            var linkCol1Obj = row.eq(1).find("a");
-
-            var itemName = companyName.replace(/\s/g,"_") +"|"+ linkCol1Obj.text().trim().replace(/\xA0|\s/g, "_");
-
-            if(  keyIndex[itemName] != null                                                                  //Do we have this job id in storage
-            // && linkCol1Obj.text().trim().replace(/\xA0|\s/g, "_") == keyIndex[companyName][0]       //Are the job descriptions the same?
-            //If the above conditions are true, then we have the link to this object
-            ){
-               linkCol1Obj.addClass("idExists").css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+keyIndex[itemName][1]).attr("target","_blank");
-               keyIndex[itemName][2] = true;        //mark down that we have used this
-            }
-            //Give the links an eventlistener to find the links
-            else
-            {
-               linkCol1Obj.attr("href","javascript:void").attr("company", companyName).bind("click", lookupJobID);
-               linkElements.push(linkCol1Obj);
-            }
-
-            //Add the Google Search for company names
-            row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+companyName.replace(/\s/g,"+")+"'/>");  
-         }
-      });
-
-      //Now we can remove the ids that are not being used
-      var newArr = [];
-      for(var itemName in keyIndex)
-      {
-         //check to see if this company was ever used
-         if(keyIndex[itemName][2])  {    
-            newArr.push(itemName);
-         }else{
-         //This company was never used, lets remove it
-            appJobIdStorage.removeID(itemName);
-         }
-      }
-      appJobIdStorage.idKeys = newArr;
-      appJobIdStorage.updateKeys();
-
-      //We are done with this array, we can remove it
-      keyIndex = null;
-
-      //Make an invisible iframe to handle links
-      $("body").append('<iframe width="100%" height="35%" src="" id="hiddenIframe" name="hiddenIframe" style="display: none;position:fixed;bottom:0px;"></iframe>');     
-
-      //Runs when the application form loads, this is where we can manipulate the id          
-      $("#hiddenIframe").load(function(){try{
-         var jobID = getCookieValue("APP_LAST_ID");
-
-         //If there is a location in the iframe and if the jobid is value
-         if( $(this).attr("src") != "" && jobID != -1)
-         {
-            //Users are waiting for their job description in a new tab
-            if(userWaitingTab === true){    
-               window.open("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=" + jobID);
-               userWaitingTab = false;
-               startDelayGrabbing();
-               hideLoadingPopup();
-            }
-            //It was autograbbed
-            else{ autoSeekJobID(); }
+         var company          = "";
+         var autoSeekingDelay = 5000;
+         var jobDescription   = "";
+         var clickedElement   = {};
+         var linkElements     = [];
+         var userWaitingTab   = false;
+         
+         //Object that manages the storage of keys and jobs ids
+         var appJobIdStorage = {
+            //Variables
+            idKeys              : [],                                                  //holds the arrays of all the stuff
+            KEYNAME_APP   : "KEYBASE_NAME_APPLICATION",           //constant that holds the name of the key to access all the job keys
             
-            //Add the id:  name|description = value
-            appJobIdStorage.addID( company.replace(/\s/g, "_")+"|"+jobDescription.replace(/\s/g, "_") , jobID);
+            //Inits the storage by getting all the id's
+            init:            function(){      
+               var keys = [];             
+               if( (keys = this.readID(this.KEYNAME_APP) ) !== false)
+               {    //Read the key if it exists
+                  this.idKeys = keys.split(" ");
+               }    
+            },
+            
+            //Returns if the key exists
+            IDExists:      function(key){    
+               return this.readID(key) != false;
+            },
+            
+            //Sets the Job ID in storage, returns true if it works and false if it failed
+            addID:         function(key, value){   
+               //If it doesnt exist, put it into the array as well right our new list of keys
+               if( !this.IDExists(key) ){
+                  this.idKeys.push(key);             
+                  this.updateKeys();
+               }
+               //Try to store the item
+               try{
+                  localStorage.setItem(key, value);
+               }catch(e){
+                  alert("Failed to write to storage:\n"+e); return false;
+               }
+               return true;
+            },
 
-            //Find all the links that correspond to the company name, there should be max 2
-            var index            = 0;
-            var changeCounters   = 0;
-            while(linkElements[index] && changeCounters < 2)
-            {
-               var eachLink = linkElements[index];
-               if(eachLink.attr("company") == company && eachLink.text().trim().replace(/\xA0/g, " ") == jobDescription){
-                  eachLink.addClass("idExists").unbind().css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
-                  linkElements.splice(index, 1);
-                  changeCounters++;
-               }else{ index++; }
+            //Read an ID or return false if not found
+            readID:         function(key){          
+               var value = localStorage.getItem(key);
+               return value != null && value != "" ? value : false;
+            },
+            
+            //Removes a value, returns the value if it worked, if not then it returns false
+            removeID:     function(key){   
+               var value;
+               if(value = this.readID(key))
+               {
+                  localStorage.removeItem(key);
+                  return value;
+               }
+               return false;
+            },
+            
+            //Push keys and updates the database
+            updateKeys:      function(){
+               try{      //Try to update our list of keys
+                  localStorage.setItem(this.KEYNAME_APP, this.idKeys.join(" ") );          //Put a string of name delimited by a space
+               }catch(e){
+                  alert("Failed to write to storage:\n"+e);  return false;
+               }
             }
+         };
+         appJobIdStorage.init();
 
-            //Give that link we clicked the new link
-            writeCookie("APP_LAST_ID", "-1");            //we have read the id, we dont need it anymore
+         //Once a user clicks a job without an ID, this runs the hyperlink in the iframe
+         function lookupJobID(evt, obj)
+         {
+            //Removing seeking functionality if someone has clicked
+            if(obj == null){ userWaitingTab = true; }
+
+            //Write these into the variables of the parent scope
+            clickedElement = obj ? obj : $(this);
+            company        = clickedElement.attr("company");
+            jobDescription = clickedElement.plainText();
+
+            var _company      = encodeURIComponent(company);
+            var _description  = encodeURIComponent(jobDescription);
+
+            //Set the source for the iframe
+            $("#hiddenIframe").attr("src",
+               "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE="+_description+"&UW_CO_PARENT_NAME="+_company
+            );
          }
+
+         //Auto seeks searches for the jobIDs without making a new tab 
+         function autoSeekJobID()
+         {    
+            if(allowSearchID === true && userWaitingTab === false && linkElements.length > 0)
+            {
+               //Seach the last ones first so there would be less loops
+               lookupJobID(null, linkElements[linkElements.length-1]);                         
+            }
+            //No more grabbing
+            else if(linkElements.length == 0)
+            {
+               setAllowIDGrabbing(false);
+            }
+         }
+         //Create a temporary Array to hold all our keys
+         var keyIndex   = [];
+         var brokenKeys = [];
+         for(var i=0; i<appJobIdStorage.idKeys.length; i++)
+         {
+            var item             = appJobIdStorage.idKeys[i];
+            var keyCompanyName   = item.substring(0, item.lastIndexOf("|")).replace(/_/g, " ");
+            var keyDescription   = item.substr(item.lastIndexOf("|")+1).replace(/_/g, " ");
+            var keyValue         = appJobIdStorage.readID(item);
+            
+            if(keyValue !== false){
+               //KeyIndex[company][0-3]: 0 - description, 1 - id number, 2 - item or the original string, 3 - was it ever used
+               keyIndex[item] = new Array(keyDescription, keyValue, false);
+            }else{
+               //Does not have the value, we can skip it.
+               brokenKeys.push(i);
+               alert("Something broke");
+            }
+         }
+         //Remove all the broken keys from the idKeys
+         for(var i=brokenKeys.length-1; i>=0; i--)
+         {  appJobIdStorage.idKeys.splice(i, 1);   }
+         brokenKeys = null;
          
+         //Add company for google search
+         $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
+            //Do something on each row
+            var row = $(this).children();
+            if(row[0].nodeName.toUpperCase() != "TH")   
+            {
+               var companyName = row.eq(2).plainText();           
+               var linkCol1Obj = row.eq(1).find("a");
 
-         }catch(e){alert(e)}
-      });
-      
-      /*
-       *    Auto Grabbing UI and Code
-       */
-      
-      var allowSearchID = true;
-      //Place the button and the eventlistener
-      $("form table table").eq(0).parent().prepend("<div style='margin: 10px 0px;font-size:12px;'><span style='font-size: 13px; font-weight: bold;'>Grabbing Job IDs</span><button onclick='return false;' class='PSPUSHBUTTON' id='appIDGrabber' style='margin: 0pt 10px; width: 130px;'>Continue Grabbing</button><img src='"+SCRIPTSURL+"/images/loading_small.gif' id='appIDGrabberLoading' style='display: none; height: 15px;'><br/><br/>This allows the script to find urls for job descriptions below and store them in your browser so that when you access the job descriptions again, they will load quickly in a new tab.<br/>The first time you click a job description, it may be slow but after you have accessed it once, it will load quicker the next time.</div>");
-      $("#appIDGrabber").click(function(){   
-         setAllowIDGrabbing(!allowSearchID);
-      });
-      
-      //Set a timer to start to crawl all the jobs for IDs
-      function startDelayGrabbing(){
-         setTimeout(function(){                                        
-            autoSeekJobID();
-         }, autoSeekingDelay);
-      }
+               var itemName = companyName.replace(/\s/g,"_") +"|"+ linkCol1Obj.text().trim().replace(/\xA0|\s/g, "_");
 
-      //Sets the grabbing state, initially it is on
-      function setAllowIDGrabbing(state)
-      {
-         allowSearchID = state;
-         //No more grabbing needed
-         if(linkElements.length == 0){
-            $("#appIDGrabberLoading").css("display","none");
-            $("#appIDGrabber").css("display","none");
-         //Continue to grab
-         }else if(allowSearchID){
-            $("#appIDGrabberLoading").css("display","inline");
-            $("#appIDGrabber").html("Stop Grabbing");
-         startDelayGrabbing();
-         //Stop grabbing
-         }else{
-            $("#appIDGrabberLoading").css("display","none");
-            $("#appIDGrabber").html("Continue Grabbing");
+               if(  keyIndex[itemName] != null                                                                  //Do we have this job id in storage
+               //If the above conditions are true, then we have the link to this object
+               ){
+                  linkCol1Obj.addClass("idExists").css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+keyIndex[itemName][1]).attr("target","_blank");
+                  keyIndex[itemName][2] = true;        //mark down that we have used this
+               }
+               //Give the links an eventlistener to find the links
+               else
+               {
+                  linkCol1Obj.attr("href","javascript:void").attr("company", companyName).bind("click", lookupJobID);
+                  linkElements.push(linkCol1Obj);
+               }
+
+               //Add the Google Search for company names
+               row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+companyName.replace(/\s/g,"+")+"'/>");  
+            }
+         });
+
+         //Now we can remove the ids that are not being used
+         var newArr = [];
+         for(var itemName in keyIndex)
+         {
+            //check to see if this company was ever used
+            if(keyIndex[itemName][2])  {    
+               newArr.push(itemName);
+            }else{
+            //This company was never used, lets remove it
+               appJobIdStorage.removeID(itemName);
+            }
          }
+         appJobIdStorage.idKeys = newArr;
+         appJobIdStorage.updateKeys();
+
+         //We are done with this array, we can remove it
+         keyIndex = null;
+
+         //Make an invisible iframe to handle links
+         $("body").append('<iframe width="100%" height="35%" src="" id="hiddenIframe" name="hiddenIframe" style="display: none;position:fixed;bottom:0px;"></iframe>');     
+
+         //Runs when the application form loads, this is where we can manipulate the id          
+         $("#hiddenIframe").load(function(){try{
+            var jobID = getCookieValue("APP_LAST_ID");
+
+            //If there is a location in the iframe and if the jobid is value
+            if( $(this).attr("src") != "" && jobID != -1)
+            {
+               //Add the id:  name|description = value
+               appJobIdStorage.addID( company.replace(/\s/g, "_")+"|"+jobDescription.replace(/\s/g, "_") , jobID);
+
+               //Find all the links that correspond to the company name, there should be max 2
+               var index            = 0;
+               var changeCounters   = 0;
+               while(linkElements[index] && changeCounters < 2)
+               {
+                  var eachLink = linkElements[index];
+                  if(eachLink.attr("company") == company && eachLink.plainText() == jobDescription){
+                     eachLink.addClass("idExists").unbind().css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
+                     linkElements.splice(index, 1);
+                     changeCounters++;
+                  }else{ index++; }
+               }
+               
+               //Users are waiting for their job description in a new tab
+               if(userWaitingTab === true){    
+                  window.open("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=" + jobID);
+                  userWaitingTab = false;
+                  startDelayGrabbing();
+                  hideLoadingPopup();
+               }
+               //It was autograbbed
+               else{ autoSeekJobID(); }
+               
+               //Give that link we clicked the new link
+               writeCookie("APP_LAST_ID", "-1");            //we have read the id, we dont need it anymore
+            }
+            }catch(e){alert(e)}
+         });
+         
+         /*
+          *    Auto Grabbing UI and Code
+          */
+         
+         var allowSearchID = true;
+         //Place the button and the eventlistener
+         $("form table table").eq(0).parent().prepend("<div style='margin: 10px 0px;font-size:12px;'><span style='font-size: 13px; font-weight: bold;'>Grabbing Job IDs</span><button onclick='return false;' class='PSPUSHBUTTON' id='appIDGrabber' style='margin: 0pt 10px; width: 130px;'>Continue Grabbing</button><img src='"+SCRIPTSURL+"/images/loading_small.gif' id='appIDGrabberLoading' style='display: none; height: 15px;'><br/><br/>This allows the script to find urls for job descriptions below and store them in your browser so that when you access the job descriptions again, they will load quickly in a new tab.<br/>The first time you click a job description, it may be slow but after you have accessed it once, it will load quicker the next time. (This feature can be removed under Settings.)</div>");
+         $("#appIDGrabber").click(function(){   
+            setAllowIDGrabbing(!allowSearchID);
+         });
+         
+         //Set a timer to start to crawl all the jobs for IDs
+         function startDelayGrabbing(){
+            setTimeout(function(){                                        
+               autoSeekJobID();
+            }, autoSeekingDelay);
+         }
+
+         //Sets the grabbing state, initially it is on
+         function setAllowIDGrabbing(state)
+         {
+            allowSearchID = state;
+            
+            //No more grabbing needed
+            if(linkElements.length == 0){
+               $("#appIDGrabberLoading").css("display","none");
+               $("#appIDGrabber").css("display","none");
+            //Continue to grab
+            }else if(allowSearchID){
+               $("#appIDGrabberLoading").css("display","inline");
+               $("#appIDGrabber").html("Stop Grabbing");
+            startDelayGrabbing();
+            //Stop grabbing
+            }else{
+               $("#appIDGrabberLoading").css("display","none");
+               $("#appIDGrabber").html("Continue Grabbing");
+            }
+         }
+         setAllowIDGrabbing(true);
       }
-      setAllowIDGrabbing(true);
+      //ID grabbing is disabled
+      else
+      {
+         $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
+            //Do something on each row
+            var row = $(this).children();
+            if(row[0].nodeName.toUpperCase() != "TH")   
+            {          
+               //Add the Google Search for company names
+               row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+row.eq(2).plainText().replace(/\s/g,"+")+"'/>");  
+            }
+         });
+      }
    }
    /*======================================*\
    l*        _INTERVIEW_PAGE                |
@@ -1800,7 +2095,7 @@ l*        _HINT_SYSTEM                    |
    }
    tooltipGenerated += "</table>";
    index = null;
- 
+   
 /*======================================*\
 l*        _SETTINGS                      |
 \*======================================*/        
@@ -1809,6 +2104,7 @@ l*        _SETTINGS                      |
     */
    addSettingsItem("General",SETTINGS_GENERAL);
    addSettingsItem("Tooltip",tooltipGenerated);
+   addSettingsItem("Pages",SETTINGS_PAGES);
 
    //Clicking the menu nav under settings
    $("#settingsNav a").click(function(){
@@ -1822,12 +2118,13 @@ l*        _SETTINGS                      |
    $("#saveSettings").click(function(){
       //Place all nav item's save functions here
       saveGeneralSettings();
-      saveTooltip();
+      saveTooltipSettings();
+      savePageSettings();
       
       //Set the state of reloading the page
       hidePopup();
       showLoadingPopup();
-      window.location.href = window.location.href;
+      refresh();
    });
    
    /*
@@ -1869,30 +2166,9 @@ l*        _POPUP_PANEL                   |
 /*======================================*\
 l*        _REMOVING_THE_TIMER            |
 \*======================================*/
-  
-   if(getCookieValue('DISABLE_TIMER') == 1){    
-      if(ISFIREFOX){
-         unsafeWindow.setupTimeout = function(){return false;};
-         unsafeWindow.displayTimeoutMsg = function(){return false;};
-         unsafeWindow.displayTimeoutWarningMsg = function(){return false;};
-      }else{
-         injectFunction('displayTimeoutMsg(){return false;}');
-         injectFunction('displayTimeoutWarningMsg(){return false;}');
-         runJS("clearInterval(timeoutID)");
-         runJS("clearInterval(timeoutWarningID)");
-      }
-      if(getCookieValue('AUTO_REFRESH') <= 0  || getCookieValue('AUTO_REFRESH') > 19){
-         //2nd setTimeout Fixes Chrome refresh after add shortlist from search
-         setTimeout(function(){
-            setTimeout(function(){
-               window.location = window.location;
-            }, 19 * 1000 * 60);
-         },1);
-      }else{
-         document.addEventListener('click',resetGlobalTimer,true);
-         resetGlobalTimer();
-      }
-   } 
+ 
+   //Remove the timer
+   removeTimer();
              
 /*======================================*\
 l*        _CSS_READY_LOAD                |

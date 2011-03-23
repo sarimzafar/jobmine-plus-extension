@@ -35,6 +35,45 @@ l*        _FUNCTIONS                     |
 /*
  *    _UTILITIES_
  */
+ 
+   //Only runs this once; cleans up the html of common pages
+   function init()
+   {
+      //Get page type and add a class to body
+      $("body").addClass(PAGE_TYPE);
+
+      // Insert navigation header at the top and overlays when not at these pages
+      if( PAGE_TYPE != "jobmine_|_university_of_waterloo" && PAGE_TYPE != "job_details"){ insertCustomHeader();}
+
+      // Add a CSS stylesheets
+      var style = document.createElement( "style" ); 
+      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style2.css';") );
+      
+      //Update CSS Stylesheet
+      if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
+      document.getElementsByTagName( "body" ).item(0).appendChild( style );	
+
+      //Adds current version to the body class
+      $('body').addClass("v"+CURRENT_VERSION);
+
+      //Removing useless parts
+      $("#WAIT_main0").remove();
+      $("#WAIT_main").remove();
+
+      //Makes all View buttons to the next tab
+      $("a.PSHYPERLINK:contains('View')").attr("target","_blank");
+
+      //SPECIFIC PAGE LAYOUTS
+      $(".PSLEVEL1GRID.tablesorter").attr("cellpadding",0);
+      $('.PSLEVEL1GRID').parent().addClass("tablepanel");
+      $("table a.PTBREADCRUMB").parents("table").remove();
+
+      //Student data Clean up
+      if(PAGE_TYPE != "student_data" ){$(".PSACTIVETAB").parents().eq(2).remove();}
+
+      //For iframes! :D
+      $("body").append("<script language='javascript'>function runIframeFunction(name,_function){window.frames[name].eval(_function);}</script>");
+   }
    
    // Set syntax highlighting colours for various text in tables
    function updateTableHighlighting()
@@ -61,9 +100,9 @@ l*        _FUNCTIONS                     |
                TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
                TABLES_OBJ.find("tr:contains('Employed')"          ).find("td").css("background-color",VERYGOOD );
                TABLES_OBJ.find("tr:contains('Not Selected')"      ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",BAD      );
                TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
                TABLES_OBJ.find("tr:contains('Applied')"           ).find("td").css("background-color",NORMAL   );
+               TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",BAD      );
                TABLES_OBJ.find("tr:contains('Approved')"          ).find("td").css("background-color",BAD      );
                TABLES_OBJ.find("tr:contains('Cancelled')"         ).find("td").css("background-color",BAD      );
                break;
@@ -181,7 +220,17 @@ l*        _FUNCTIONS                     |
    function injectFunction(_function,bruteforce){
       $('body').append('<script language="javascript">function '+_function+'</script>');
    }
+   
+   //Returns true or false if the current page's url contains specific text
+   function doesUrlContain(string)
+   {
+      return window.location.href.indexOf(string) != -1;
+   }
 
+   function refresh()
+   {
+      window.location.href = window.location.href;
+   }
    
 /*
  *    _LOADING_POPUP_
@@ -190,7 +239,7 @@ l*        _FUNCTIONS                     |
    //Shows the loading Popup
    function showLoadingPopup(){
       if($("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
-   $("#popupWhiteContainer").css("display","block");	
+      $("#popupWhiteContainer").css("display","block");	
       $("body").css("overflow","hidden");
       $("#hintmsg").css("display","none");
       $("#popupContainer").css("visibility","hidden");
@@ -198,6 +247,7 @@ l*        _FUNCTIONS                     |
    
    //Hides the Loading Popup if it was shown before
    function hideLoadingPopup(){
+      $("#popupContainer").css("visibility", "visible");
       $("#whiteOverlay").css("top","125px");
       $("#popupWhiteContainer").css("display","none");
       $("body").css("overflow","auto");
@@ -237,8 +287,35 @@ l*        _FUNCTIONS                     |
          clearTimeout(GLOBAL_TIMER);        	
       }
       GLOBAL_TIMER  = setTimeout(function(){
-         window.location.href = window.location.href;
+         refresh();
       },getCookieValue('AUTO_REFRESH')*60*1000); 
+   }
+   
+   function removeTimer()
+   {
+      if(getCookieValue('DISABLE_TIMER') == 1){    
+         if(ISFIREFOX){
+            unsafeWindow.setupTimeout = function(){return false;};
+            unsafeWindow.displayTimeoutMsg = function(){return false;};
+            unsafeWindow.displayTimeoutWarningMsg = function(){return false;};
+         }else{
+            injectFunction('displayTimeoutMsg(){return false;}');
+            injectFunction('displayTimeoutWarningMsg(){return false;}');
+            runJS("clearInterval(timeoutID)");
+            runJS("clearInterval(timeoutWarningID)");
+         }
+         if(getCookieValue('AUTO_REFRESH') <= 0  || getCookieValue('AUTO_REFRESH') > 19){
+            //2nd setTimeout Fixes Chrome refresh after add shortlist from search
+            setTimeout(function(){
+               setTimeout(function(){
+                  refresh();
+               }, 19 * 1000 * 60);
+            },1);
+         }else{
+            document.addEventListener('click',resetGlobalTimer,true);
+            resetGlobalTimer();
+         }
+      } 
    }
    
 /* 
@@ -319,10 +396,21 @@ l*        _FUNCTIONS                     |
       writeCookie('AUTO_REFRESH',   autorefresh    );
    }
    
+   //Saves settings for the pages nav
+   function savePageSettings()
+   {
+      var disable_grabId   = $("#page_app_idGrabbingChkbx") .attr("checked");
+      var show_oldDtlPage  = $("#detail_dtl_showOldPage")   .attr("checked");
+      
+      //Write Cookies
+      writeCookie('DISABLE_ID_GRAB' , disable_grabId ? 1 : 0);
+      writeCookie('SHOW_OLD_DETAILS', show_oldDtlPage ? 1 : 0);
+   }
+   
 /*
  *    _HINTS_TOOLTIP_
  */
-   function saveTooltip()
+   function saveTooltipSettings()
    {               
      var cookieQuery = $("#enableTooltip")[0].checked ? 1 : 0;  
       if(cookieQuery != 0)               //is tooltips enabled?           
@@ -516,7 +604,9 @@ l*        _FUNCTIONS                     |
           *    Settings Panel
           */
          if(panelName == "Settings")  
-         {  //Get general settings cookies
+         {  /*
+             *    Get general settings cookies
+             */
             $('#popupTitle')        .html("General Settings");
             $("#popupSelect")       .attr("value",    getCookieValue('DEFAULT_PAGE'));
             $("#popupText")         .attr("value",    (getCookieValue('AUTO_REFRESH')  != -1? getCookieValue('AUTO_REFRESH') : 0));
@@ -524,11 +614,13 @@ l*        _FUNCTIONS                     |
             $('#updateCheckbox')    .attr("checked",  (getCookieValue('HIDE_UPDATES')  ==  1 ? true : false));  
             $('#loadCheckbox')      .attr("checked",  (getCookieValue('LOAD_SCREEN')   ==  1 ? true : false));  
 
+            
+            /*
+             *    Get tooltip settings cookies
+             */
             //Load all the tooltip settings from cookies
             var cookieVal  = getCookieValue("TOOLTIP");
             var query      = cookieVal == -1 ? new Array(0) : cookieVal.split("|");
-            
-            //Tooltips are enabled from cookies
             if(query.shift() != 0)        
             {
                $("#enableTooltip").attr("checked","checked").parent().next().removeClass("disabled").find("input").removeAttr("disabled");
@@ -559,8 +651,16 @@ l*        _FUNCTIONS                     |
             $("#enableTooltip").removeAttr("checked");
                toggleEnableTooltip(document.getElementById("enableTooltip"));
             }
-
-            //Set Initial Toggles
+            
+            /*
+             *    Get pages settings cookies
+             */
+            $("#page_app_idGrabbingChkbx").attr("checked",  (getCookieValue('DISABLE_ID_GRAB')  ==  1 ? true : false)); 
+            $("#detail_dtl_showOldPage")  .attr("checked",  (getCookieValue('SHOW_OLD_DETAILS') ==  1 ? true : false)); 
+          
+            /*
+             *    Set toggles for settings panel
+             */
             toggleRemoveTimer(document.getElementById("removeTimerChkbx"));
             
             //Make sure you make all other setting panels are invisible and only set the general settings on
@@ -569,4 +669,3 @@ l*        _FUNCTIONS                     |
          }
       }
    }
-

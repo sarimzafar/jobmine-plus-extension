@@ -97,14 +97,6 @@ body:not(.job_search_component, .student_data) form table{
      text-align:center;
 }
 
-/*
- *   Testing     
- */
-body.job_search_component form table table td.tablepanel table.PSLEVEL1GRID.results tr td div a.PSHYPERLINK:visited 
-{
-     color: red !important;
-     /*color: #0000FE;*/
-}
 /*Black Overlay*/
 #overlay{
      position:fixed;

@@ -5,6 +5,8 @@
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?cmd=*
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/ES/*
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE=*
+// @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=*
+// @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Market=GBL&Page=UW_CO_STU_JOBDTLS&Action=U&target=Transfer*
 // @include        https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?ICType=*
 // @exclude        *IScript_ShowStuDocument*
 // @exclude        *FieldFormula.IScript_ShowAllDocuments*
@@ -12,7 +14,6 @@
 // @exclude        *GetMenuHeader*
 // @exclude	       *WEBLIB_UW_DOCS.UW_CO_DOC_TEXT*
 // ==/UserScript==
-
 
 /*   Table of contents
  *   -----------------
@@ -32,6 +33,7 @@
  *    _JQUERY_FUNCTION
  *    _REDIRECTION
  *    _PAGE_CLEAN_UP
+ *    _JOB_DESCRIPTION
  *    _JOB_SEARCH_PAGE
  *    _PROFILE_PAGE
  *    _DOCUMENTS_PAGE
@@ -46,11 +48,19 @@
  *    _HIGHLIGHTING
  
  
+ ERRORS - What to fix
+ --------
+ //General
+ - google searching, need to encodeURL and then replace space
+ - remove all trailing non-word characters for job details for links
+ 
+ //Chrome
+ - Applications do not crawl or work under chrome
+ - cannot run any iframe under chrome, please fix
+ - does not see visited under job search
  
  
- *    _ERRORS  
  */
-
 
 //Check to see if we can use storage
 if(localStorage == null) {
@@ -91,3 +101,5 @@ l*        _CONSTANTS                     |
  *    Settings Layout
  */   
    var SETTINGS_GENERAL = '<table cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><!-- <option value="wr">Work Report Evaluations</option> --></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" class="textField" id="popupText" type="text"></td></tr></tbody></table>';
+   
+   var SETTINGS_PAGES   = "<span class='heading'>Applications Page</span><table class='cell' cellpadding='0' cellspacing='0'><tr><td class='label' v-align='top'>Disable ID Grabbing</td><td class='field' v-align='top'><input id='page_app_idGrabbingChkbx' type='checkbox'></td></tr></table><br/><span class='heading'>Job Details Page</span><table class='cell' cellpadding='0' cellspacing='0'><tr><td class='label' v-align='top'>Show Old Job Details Page</td><td class='field' v-align='top'><input id='detail_dtl_showOldPage' type='checkbox'></td></tr></table>";
