@@ -238,6 +238,7 @@ body:not(.job_search_component, .student_data) form table{
 #hintmsg{
      visibility:visible !important;
      font-family:Verdana, Arial;
+     z-index: 10;
      color:black;
      font-size:11px;
      background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hintbox.png");
