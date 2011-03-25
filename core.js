@@ -1,3 +1,4 @@
+
 /*======================================*\
 l*        _PAGE_CLEAN_UP                 |
 \*======================================*/
@@ -79,26 +80,29 @@ l*        _JOB_DESCRIPTION               |
          jobDescriptionData.description = jobDescriptionData.description.replace(/((http:|https:|www.)[^\s]+)/gi, function(item){
             item = item.replace(/&nbsp;/, "");        //usually this appears at the end of the link
             
-            //Removes random punctuation at the end of the link
+            //Removes random all punctuation at the end of the link
             var endPunctuation = "";
-            if(endPunctuation = item[item.length-1].match(/\W/)){ item = item.slice(0, -1);  }
+            item = item.replace(/([^\/\w])+$/, function(characters){
+               endPunctuation = characters;
+               return "";
+            });
             
             item = item.toUpperCase().indexOf('HTTP') == 0 ? item : "http://"+item;         
             return "<a href='"+item+"' target='_blank'>"+item+"</a>" + (endPunctuation ? endPunctuation : "");
          });
          
          //Append CSS and some HTML to display the new job description page
-         var jobDescCSS = "<style>.printshow{display:none;}iframe{overflow-x:hidden;overflow-y:scroll;}.jobmineButton{font-family: 'Arial','sans-serif';font-size: 9pt;font-weight: normal;font-Style: normal;font-variant: normal;color: rgb(0,0,0);background-color: rgb(255,255,153);}#jobDetails.page{width:760px;height:950px;min-height:950px;margin: 50px auto;-moz-box-shadow: 0 0 1em black;-webkit-box-shadow: 0 0 1em black;background-color: #f6f6f6;padding: 35px 20px;font-family: Arial, Verdana, san-serif;font-size:12px;}html, body{margin:0;padding:0;}input.button{float:right;}.important{color:red;}.jobDescriptionArea td, #comments td{font-size:14px;}.jobDescriptionArea .left{width:100%;}.jobDescriptionArea .right td{white-space:nowrap;}.jobDescriptionArea a.location{color: #3333cc;text-decoration: none;}.jobDescriptionArea .category{font-weight:bold;padding-right:10px;white-space:nowrap;width:10px;}#comments{margin-top:10px;display:"+(jobDescriptionData.comments == " " ? "none" : "block")+";}#comments .category{font-weight:bold;padding-right:30px;}hr{color:#6c6cbd;margin:10px 0;}#content .body{margin: 15px 0px;}.title{font-size:19px;color: #4b4bb4 !important;font-weight: bold;}#jobDetails .title a:visited{font-size:19px;color: #4b4bb4 !important;}#jobDetails .title a{font-weight: normal;margin-left:10px;}#content{height:100%;}#footer{max-height:110px;}/*Popup Close*/#popupContainer input.button{position:absolute;top:15px;right:10px;}/*Toolbar*/#toolbar{background-color: rgba(0,0,0,0.6);color: white;width:100%;position:fixed;text-align:center;top:0;left:0;padding: 5px 20px;font-family:Arial;font-size:12px;}#toolbar a{color: white;}#toolbar a:hover{color: #CCC;}/*Printing*/@media print{a{color: black !important;text-decoration: none;}hr{color:black;}.printHide{display:none !important;}#jobDetails .title{color: black !important;}body, #jobDetails.page{width: 100%;padding:0px;margin:0px;-moz-box-shadow: none;-webkit-box-shadow: none;background-color:white;}.printshow{display:inline !important;}}</style>"
-         var popupCSS   = "<style>#popupContainer{position:fixed;z-index:200;top:0px;left: 0px;height:100%;width:100%;}#overlay{opacity:0.6;height:100%;width:100%;filter: alpha(opacity = 70);filter:progid:DXImageTransform.Microsoft.Alpha(opacity=70);background-color:black;}#popupWrapper{left:0px;top:0px;position:absolute;width:100%;}#popupContent{position:relative;margin:0 auto;min-height:400px;height:400px;top:150px;width:510px;padding:10px;background-color:white;-moz-box-shadow: 0 0 1em black;-webkit-box-shadow: 0 0 1em black;background:no-repeat url('https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/loading_small.gif') white 50%;}#popupContent .title{font-weight:bold;font-size:18px;display:block; margin-top:5px;}</style>"
+         var jobDescCSS = "<style>.printshow{display:none;}iframe{overflow-x:hidden;overflow-y:scroll;}.jobmineButton{font-family: 'Arial','sans-serif';font-size: 9pt;font-weight: normal;font-Style: normal;font-variant: normal;color: rgb(0,0,0);background-color: rgb(255,255,153);}#jobDetails.page{width:760px;height:950px;min-height:950px;margin: 50px auto;-moz-box-shadow: 0 0 1em black;-webkit-box-shadow: 0 0 1em black;background-color: #f6f6f6;padding: 35px 20px;font-family: Arial, Verdana, san-serif;font-size:12px;}html, body{margin:0;padding:0;}input.button{float:right;}.important{color:red;}.jobDescriptionArea td, #comments td{font-size:14px;}.jobDescriptionArea .left{width:100%;}.jobDescriptionArea .right td{white-space:nowrap;}.jobDescriptionArea a.location{color: #3333cc;text-decoration: none;}.jobDescriptionArea .category{font-weight:bold;padding-right:10px;white-space:nowrap;width:10px;}#comments{margin-top:10px;display:"+(jobDescriptionData.comments == " " ? "none" : "block")+";}#comments .category{font-weight:bold;padding-right:30px;}hr{color:#6c6cbd;margin:10px 0;}#content .body{margin: 15px 0px;}.title{font-size:19px;color: #4b4bb4 !important;font-weight: bold;}#jobDetails .title a:visited{font-size:19px;color: #4b4bb4 !important;}#jobDetails .title a{font-weight: normal;margin-left:10px;}#content{height:100%;}#footer{max-height:110px;}/*Popup Close*/#popupContainer input.button{position:absolute;top:15px;right:10px;}/*Toolbar*/#toolbar{background-color: rgba(0,0,0,0.6);color: white;width:100%;position:fixed;text-align:center;top:0;left:0;padding: 5px 20px;font-family:Arial;font-size:12px;}#toolbar a{color: white;}#toolbar a:hover{color: #CCC;}/*Printing*/@media print{a{color: black !important;text-decoration: none;}hr{color:black;}.printHide{display:none !important;}#jobDetails .title{color: black !important;}body, #jobDetails.page{width: 100%;padding:0px;margin:0px;-moz-box-shadow: none;-webkit-box-shadow: none;background-color:white;}.printshow{display:inline !important;}}</style>";
+         var popupCSS   = "<style>#popupContainer{position:fixed;z-index:200;top:0px;left: 0px;height:100%;width:100%;}#overlay{opacity:0.6;height:100%;width:100%;filter: alpha(opacity = 70);filter:progid:DXImageTransform.Microsoft.Alpha(opacity=70);background-color:black;}#popupWrapper{left:0px;top:0px;position:absolute;width:100%;}#popupContent{position:relative;margin:0 auto;min-height:400px;height:400px;top:150px;width:510px;padding:10px;background-color:white;-moz-box-shadow: 0 0 1em black;-webkit-box-shadow: 0 0 1em black;background:no-repeat url('https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/loading_small.gif') white 50%;}#popupContent .title{font-weight:bold;font-size:18px;display:block; margin-top:5px;}</style>";
          
          var toolbar = "<div id='toolbar' class='printHide'>Don't like this look for your job descriptions? <a id='showOldDetailsBtn' href='#'>Click here to change it back</a></div>";
          
          var popup = "<div id='popupContainer' class='printHide' style='display:none;'><link type='text/css' rel='stylesheet' href='popup.css'/><div id='overlay'><!-- --></div><div id='popupWrapper'><div id='popupContent'><input type='button' class='button jobmineButton' value='Close' onclick='document.body.style.marginRight = \"0\";document.getElementById(\"popupContainer\").style.display = \"none\";document.body.style.overflow = \"auto\"'/><span class='title'>Employer Profile</span><iframe id='hiddenIframe' style='margin-top:10px;' name='hiddenIframe' src='test.html' frameborder='0' width='100%' height='360px'></iframe></div></div></div>";
          
-         var newBody =  "<table class='page' id='jobDetails' cellspacing='0' cellpadding='0'><tr><td valign='top' id='header'><span class='title'>Employer: <a class='printHide' target='_blank' title='Google search "+jobDescriptionData.employerName+"' href='http://www.google.ca/#hl=en&q="+jobDescriptionData.employerName.replace(/\s/g,"+")+"'>"+(jobDescriptionData.employerName.length > 48 ? jobDescriptionData.employerName.substring(0,48)+"..." : jobDescriptionData.employerName)+"</a><a class='printshow' href='#'>"+jobDescriptionData.employerName+"</a></span>"+
+         var newBody =  "<table class='page' id='jobDetails' cellspacing='0' cellpadding='0'><tr><td valign='top' id='header'><span class='title'>Employer: <a class='printHide' target='_blank' title='Google search "+jobDescriptionData.employerName+"' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"'>"+(jobDescriptionData.employerName.length > 48 ? jobDescriptionData.employerName.substring(0,48)+"..." : jobDescriptionData.employerName)+"</a><a class='printshow' href='#'>"+jobDescriptionData.employerName+"</a></span>"+
                         "<input class='button printHide' onclick='window.print();' type='button' value='Print Job Description'/><br/><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>"+
                         "<tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Job Title:</td><td valign='top'>"+jobDescriptionData.position+"</td></tr><tr>"+
-                        "<td valign='top' class='category'>Work Location:</td><td valign='top'><a target='_blank' href='http://maps.google.ca/maps?hl=en&q="+jobDescriptionData.employerName.replace(/\s/g,"+")+"+"+jobDescriptionData.location.replace(/\s/g,"+")+"' title='Search location' class='location'>"+jobDescriptionData.location+"</a></td></tr><tr>"+
+                        "<td valign='top' class='category'>Work Location:</td><td valign='top'><a target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"+"+encodeURIComponent(jobDescriptionData.location)+"' title='Search location' class='location'>"+jobDescriptionData.location+"</a></td></tr><tr>"+
                         "<td valign='top' class='category'>Available Openings:</td><td valign='top'>"+jobDescriptionData.openings+"</td></tr></table></td><td valign='top' class='right'>"+
                         "<table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Levels:</td><td valign='top'>"+jobDescriptionData.jobLevels+"</td></tr><tr>"+
                         "<td valign='top' class='category'>Grades:</td><td valign='top'>"+jobDescriptionData.grades+"</td></tr></table>"+
@@ -195,7 +199,7 @@ l*        _JOB_SEARCH_PAGE               |
       
       var tableBody = null;
       
-      //If This page is not the loop up page
+      //If This page is not the look up page
       if(!$("form > span").html() || $("form > span").html().search(/Lookup/i) == -1)
          {
          $('form > table > tbody > tr:first-child > td:first-child').html("<div style='margin-bottom:30px;' class='PAPAGETITLE'><span style='position:absolute;margin-left:10px;'>Job Search Criteria</span></div>");
@@ -221,106 +225,205 @@ l*        _JOB_SEARCH_PAGE               |
          $('form > table > tbody > tr:last-child').remove();
          $('table.PSGROUPBOX').parent().prev().attr("colspan",2).parent().prev().children(":first-child").attr("height","30");
          $('form:last').append("<table id='searchTable' cellspacing='0' cellpadding='0'><tr><td>"+appsRemaining+"</td></tr>"+searchTable+"</table>").css("margin-bottom","30px");              //full width table
+         
+         /*
+          *    Object that manages the visited list
+          *       This object manages the visited job descriptions using localStorage. 
+          */        
+         var JOB_VISITED_MANAGER = {
+         //Variables
+            KEYPREFIX : "visited_",
+            termInput : $("#UW_CO_JOBSRCH_UW_CO_WT_SESSION").attr("value").trim(),
+            
+         //Checks to see if we need to remove all of the jobs first from viewed history
+            validateDate :    function(){
+               var currentTerm = getCurrentTerm();
+               
+               //Write the last time we accessed it and today's date for comparison
+               var now = new Date();
+               var today = now.getFullYear()+"|"+now.getMonth()+"|"+now.getUTCDate();
+               var lastAccessDate = (localStorage.getItem("searchPageLastAccess") ? localStorage.getItem("searchPageLastAccess") : today).split("|");
+               localStorage.setItem("searchPageLastAccess", today);
+               
+               today = today.split("|");
+               var differenceInMonths = (Date.UTC(today[0], today[1], today[2]) - Date.UTC(lastAccessDate[0], lastAccessDate[1], lastAccessDate[2]) )/1000/60/60/24/30;
+               
+               //It has been about 2 months since you accessed job search, clear everything
+               if(differenceInMonths >= 2)
+               {  
+                  alert("Clear all");
+                  this.clear();
+               }
+               else if(parseInt(this.termInput) > parseInt(currentTerm)    //If the guessed term is smaller than the term we are search through
+                     && parseInt(today[1]) >= parseInt(currentTerm[3] )     //AND if we have passed a certain date with the old term, eg. if winter term, the last date is may
+               ){
+                  alert("Clear old");
+                  this.clearOldTerms();
+               }
+            },
+         //Sets the Job ID in storage, returns true if it works and false if it failed
+            addID:            function(id){   
+               //If it doesnt exist, put it into the array as well right our new list of keys
+               if( !this.IDExists(id) ){
+                  //Try to store the item
+                  try{
+                     localStorage.setItem(this.KEYPREFIX + id, this.termInput);
+                  }catch(e){
+                     alert("Failed to write to storage:\n"+e); return false;
+                  }
+               }
+               return true;
+            },
+         //Returns if the key exists
+            IDExists:         function(id){    
+               return this.readID(id) != false;
+            },
+         //Read an ID or return false if not found
+            readID:           function(id){          
+               var value = localStorage.getItem(this.KEYPREFIX + id);
+               return value != null && value != "" ? value : false;
+            }, 
+         //Deletes all of the old terms that have been expired
+            clearOldTerms:    function()
+            {
+               if(this.termInput != "" && this.termInput.length == 4)         //Redundency
+               {
+                  //Cycle through all keys in storage
+                  for(var key in localStorage)
+                  {
+                     //if the key is associated with viewed and is not the specified term, remove it!
+                     if(key.substring(0,8) == this.KEYPREFIX && localStorage.getItem(key) != this.termInput)
+                     {
+                        localStorage.removeItem(key);
+                     }
+                  }
+               }else{
+                  alert("Something broke.");
+               }
+            },
+         //Clear all keys that have anything to do with job visits
+            clear:            function()
+            {
+               //Cycle through all keys in storage
+               for(var key in localStorage)
+               {
+                  //if the key is associated with reading, then remove all
+                  if(key.substring(0,8) == this.KEYPREFIX)
+                  {
+                     localStorage.removeItem(key);
+                  }
+               }
+            }
+         };
+         JOB_VISITED_MANAGER.validateDate();
 
          //Playing with the table; details below
          tableBody = $("#searchTable tr tr:eq(1) td.tablepanel table.PSLEVEL1GRID tr");
          if(tableBody.length > 2)
          {
             tableBody.each(function(row){ var obj = $(this).children();          
-            //HEADER
-            if(row == 0){
-               //Tells the table that the results are up
-               $(this).parent().parent().addClass("results");
+               //HEADER
+               if(row == 0){
+                  //Tells the table that the results are up
+                  $(this).parent().parent().addClass("results");
 
-               //Adds new columns (status and hiring)
-               obj.eq(0).before("<th class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Status</th>");
-               obj.eq(8).after("<th title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Hiring Chances*</th>");
+                  //Adds new columns (status and hiring)
+                  obj.eq(0).before("<th class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Status</th>");
+                  obj.eq(8).after("<th title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Hiring Chances*</th>");
                
-            //Cells
-            }else{
-            /*
-            *     ADD THE STATUS COLUMN
-            */
-               var jobStatus = obj.eq(0);
-               jobStatus.before("<td class='PSLEVEL1GRIDODDROW' align='left'>"+(obj.eq(6).find("div:contains('Already Applied')").length == 0 ? "New" : "Applied")+"</td>");
+               //Cells
+               }else{
+               /*
+                *     ADD THE STATUS COLUMN
+                */
+                  var jobStatusCol = obj.eq(0);
+                  var jobID = obj.eq(0).plainText();
+                  
+                  //Find what the status of the job is
+                  var status;
+                  if(obj.eq(7).find("div").plainText().indexOf('Already Applied') != -1){
+                     status = "Applied";
+                  }else if(obj.eq(7).find("div").plainText().indexOf('On Short List') != -1){
+                     status = "On Shortlist";
+                  }else if(JOB_VISITED_MANAGER.IDExists(jobID)){
+                     status = "Viewed/Read";
+                  }else{
+                     status = "New";
+                  }
+                  jobStatusCol.before("<td class='PSLEVEL1GRIDODDROW' align='left'>"+status+"</td>");
 
-            /*
-            *     ADD THE HIRING CHANCES     
-            */                                      
-               var numApps = obj.eq(8);
-               /*    Reading Purposes
-                     var openings = parseInt(obj.eq(5).html());
-                     var applications = parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1));
-               */
-               numApps.after("<td title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+Math.round((parseInt(obj.eq(5).html())/parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1)))*10000)/100+"%</td>");
+               /*
+                *     ADD THE HIRING CHANCES     
+                */                                      
+                  var numApps = obj.eq(8);
+                  /*    Reading Purposes
+                        var openings = parseInt(obj.eq(5).html());
+                        var applications = parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1));
+                  */
+                  numApps.after("<td title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+Math.round((parseInt(obj.eq(5).html())/parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1)))*10000)/100+"%</td>");
 
-               if(obj.eq(7).children().html().trim() == "&nbsp;"){
-                  obj.eq(7).children().html("Not Able to Shortlist").attr("title","Jobmine has a thing where if you delete a job from shortlist, you cannot shortlist the job again. Sorry.");
-               }
+                  if(obj.eq(7).children().html().trim() == "&nbsp;"){
+                     obj.eq(7).children().html("Not Able to Shortlist").attr("title","Jobmine has a thing where if you delete a job from shortlist, you cannot shortlist the job again. Sorry.");
+                  }
 
-            /*
-            *   ADD THE GOOGLE MAPS AND SEARCHES
-            */ 
-               var company = obj.eq(2).html().trim();
-               var location = obj.eq(4).html().trim();
+               /*
+                *   ADD THE GOOGLE MAPS AND SEARCHES
+                */ 
+                  var company = obj.eq(2).html().trim();
+                  var location = obj.eq(4).html().trim();
 
-               //This is the Google search for the company
-               obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
-               //This is for google map the location
-               obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+company.replace(/\s/g,"+")+"+"+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
+                  //This is the Google search for the company
+                  obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(company)+"'/>");            
+                  //This is for google map the location
+                  obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(company)+"+"+encodeURIComponent(location)+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
 
-            /*
-            *   CHANGE JOB DESCRIPTIONS
-            *     Jobs appear as a tab now and it doesnt need to be refreshed                                  
-            */
-               obj.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+obj.eq(0).html().trim()).attr("target","_blank");
+               /*
+                *   CHANGE JOB DESCRIPTIONS
+                *     Jobs appear as a tab now and it doesnt need to be refreshed                                  
+                */
+                  function hasViewedDescription()
+                  {
+                     var thisObj = $(this);
+                     
+                     //Remove click
+                     thisObj.unbind();
+                     //Add the job id
+                     JOB_VISITED_MANAGER.addID(thisObj.attr("jobID"));
+                     
+                     //Mark down that we have seen this job
+                     thisObj[0].parentNode.parentNode.parentNode.firstChild.nextSibling.firstChild.nodeValue = "Viewed/Read";
+                     
+                     //Update the state of the row
+                     updateTableHighlighting( $("#toggleHighlight").attr("state") == "on" );
+                     TABLES_OBJ.trigger("update");
+                  }
+                  
+                  var aLink = obj.eq(1).find("a");
+                  aLink.attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank").attr("jobID",jobID);
+                  
+                  //New job means we have not seen the job yet
+                  if(status == "New"){
+                     aLink.bind("click", hasViewedDescription);
+                  }
                }         
             });
          }
-
-         //Set the search visited when it ready
-         function setReadyVisited()
-         {
-            var totalRows = TABLES_OBJ.find("tr");
-            if(totalRows.length > 2)           //Make sure the table isnt empty
+         
+         //Clears the viewing history
+         function clearingHistory(){
+            if(confirm("Are you sure you would like to clear you viewed history? This page will refresh after it clears the history."))
             {
-               //Each row
-               totalRows.each(function(row){
-                  if(row != 0){
-                  /*
-                   *        VISITED LINK
-                   */
-                     var jobDescLink = $(this).children().eq(2).find("a");
-
-                     if(window.getComputedStyle(jobDescLink[0], null).getPropertyValue("color") == "rgb(0, 0, 254)")
-                     {
-                        //Change the color of the text and the 
-                        jobDescLink.css("color","#0000FF");
-
-                        //If you have not applied for the job, change the status
-                        if(jobDescLink.parent().parent().parent().find("td:first-child").html() != "Applied"){
-                           jobDescLink.parent().parent().parent().find("td:first-child").html("Viewed");                                             
-                        }
-                     }
-                     /*
-                      *        NEW/UNVISITED LINK
-                      */
-                     else{
-                        //When someone clicks a "new" job link, it will register that item "visited"
-                        jobDescLink.click(function(){
-                           $(this).css("color","#0000FF").parent().parent().parent().find("td:first-child").html("Viewed");
-                           TABLES_OBJ.trigger("update");  
-                           updateTableHighlighting();                                           
-                        });
-                     }
-                     TABLES_OBJ.trigger("update");
-                  }
-               });
+               loadPopupMsg("Clearing the viewed history.<br/><span style='color:red;font-size:20px;'>This cannot be cancelled, please do not try.<br/>Really I mean it.</span>");
+               showLoadingPopup();
+               JOB_VISITED_MANAGER.clear();
+               refresh();
             }
-            updateTableHighlighting();
          }
+
          var TABLES_OBJ = applyTableSorting("table table table.PSLEVEL1GRID",PAGE_TYPE);
          $("body > form > table").css("width","auto");
+         $("form").eq(1).append("<input id='clearViewedHistoryBtn' popup='false' class='PSPUSHBUTTON' type='button' title='What this does is clears the history of your searches that you have viewed/read already.' oncick='return false;' value='Clear Viewed History'/><br/>");
+         $("#clearViewedHistoryBtn").click(clearingHistory);
       }else{
          $("form").css("margin-bottom","20px");
       }
@@ -414,8 +517,8 @@ l*        _JOB_SHORT_LIST_PAGE           |
             //Add company and location href
             var company = child.eq(2).html().trim();
             var location = child.eq(4).html().trim();                         
-            child.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
-            child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+company.replace(/\s/g,"+")+"'/>"); 
+            child.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(company)+"'/>");            
+            child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(location)+"+"+encodeURIComponent(company)+"'/>"); 
 
             //Change the hyperlink for the job descriptions
             child.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+child.eq(0).html().trim()).attr("target","_blank");
@@ -549,290 +652,22 @@ l*        _APPLICATIONS_PAGE             |
 \*======================================*/
    else if(PAGE_TYPE == "student_app_summary")
    {
-      /*
-       *    Initial Content Changes
-       */
-      var TABLES_OBJ = applyTableSorting("table table table.PSLEVEL1GRID" , PAGE_TYPE);
+      var TABLES_OBJ = applyTableSorting("table table table.PSLEVEL1GRID");
       TABLES_OBJ.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
       TABLES_OBJ.eq(0).find("td:contains('Ranking Completed')").html("Ranked or Offer").parent().attr("title","This means that the company you had an interview with has either ranked or offered you a job.");
-
-      /*
-       *    JOB ID STORAGE SYSTEM                          
-       */
-      //If not disabled, 1=disabled, -1,0=enabled
-      if(getCookieValue("DISABLE_ID_GRAB") != 1)
-      {
-         var company          = "";
-         var autoSeekingDelay = 5000;
-         var jobDescription   = "";
-         var clickedElement   = {};
-         var linkElements     = [];
-         var userWaitingTab   = false;
-         
-         //Object that manages the storage of keys and jobs ids
-         var appJobIdStorage = {
-            //Variables
-            idKeys              : [],                                                  //holds the arrays of all the stuff
-            KEYNAME_APP   : "KEYBASE_NAME_APPLICATION",           //constant that holds the name of the key to access all the job keys
+      
+      $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
+         //Do something on each row
+         var row = $(this).children();
+         if(row[0].nodeName.toUpperCase() != "TH")   
+         {          
+            //Add the Google Search for company names
+            row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(row.eq(2).plainText())+"'/>");  
             
-            //Inits the storage by getting all the id's
-            init:            function(){      
-               var keys = [];             
-               if( (keys = this.readID(this.KEYNAME_APP) ) !== false)
-               {    //Read the key if it exists
-                  this.idKeys = keys.split(" ");
-               }    
-            },
-            
-            //Returns if the key exists
-            IDExists:      function(key){    
-               return this.readID(key) != false;
-            },
-            
-            //Sets the Job ID in storage, returns true if it works and false if it failed
-            addID:         function(key, value){   
-               //If it doesnt exist, put it into the array as well right our new list of keys
-               if( !this.IDExists(key) ){
-                  this.idKeys.push(key);             
-                  this.updateKeys();
-               }
-               //Try to store the item
-               try{
-                  localStorage.setItem(key, value);
-               }catch(e){
-                  alert("Failed to write to storage:\n"+e); return false;
-               }
-               return true;
-            },
-
-            //Read an ID or return false if not found
-            readID:         function(key){          
-               var value = localStorage.getItem(key);
-               return value != null && value != "" ? value : false;
-            },
-            
-            //Removes a value, returns the value if it worked, if not then it returns false
-            removeID:     function(key){   
-               var value;
-               if(value = this.readID(key))
-               {
-                  localStorage.removeItem(key);
-                  return value;
-               }
-               return false;
-            },
-            
-            //Push keys and updates the database
-            updateKeys:      function(){
-               try{      //Try to update our list of keys
-                  localStorage.setItem(this.KEYNAME_APP, this.idKeys.join(" ") );          //Put a string of name delimited by a space
-               }catch(e){
-                  alert("Failed to write to storage:\n"+e);  return false;
-               }
-            }
-         };
-         appJobIdStorage.init();
-
-         //Once a user clicks a job without an ID, this runs the hyperlink in the iframe
-         function lookupJobID(evt, obj)
-         {
-            //Removing seeking functionality if someone has clicked
-            if(obj == null){ userWaitingTab = true; }
-
-            //Write these into the variables of the parent scope
-            clickedElement = obj ? obj : $(this);
-            company        = clickedElement.attr("company");
-            jobDescription = clickedElement.plainText();
-
-            var _company      = encodeURIComponent(company);
-            var _description  = encodeURIComponent(jobDescription);
-
-            //Set the source for the iframe
-            $("#hiddenIframe").attr("src",
-               "https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE="+_description+"&UW_CO_PARENT_NAME="+_company
-            );
+            //Add link to get tabbed job description
+            row.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+row.eq(0).plainText()).attr("target","_blank");
          }
-
-         //Auto seeks searches for the jobIDs without making a new tab 
-         function autoSeekJobID()
-         {    
-            if(allowSearchID === true && userWaitingTab === false && linkElements.length > 0)
-            {
-               //Seach the last ones first so there would be less loops
-               lookupJobID(null, linkElements[linkElements.length-1]);                         
-            }
-            //No more grabbing
-            else if(linkElements.length == 0)
-            {
-               setAllowIDGrabbing(false);
-            }
-         }
-         //Create a temporary Array to hold all our keys
-         var keyIndex   = [];
-         var brokenKeys = [];
-         for(var i=0; i<appJobIdStorage.idKeys.length; i++)
-         {
-            var item             = appJobIdStorage.idKeys[i];
-            var keyCompanyName   = item.substring(0, item.lastIndexOf("|")).replace(/_/g, " ");
-            var keyDescription   = item.substr(item.lastIndexOf("|")+1).replace(/_/g, " ");
-            var keyValue         = appJobIdStorage.readID(item);
-            
-            if(keyValue !== false){
-               //KeyIndex[company][0-3]: 0 - description, 1 - id number, 2 - item or the original string, 3 - was it ever used
-               keyIndex[item] = new Array(keyDescription, keyValue, false);
-            }else{
-               //Does not have the value, we can skip it.
-               brokenKeys.push(i);
-               alert("Something broke");
-            }
-         }
-         //Remove all the broken keys from the idKeys
-         for(var i=brokenKeys.length-1; i>=0; i--)
-         {  appJobIdStorage.idKeys.splice(i, 1);   }
-         brokenKeys = null;
-         
-         //Add company for google search
-         $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
-            //Do something on each row
-            var row = $(this).children();
-            if(row[0].nodeName.toUpperCase() != "TH")   
-            {
-               var companyName = row.eq(2).plainText();           
-               var linkCol1Obj = row.eq(1).find("a");
-
-               var itemName = companyName.replace(/\s/g,"_") +"|"+ linkCol1Obj.text().trim().replace(/\xA0|\s/g, "_");
-
-               if(  keyIndex[itemName] != null                                                                  //Do we have this job id in storage
-               //If the above conditions are true, then we have the link to this object
-               ){
-                  linkCol1Obj.addClass("idExists").css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+keyIndex[itemName][1]).attr("target","_blank");
-                  keyIndex[itemName][2] = true;        //mark down that we have used this
-               }
-               //Give the links an eventlistener to find the links
-               else
-               {
-                  linkCol1Obj.attr("href","javascript:void").attr("company", companyName).bind("click", lookupJobID);
-                  linkElements.push(linkCol1Obj);
-               }
-
-               //Add the Google Search for company names
-               row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+companyName.replace(/\s/g,"+")+"'/>");  
-            }
-         });
-
-         //Now we can remove the ids that are not being used
-         var newArr = [];
-         for(var itemName in keyIndex)
-         {
-            //check to see if this company was ever used
-            if(keyIndex[itemName][2])  {    
-               newArr.push(itemName);
-            }else{
-            //This company was never used, lets remove it
-               appJobIdStorage.removeID(itemName);
-            }
-         }
-         appJobIdStorage.idKeys = newArr;
-         appJobIdStorage.updateKeys();
-
-         //We are done with this array, we can remove it
-         keyIndex = null;
-
-         //Make an invisible iframe to handle links
-         $("body").append('<iframe width="100%" height="35%" src="" id="hiddenIframe" name="hiddenIframe" style="display: none;position:fixed;bottom:0px;"></iframe>');     
-
-         //Runs when the application form loads, this is where we can manipulate the id          
-         $("#hiddenIframe").load(function(){try{
-            var jobID = getCookieValue("APP_LAST_ID");
-
-            //If there is a location in the iframe and if the jobid is value
-            if( $(this).attr("src") != "" && jobID != -1)
-            {
-               //Add the id:  name|description = value
-               appJobIdStorage.addID( company.replace(/\s/g, "_")+"|"+jobDescription.replace(/\s/g, "_") , jobID);
-
-               //Find all the links that correspond to the company name, there should be max 2
-               var index            = 0;
-               var changeCounters   = 0;
-               while(linkElements[index] && changeCounters < 2)
-               {
-                  var eachLink = linkElements[index];
-                  if(eachLink.attr("company") == company && eachLink.plainText() == jobDescription){
-                     eachLink.addClass("idExists").unbind().css("color", "red").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
-                     linkElements.splice(index, 1);
-                     changeCounters++;
-                  }else{ index++; }
-               }
-               
-               //Users are waiting for their job description in a new tab
-               if(userWaitingTab === true){    
-                  window.open("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID=" + jobID);
-                  userWaitingTab = false;
-                  startDelayGrabbing();
-                  hideLoadingPopup();
-               }
-               //It was autograbbed
-               else{ autoSeekJobID(); }
-               
-               //Give that link we clicked the new link
-               writeCookie("APP_LAST_ID", "-1");            //we have read the id, we dont need it anymore
-            }
-            }catch(e){alert(e)}
-         });
-         
-         /*
-          *    Auto Grabbing UI and Code
-          */
-         
-         var allowSearchID = true;
-         //Place the button and the eventlistener
-         $("form table table").eq(0).parent().prepend("<div style='margin: 10px 0px;font-size:12px;'><span style='font-size: 13px; font-weight: bold;'>Grabbing Job IDs</span><button onclick='return false;' class='PSPUSHBUTTON' id='appIDGrabber' style='margin: 0pt 10px; width: 130px;'>Continue Grabbing</button><img src='"+SCRIPTSURL+"/images/loading_small.gif' id='appIDGrabberLoading' style='display: none; height: 15px;'><br/><br/>This allows the script to find urls for job descriptions below and store them in your browser so that when you access the job descriptions again, they will load quickly in a new tab.<br/>The first time you click a job description, it may be slow but after you have accessed it once, it will load quicker the next time. (This feature can be removed under Settings.)</div>");
-         $("#appIDGrabber").click(function(){   
-            setAllowIDGrabbing(!allowSearchID);
-         });
-         
-         //Set a timer to start to crawl all the jobs for IDs
-         function startDelayGrabbing(){
-            setTimeout(function(){                                        
-               autoSeekJobID();
-            }, autoSeekingDelay);
-         }
-
-         //Sets the grabbing state, initially it is on
-         function setAllowIDGrabbing(state)
-         {
-            allowSearchID = state;
-            
-            //No more grabbing needed
-            if(linkElements.length == 0){
-               $("#appIDGrabberLoading").css("display","none");
-               $("#appIDGrabber").css("display","none");
-            //Continue to grab
-            }else if(allowSearchID){
-               $("#appIDGrabberLoading").css("display","inline");
-               $("#appIDGrabber").html("Stop Grabbing");
-            startDelayGrabbing();
-            //Stop grabbing
-            }else{
-               $("#appIDGrabberLoading").css("display","none");
-               $("#appIDGrabber").html("Continue Grabbing");
-            }
-         }
-         setAllowIDGrabbing(true);
-      }
-      //ID grabbing is disabled
-      else
-      {
-         $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
-            //Do something on each row
-            var row = $(this).children();
-            if(row[0].nodeName.toUpperCase() != "TH")   
-            {          
-               //Add the Google Search for company names
-               row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+row.eq(2).plainText().replace(/\s/g,"+")+"'/>");  
-            }
-         });
-      }
+      });
    }
    /*======================================*\
    l*        _INTERVIEW_PAGE                |
@@ -898,7 +733,7 @@ l*        _APPLICATIONS_PAGE             |
 
             //Check to see all fields are valid before we add the calendar, else leave it blank
             if(month && time != "" && type && jobTitle){
-               row.eq(12).after('<td title="Click to add to Google Calendar!" class="PSLEVEL1GRIDODDROW" align="left"><a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+company+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a></td>');
+               row.eq(12).after('<td title="Click to add to Google Calendar!" class="PSLEVEL1GRIDODDROW" align="left"><a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+encodeURIComponent(company)+'&dates='+dateStr+'&details='+details+'&location='+encodeURIComponent(location)+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a></td>');
             }else{
                row.eq(12).after('<td class="PSLEVEL1GRIDODDROW" align="left">&nbsp;</td>');
             }
@@ -927,7 +762,7 @@ l*        _HINT_SYSTEM                    |
    HINT_ARRAY["com"]     = [];
    HINT_ARRAY["com"].    push({page:  "com",  percentage: 0.4, text : "Check out the settings tab to customize your experience. You can remove the timer and/or set the default page Jobmine Plus loads.", obj:$("#settings_nav")[0] });
    HINT_ARRAY["com"].    push({page:  "com",  percentage: 0.3, text : "Click the header a column to sort jobs and other information.", obj:TABLES_OBJ.find("th.PSLEVEL1GRIDCOLUMNHDR.header")[2]  });
-   HINT_ARRAY["com"].    push({page:  "com",  percentage: 0.4, text : "Send me an email if you have any questions, concerns or wanted features.", obj:$("#about_nav")[0] });
+   HINT_ARRAY["com"].    push({page:  "com",  percentage: 0.4, text : "Send me an email if you have any questions, concerns or wanted features. You can also check out the FAQ.", obj:$("#about_nav")[0] });
 
    //Applications hints
    HINT_ARRAY["apps"]    = [];
@@ -940,8 +775,9 @@ l*        _HINT_SYSTEM                    |
    //Job Search hints
    HINT_ARRAY["search"]  = [];
    HINT_ARRAY["search"]. push({page: "search",percentage: 0.4, text : "You can now select the location and Jobmine Plus will Google Maps it for you.", obj:TABLES_OBJ.find("a.mapsSearch")[0]  });
-   HINT_ARRAY["search"]. push({page: "search",percentage: 0.3, text : "This is hiring changes. Note: you need to be skilled to get the job, I am not responsible for incorrect statistics.", obj:TABLES_OBJ.find("th.PSLEVEL1GRIDCOLUMNHDR:contains('Hiring Chances*')")[0]  });
+   HINT_ARRAY["search"]. push({page: "search",percentage: 0.3, text : "This is hiring chances. Note: you need to be skilled to get the job, I am not responsible for incorrect statistics.", obj:TABLES_OBJ.find("th.PSLEVEL1GRIDCOLUMNHDR:contains('Hiring Chances*')")[0]  });
    HINT_ARRAY["search"]. push({page: "search",percentage: 1.0, text : "It seems the term is incorrect.<br/><br/>Jobmine Plus suggests that the term is <a popup='false' onclick='document.getElementById(\"UW_CO_JOBSRCH_UW_CO_WT_SESSION\").value = \"1115\"'>"+getCurrentTerm()+" (Click to change)</a>.", obj: document.getElementById("UW_CO_JOBSRCH_UW_CO_WT_SESSION"), funct: function(){if($("#UW_CO_JOBSRCH_UW_CO_WT_SESSION").attr("value") != getCurrentTerm()){return true}else{return false}}  });
+   HINT_ARRAY["search"]. push({page: "search",percentage: 0.7, text : "This is the status column. This keeps track of viewed/read, new, applied and shortlisted jobs. Clear history using the button at the below the table.", obj:TABLES_OBJ.find("th:contains('Status')")[0]   });
 
    //Map the hints depending on the page
    var tempPageHint;
@@ -1058,9 +894,6 @@ l*        _CSS_READY_LOAD                |
       try{
          randomizeHints(tempPageHint.concat(HINT_ARRAY["com"]));
 
-         //If we are at jobs, we can run the visited highlighting and sorting
-         if(PAGE_TYPE == "job_search_component"){ setReadyVisited(); }
-         
          //Apply the eventlisteners for white overlay
          setWhiteOverlayListeners();
          

@@ -1,13 +1,9 @@
 Issues:
--chrome make job details appear in tabs like firefox
 - fix for smaller screens
-- On chrome, the search refreshes because of an error after shortlisting
 
 Optional Fixes:
-- add better sorting for dates
 
 Features:
-- All the view applications for the employer, make it look better
 - checkboxes on applications to update or use a newer or different resume
 - click the back to change the colour of a row
 
@@ -15,8 +11,10 @@ Features:
 Added in this release (1.07)
 - changed the password to save and user name
 - fixed all (ones i can find) date sorting
-- added viewed/new and colouring to the fields
-- made all job descriptions as tabs -> applications now have a grabbing mechanism
+- added viewed/new and colouring to the fields in search page
+- made all job descriptions as tabs
+- allowed to hide highlighting
+- changed the job description page
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html

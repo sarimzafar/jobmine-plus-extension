@@ -97,7 +97,6 @@ body:not(.job_search_component, .student_data) form table{
      text-align:center;
 }
 
-
 /*Black Overlay*/
 #overlay{
      position:fixed;
@@ -147,7 +146,7 @@ body:not(.job_search_component, .student_data) form table{
 
 #popupContent .details{
      font-size:11px;
-     margin-left:5px;
+     margin: 0 5px;
      display:block;
      color:#555555;
 }
@@ -161,7 +160,7 @@ body:not(.job_search_component, .student_data) form table{
      -moz-box-shadow:2px 0 10px #333333;
      -webkit-box-shadow:2px 0 10px #333333;
      height:100%;
-     padding:15px;
+     padding:10px;
 }
 #popupContent #settingsRight{
      width:350px;
@@ -196,6 +195,30 @@ body:not(.job_search_component, .student_data) form table{
      overflow:auto;
 }
 
+#popupContent div table.cell{
+   padding: 0 20px;
+   font-size:13px;
+}
+#popupContent div table.cell td.label{
+   width:70%;
+   padding-top:5px;
+   color:#444;
+}
+#popupContent div table.cell td.field{
+   width:30%;
+   padding-top:10px;
+}
+#popupContent div table.cell td{
+   text-align:left;
+}
+
+#popupContent div table.cell td.field input, #settingsContent div table.cell td.field select{
+   width:auto;
+   margin:0px;
+   margin-top:2px;
+}
+
+
 /* TOOLTIP */ 
 #popupContent input.tooltipChkbx{
      width:auto;
@@ -215,20 +238,29 @@ body:not(.job_search_component, .student_data) form table{
 #hintmsg{
      visibility:visible !important;
      font-family:Verdana, Arial;
+     z-index: 10;
      color:black;
      font-size:11px;
      background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hintbox.png");
 }
 
-#hintmsg a{    
+#hintmsg a{
+   color: blue;
+   text-decoration: underline;
+   cursor: pointer;
+}
+
+#hintmsg a.close{    
      width:10px;
      height:10px;
      display:block;
      outline:none;
      background-image:url("https://jobmine-plus.googlecode.com/svn/trunk/scripts/images/hint_close.png");
-     float:right;     
+     float:right;   
+     color: black;
+     text-decoration: none;
 }
-#hintmsg a:hover{  
+#hintmsg a.close:hover{  
      opacity:0.7;
 }
 

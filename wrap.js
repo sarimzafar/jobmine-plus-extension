@@ -1,3 +1,4 @@
+
 /*======================================*\
 l*        _DEBUG_UNIT                    |
 \*======================================*/
@@ -42,20 +43,17 @@ l*        _DEBUG_UNIT                    |
       function refreshDDStore()
       {
          var options = "";
-         if(localStorage.getItem("KEYBASE_NAME_APPLICATION"))
+         var counter = 0;
+         for(var key in localStorage)
          {
-            listOfKeys = localStorage.getItem("KEYBASE_NAME_APPLICATION").split(" ");
-
-            for(var i=0;i< listOfKeys.length;i++)
-            {
-               var name = listOfKeys[i];
-               var value = localStorage.getItem(name);
-               options += "<option id='"+name+"' value='"+name+"'>"+name.substring(0, 22)+"</option>";        
-               items[name] = value;
-            }
-            return options;
+            var name = key;
+            var value = localStorage.getItem(key);
+            options += "<option id='"+name+"' value='"+name+"'>"+name.substring(0, 22)+"</option>";        
+            items[name] = value;
+            counter++;
          }
-         return "<option>Nothing in here</option>";
+         if(counter == 0){ return "<option>Nothing in here</option>";}
+         return options;
       }
       ddStorage += refreshDDStore();
       ddStorage += "</select>";
@@ -64,10 +62,11 @@ l*        _DEBUG_UNIT                    |
       dContainer.innerHTML += ddStorage;
       dContainer.innerHTML += "<button id='DDStore'>Read Storage</button><br/><br/>";     
       dContainer.innerHTML += "<button id='deleteStorage'>Clear Storage</button>";
-      dContainer.innerHTML += "<button onclick='alert(localStorage.getItem(\"KEYBASE_NAME_APPLICATION\").replace(/\\s/g, \"\\n\"))'>Alert Keys</button><br/>";
+      dContainer.innerHTML += "<button id='refreshStorage'>Refresh Storage</button><br/>";
       dContainer.innerHTML += "<b>Output</b><div style='overflow:auto;' id='dOutput'></div>";
 
       var storeAlert = document.getElementById("DDStore");
+      var refreshStorage = document.getElementById("refreshStorage");
       var debugDDStorage = document.getElementById("debugDDStorage");
       var deleteStorage = document.getElementById("deleteStorage");
       var dOutput = document.getElementById("dOutput");
@@ -84,6 +83,10 @@ l*        _DEBUG_UNIT                    |
 
       if(storeAlert){
       storeAlert.addEventListener("click",function(){try{var value = debugDDStorage.value; debugDDStorage.innerHTML = refreshDDStore(); dOutput.innerHTML = items[value];document.getElementById(value).setAttribute("selected","true");}catch(e){alert(e)}},false);
+      }
+      
+      if(refreshStorage){
+      refreshStorage.addEventListener("click",function(){debugDDStorage.innerHTML = refreshDDStore();},false);
       }
 
       if(deleteStorage){
@@ -150,9 +153,36 @@ l*        _JQUERY_FUNCTION               |
    //Applying table sorting for all tables dependent on the page
    function applyTableSorting(path){
       var tables = $(path);
+      
+      //Prepend a toogle to enable or disable the highlighting, only on selected pages
+      if(PAGE_TYPE == "student_app_summary"
+       ||PAGE_TYPE == "student_sel.interview_schedule"
+       ||PAGE_TYPE == "job_short_list"
+       ||PAGE_TYPE == "student_interviews"
+       ||PAGE_TYPE == "student_ranking_open"
+       ||PAGE_TYPE == "job_search_component"
+      ){
+         $("form").eq(1).prepend("<button class='PSPUSHBUTTON' state='on' onclick='return false;' id='toggleHighlight' popup='false'>Hide Highlighting</button><br/><br/>");
+         $("#toggleHighlight").click(function(){
+            var thisObj = $(this);
+            var state = thisObj.attr("state") == "on";         //True if highlight is on
+            if(state){
+               thisObj.attr("state","off");
+               thisObj.html("Show Highlighting");
+            }else{
+               thisObj.attr("state","on");
+               thisObj.html("Hide Highlighting");
+            }
+            updateTableHighlighting(!state);
+         });
+      }
+      
       if (tables.size()) {
          $("table:not('.PSGROUPBOX')").css("width","100%");
-         tables.each(function() {$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));	});
+         tables.each(function(tableNum) {
+            var thisObj = $(this);
+            thisObj.prepend($("<thead></thead>").append($(this).find("tr:first").remove()));	
+         });
          tables.addClass("tablesorter");
 
          //Applies the sorting dependent on the page
@@ -172,6 +202,7 @@ l*        _JQUERY_FUNCTION               |
             default:
                tables.tablesorter();   break;
          }
+         
          tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");
       }
       return tables;
@@ -224,80 +255,6 @@ l*        _REDIRECTION                   |
      }
      return;
    }
-   
-/*
- *    Applications - below if else is in an iframe and it try to grab the IDs
- */
-   else if(IS_IN_IFRAME && document.title == "Job Details" )
-   {
-      var foundJobID = 0;                                                   //Holds the id if found on the page, if not it is 0
-
-      //We hit the search page and we want to hurry and press the button
-      if(doesUrlContain("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE=")){
-         //Firefox or Chrome?
-         window.location = ISFIREFOX ? "javascript:submitAction_main(document,'main', '#ICSearch')" : "javascript:submitAction_main(document.main, '#ICSearch')";
-         return;
-         //After this it will run one of the two if else statements below
-      }
-      /*
-       *    1. Check if the page is a search page (lookup for jobs)
-       */
-      else if(document.body.className.indexOf("PSSRCHPAGE") != -1){        
-         //Init Variables
-         var nextNode = {};                                               //Cycles through later on and holds the current object     
-         var index =  0;                                                     //Cycling index
-         var term = getCurrentTerm();                                 //Gets the term
-         var nodes = document.getElementsByTagName("a");   //Holds all the a-tags on the page, we look in this
-
-         //Look for a link (a-tag) for the hyperlink of the correct term
-         while (foundJobID == 0 && nodes[++index])
-         {    //If we find the term in the text of an a-tag, we have found it!
-            if(nodes[index].firstChild && term == nodes[index].firstChild.nodeValue){
-               //Grab the job Title
-               var jobTitle = nodes[index+1].firstChild.nodeValue;
-               
-               //If the next row has the same term and job title, then the first one is a template version
-               if(  nodes[index+6] && nodes[index+6].firstChild && jobTitle == nodes[index+6].firstChild.nodeValue         //Check if the job titles are the same     
-                  &&nodes[index+5] && term == nodes[index+5].firstChild.nodeValue)                                         //Then check if the terms are the same
-               {
-                  foundJobID = nodes[index+4].firstChild.nodeValue;
-               }
-               //We only have one correct term job listed
-               else
-               {
-                  foundJobID = nodes[index-1].firstChild.nodeValue;    //We set the previous a-tag's value which is the id and not the term                         
-               }
-            }
-         }
-         //We found it, if we haven't then it is Jobmine's fault, we now can make a new tab
-         if(foundJobID == 0){
-            alert("CANNOT FIND ID");
-            return;
-         }
-      }
-      /*
-       *    2. This is when the search for the lookup jobs loads a description instead of a list of indexes
-       */
-      else if(doesUrlContain("?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOBDTLS"))
-      {                                  
-         //This page is the job details page with a specific url, we grab the job ID and run
-         foundJobID = document.getElementsByTagName("div")[6].firstChild.nodeValue;             //6 is the location of the jobID, jobmine loads this as a template, it will hopefully never change
-
-         //Make sure it is a number
-         if(!isNumeric( foundJobID )){
-            alert("GRABBED THE WRONG THING: you got "+ foundJobID);
-            return;
-         }
-      }
-        
-      //Write the job id in a cookie
-      writeCookie("APP_LAST_ID", foundJobID);
-
-      //Go to a blank page when finished
-      window.location = "about:blank";
-      return;
-   }
-   
 /*
  *    Right when Jobmine logins in
  */

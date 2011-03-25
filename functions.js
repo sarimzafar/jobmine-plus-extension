@@ -1,3 +1,4 @@
+  
 /*======================================*\
 l*        _FUNCTIONS                     |
 \*======================================*/
@@ -47,7 +48,7 @@ l*        _FUNCTIONS                     |
 
       // Add a CSS stylesheets
       var style = document.createElement( "style" ); 
-      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style2.css';") );
+      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
       
       //Update CSS Stylesheet
       if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
@@ -76,7 +77,7 @@ l*        _FUNCTIONS                     |
    }
    
    // Set syntax highlighting colours for various text in tables
-   function updateTableHighlighting()
+   function updateTableHighlighting(allowHighlighting)
    {     
       var NORMAL     = "";
       var VERYGOOD   = "#9f9";
@@ -85,56 +86,64 @@ l*        _FUNCTIONS                     |
       var BAD        = "#fdaaaa";
       var WORST      = "#b5bbc1";
       
-      //If tables exist on the page
-      if(TABLES_OBJ)
+      if(allowHighlighting !== false)
       {
-         switch(PAGE_TYPE)
+         
+         //If tables exist on the page
+         if(TABLES_OBJ)
          {
-            case "student_app_summary":
-               TABLES_OBJ.find("tr").find("td:first, th:first").remove();
-               TABLES_OBJ.find("tr:contains('Ranking')"           ).find("td").css("background-color",MEDIOCRE );
-               TABLES_OBJ.find("tr:contains('Ranking Complete')"  ).find("td").css("background-color",BAD      );
-               TABLES_OBJ.find("tr:contains('Ranked or Offer')"   ).find("td").css("background-color",GOOD     );
-               TABLES_OBJ.find("tr:contains('Selected')"          ).find("td").css("background-color",VERYGOOD );	
-               TABLES_OBJ.find("tr:contains('Alternate')"         ).find("td").css("background-color",MEDIOCRE );
-               TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Employed')"          ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Not Selected')"      ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Applied')"           ).find("td").css("background-color",NORMAL   );
-               TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",BAD      );
-               TABLES_OBJ.find("tr:contains('Approved')"          ).find("td").css("background-color",BAD      );
-               TABLES_OBJ.find("tr:contains('Cancelled')"         ).find("td").css("background-color",BAD      );
-               break;
-            case "student_sel.interview_schedule":
-               TABLES_OBJ.find("tr:contains('Break')"             ).find("td").css("background-color",MEDIOCRE );
-               break;
-            case "job_short_list":
-               TABLES_OBJ.find("tr:contains('Already Applied')"   ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Not Posted')"        ).find("td").css("background-color",BAD      );
-               TABLES_OBJ.find("tr:contains('Not Authorized to ')").find("td").css("background-color",WORST    );
-               break;
-            case "student_interviews":
-               TABLES_OBJ.find("tr:contains('Ranking')"           ).find("td").css("background-color",MEDIOCRE );
-               TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Screened')"          ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Selected')"          ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Unfilled')"          ).find("td").css("background-color",WORST    );
-               break;
-            case "student_ranking_open":
-               TABLES_OBJ.find("tr:contains('Offer')"             ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Ranked')"            ).find("td").css("background-color",GOOD     );
-               TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
-               break;
-            case 'job_search_component':
-               TABLES_OBJ.find("tr:contains('New')"               ).find("td").css("background-color",MEDIOCRE );
-               TABLES_OBJ.find("tr:contains('Viewed')"            ).find("td").css("background-color",NORMAL   );
-               TABLES_OBJ.find("tr:contains('On Short List')"     ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Not Able to Shortl')").find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Already Applied')"   ).find("td").css("background-color",WORST    );
-               break;
+            switch(PAGE_TYPE)
+            {
+               case "student_app_summary":
+                  TABLES_OBJ.find("tr:contains('Ranking')"           ).find("td").css("background-color",MEDIOCRE );
+                  TABLES_OBJ.find("tr:contains('Ranking Complete')"  ).find("td").css("background-color",BAD      );
+                  TABLES_OBJ.find("tr:contains('Ranked or Offer')"   ).find("td").css("background-color",GOOD     );
+                  TABLES_OBJ.find("tr:contains('Selected')"          ).find("td").css("background-color",VERYGOOD );	
+                  TABLES_OBJ.find("tr:contains('Alternate')"         ).find("td").css("background-color",MEDIOCRE );
+                  TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Employed')"          ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Not Selected')"      ).find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Applied')"           ).find("td").css("background-color",NORMAL   );
+                  TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",BAD      );
+                  TABLES_OBJ.find("tr:contains('Approved')"          ).find("td").css("background-color",BAD      );
+                  TABLES_OBJ.find("tr:contains('Cancelled')"         ).find("td").css("background-color",BAD      );
+                  break;
+               case "student_sel.interview_schedule":
+                  TABLES_OBJ.find("tr:contains('Break')"             ).find("td").css("background-color",MEDIOCRE );
+                  break;
+               case "job_short_list":
+                  TABLES_OBJ.find("tr:contains('Already Applied')"   ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Not Posted')"        ).find("td").css("background-color",BAD      );
+                  TABLES_OBJ.find("tr:contains('Not Authorized to ')").find("td").css("background-color",WORST    );
+                  break;
+               case "student_interviews":
+                  TABLES_OBJ.find("tr:contains('Ranking')"           ).find("td").css("background-color",MEDIOCRE );
+                  TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Screened')"          ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Selected')"          ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Unfilled')"          ).find("td").css("background-color",WORST    );
+                  break;
+               case "student_ranking_open":
+                  TABLES_OBJ.find("tr:contains('Offer')"             ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Ranked')"            ).find("td").css("background-color",GOOD     );
+                  TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
+                  break;
+               case 'job_search_component':
+                  TABLES_OBJ.find("tr:contains('New')"               ).find("td").css("background-color",MEDIOCRE );
+                  TABLES_OBJ.find("tr:contains('Viewed/Read')"       ).find("td").css("background-color",NORMAL   );
+                  TABLES_OBJ.find("tr:contains('On Short List')"     ).find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Not Able to Shortl')").find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Already Applied')"   ).find("td").css("background-color",WORST    );
+                  break;
+            }
          }
+      }
+      else
+      {
+      //Remove the highlighting
+         TABLES_OBJ.find("td").css("background-color", NORMAL);
       }
    }
    
@@ -273,7 +282,7 @@ l*        _FUNCTIONS                     |
             }
          });
 
-         $("input[type='button']").click(showLoadingPopup);
+         $("input[type='button'][popup!='false']").click(showLoadingPopup);
       }
    }
    
@@ -350,7 +359,7 @@ l*        _FUNCTIONS                     |
          header +=      '</div><button class="button PSPUSHBUTTON" id="saveSettings">Save and Refresh</button><button style="float: right;" class="button PSPUSHBUTTON closePopup">Cancel</button></td></tr></table></div>';
 
          //About Popup
-         header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>Any problems/issues/wanted features email me at:<br/><span class='details'>Email: <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
+         header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>FAQ:<a href='http://userscripts.org/topics/70845' target='_blank'>http://userscripts.org/topics/70845</a><br/><br/>Any problems/issues/wanted features email me at:<br/><span class='details'>Email: <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
 
          header +=     "</span></div></div></div>";
 
@@ -399,11 +408,9 @@ l*        _FUNCTIONS                     |
    //Saves settings for the pages nav
    function savePageSettings()
    {
-      var disable_grabId   = $("#page_app_idGrabbingChkbx") .attr("checked");
       var show_oldDtlPage  = $("#detail_dtl_showOldPage")   .attr("checked");
       
       //Write Cookies
-      writeCookie('DISABLE_ID_GRAB' , disable_grabId ? 1 : 0);
       writeCookie('SHOW_OLD_DETAILS', show_oldDtlPage ? 1 : 0);
    }
    
@@ -524,7 +531,7 @@ l*        _FUNCTIONS                     |
             }
             writeCookie("TOOLTIP", cookieQuery);        
          }
-
+         
          //Show it if:
          if(   selectedValues[number] != 0                     //Has not been blocked under settings
             && chosenIndex <= probability                      //If probability allows the percentage to show it
@@ -655,7 +662,6 @@ l*        _FUNCTIONS                     |
             /*
              *    Get pages settings cookies
              */
-            $("#page_app_idGrabbingChkbx").attr("checked",  (getCookieValue('DISABLE_ID_GRAB')  ==  1 ? true : false)); 
             $("#detail_dtl_showOldPage")  .attr("checked",  (getCookieValue('SHOW_OLD_DETAILS') ==  1 ? true : false)); 
           
             /*
