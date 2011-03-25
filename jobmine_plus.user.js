@@ -51,8 +51,6 @@
  ERRORS - What to fix
  --------
  //General
- - google searching, need to encodeURL and then replace space
- - remove all trailing non-word characters for job details for links
  
  //Chrome
  
@@ -100,52 +98,6 @@ l*        _CONSTANTS                     |
    var SETTINGS_GENERAL = '<table cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><!-- <option value="wr">Work Report Evaluations</option> --></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" class="textField" id="popupText" type="text"></td></tr></tbody></table>';
    
    var SETTINGS_PAGES   = "<span class='heading'>Job Details Page</span><table class='cell' cellpadding='0' cellspacing='0'><tr><td class='label' v-align='top'>Show Old Job Details Page</td><td class='field' v-align='top'><input id='detail_dtl_showOldPage' type='checkbox'></td></tr></table>";
-   
-/* 
- *    Local Storage Managers
- */
-   var JOB_VISITED_MANAGER = {
-      //Variables
-      KEYPREFIX : "visited_",
-      
-      //Sets the Job ID in storage, returns true if it works and false if it failed
-      addID:         function(id){   
-         //If it doesnt exist, put it into the array as well right our new list of keys
-         if( !this.IDExists(id) ){
-            //Try to store the item
-            try{
-               localStorage.setItem(this.KEYPREFIX + id, 1);
-            }catch(e){
-               alert("Failed to write to storage:\n"+e); return false;
-            }
-         }
-         return true;
-      },
-   
-      //Returns if the key exists
-      IDExists:      function(id){    
-         return this.readID(id) != false;
-      },
-      //Read an ID or return false if not found
-      readID:         function(id){          
-         var value = localStorage.getItem(this.KEYPREFIX + id);
-         return value != null && value != "" ? value : false;
-      }, 
-      
-      //Clear all keys that have anything to do with job visits
-      clear:         function()
-      {
-         //Cycle through all keys in storage
-         for(var key in localStorage)
-         {
-            //if the key is associated with reading, then remove all
-            if(key.substring(0,8) == this.KEYPREFIX)
-            {
-               localStorage.removeItem(key);
-            }
-         }
-      }
-   };
    
 /*======================================*\
 l*        _FUNCTIONS                     |
@@ -225,7 +177,7 @@ l*        _FUNCTIONS                     |
    }
    
    // Set syntax highlighting colours for various text in tables
-   function updateTableHighlighting()
+   function updateTableHighlighting(allowHighlighting)
    {     
       var NORMAL     = "";
       var VERYGOOD   = "#9f9";
@@ -234,55 +186,64 @@ l*        _FUNCTIONS                     |
       var BAD        = "#fdaaaa";
       var WORST      = "#b5bbc1";
       
-      //If tables exist on the page
-      if(TABLES_OBJ)
+      if(allowHighlighting !== false)
       {
-         switch(PAGE_TYPE)
+         
+         //If tables exist on the page
+         if(TABLES_OBJ)
          {
-            case "student_app_summary":
-               TABLES_OBJ.find("tr:contains('Ranking')"           ).find("td").css("background-color",MEDIOCRE );
-               TABLES_OBJ.find("tr:contains('Ranking Complete')"  ).find("td").css("background-color",BAD      );
-               TABLES_OBJ.find("tr:contains('Ranked or Offer')"   ).find("td").css("background-color",GOOD     );
-               TABLES_OBJ.find("tr:contains('Selected')"          ).find("td").css("background-color",VERYGOOD );	
-               TABLES_OBJ.find("tr:contains('Alternate')"         ).find("td").css("background-color",MEDIOCRE );
-               TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Employed')"          ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Not Selected')"      ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Applied')"           ).find("td").css("background-color",NORMAL   );
-               TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",BAD      );
-               TABLES_OBJ.find("tr:contains('Approved')"          ).find("td").css("background-color",BAD      );
-               TABLES_OBJ.find("tr:contains('Cancelled')"         ).find("td").css("background-color",BAD      );
-               break;
-            case "student_sel.interview_schedule":
-               TABLES_OBJ.find("tr:contains('Break')"             ).find("td").css("background-color",MEDIOCRE );
-               break;
-            case "job_short_list":
-               TABLES_OBJ.find("tr:contains('Already Applied')"   ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Not Posted')"        ).find("td").css("background-color",BAD      );
-               TABLES_OBJ.find("tr:contains('Not Authorized to ')").find("td").css("background-color",WORST    );
-               break;
-            case "student_interviews":
-               TABLES_OBJ.find("tr:contains('Ranking')"           ).find("td").css("background-color",MEDIOCRE );
-               TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Screened')"          ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Selected')"          ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Unfilled')"          ).find("td").css("background-color",WORST    );
-               break;
-            case "student_ranking_open":
-               TABLES_OBJ.find("tr:contains('Offer')"             ).find("td").css("background-color",VERYGOOD );
-               TABLES_OBJ.find("tr:contains('Ranked')"            ).find("td").css("background-color",GOOD     );
-               TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
-               break;
-            case 'job_search_component':
-               TABLES_OBJ.find("tr:contains('New')"               ).find("td").css("background-color",MEDIOCRE );
-               TABLES_OBJ.find("tr:contains('Viewed')"            ).find("td").css("background-color",NORMAL   );
-               TABLES_OBJ.find("tr:contains('On Short List')"     ).find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Not Able to Shortl')").find("td").css("background-color",WORST    );
-               TABLES_OBJ.find("tr:contains('Already Applied')"   ).find("td").css("background-color",WORST    );
-               break;
+            switch(PAGE_TYPE)
+            {
+               case "student_app_summary":
+                  TABLES_OBJ.find("tr:contains('Ranking')"           ).find("td").css("background-color",MEDIOCRE );
+                  TABLES_OBJ.find("tr:contains('Ranking Complete')"  ).find("td").css("background-color",BAD      );
+                  TABLES_OBJ.find("tr:contains('Ranked or Offer')"   ).find("td").css("background-color",GOOD     );
+                  TABLES_OBJ.find("tr:contains('Selected')"          ).find("td").css("background-color",VERYGOOD );	
+                  TABLES_OBJ.find("tr:contains('Alternate')"         ).find("td").css("background-color",MEDIOCRE );
+                  TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Employed')"          ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Not Selected')"      ).find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Applied')"           ).find("td").css("background-color",NORMAL   );
+                  TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",BAD      );
+                  TABLES_OBJ.find("tr:contains('Approved')"          ).find("td").css("background-color",BAD      );
+                  TABLES_OBJ.find("tr:contains('Cancelled')"         ).find("td").css("background-color",BAD      );
+                  break;
+               case "student_sel.interview_schedule":
+                  TABLES_OBJ.find("tr:contains('Break')"             ).find("td").css("background-color",MEDIOCRE );
+                  break;
+               case "job_short_list":
+                  TABLES_OBJ.find("tr:contains('Already Applied')"   ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Not Posted')"        ).find("td").css("background-color",BAD      );
+                  TABLES_OBJ.find("tr:contains('Not Authorized to ')").find("td").css("background-color",WORST    );
+                  break;
+               case "student_interviews":
+                  TABLES_OBJ.find("tr:contains('Ranking')"           ).find("td").css("background-color",MEDIOCRE );
+                  TABLES_OBJ.find("tr:contains('Scheduled')"         ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Screened')"          ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Selected')"          ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Filled')"            ).find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Unfilled')"          ).find("td").css("background-color",WORST    );
+                  break;
+               case "student_ranking_open":
+                  TABLES_OBJ.find("tr:contains('Offer')"             ).find("td").css("background-color",VERYGOOD );
+                  TABLES_OBJ.find("tr:contains('Ranked')"            ).find("td").css("background-color",GOOD     );
+                  TABLES_OBJ.find("tr:contains('Not Ranked')"        ).find("td").css("background-color",WORST    );
+                  break;
+               case 'job_search_component':
+                  TABLES_OBJ.find("tr:contains('New')"               ).find("td").css("background-color",MEDIOCRE );
+                  TABLES_OBJ.find("tr:contains('Viewed/Read')"       ).find("td").css("background-color",NORMAL   );
+                  TABLES_OBJ.find("tr:contains('On Short List')"     ).find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Not Able to Shortl')").find("td").css("background-color",WORST    );
+                  TABLES_OBJ.find("tr:contains('Already Applied')"   ).find("td").css("background-color",WORST    );
+                  break;
+            }
          }
+      }
+      else
+      {
+      //Remove the highlighting
+         TABLES_OBJ.find("td").css("background-color", NORMAL);
       }
    }
    
@@ -421,7 +382,7 @@ l*        _FUNCTIONS                     |
             }
          });
 
-         $("input[type='button']").click(showLoadingPopup);
+         $("input[type='button'][popup!='false']").click(showLoadingPopup);
       }
    }
    
@@ -498,7 +459,7 @@ l*        _FUNCTIONS                     |
          header +=      '</div><button class="button PSPUSHBUTTON" id="saveSettings">Save and Refresh</button><button style="float: right;" class="button PSPUSHBUTTON closePopup">Cancel</button></td></tr></table></div>';
 
          //About Popup
-         header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>Any problems/issues/wanted features email me at:<br/><span class='details'>Email: <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
+         header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>FAQ:<a href='http://userscripts.org/topics/70845' target='_blank'>http://userscripts.org/topics/70845</a><br/><br/>Any problems/issues/wanted features email me at:<br/><span class='details'>Email: <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
 
          header +=     "</span></div></div></div>";
 
@@ -670,7 +631,7 @@ l*        _FUNCTIONS                     |
             }
             writeCookie("TOOLTIP", cookieQuery);        
          }
-
+         
          //Show it if:
          if(   selectedValues[number] != 0                     //Has not been blocked under settings
             && chosenIndex <= probability                      //If probability allows the percentage to show it
@@ -969,9 +930,36 @@ l*        _JQUERY_FUNCTION               |
    //Applying table sorting for all tables dependent on the page
    function applyTableSorting(path){
       var tables = $(path);
+      
+      //Prepend a toogle to enable or disable the highlighting, only on selected pages
+      if(PAGE_TYPE == "student_app_summary"
+       ||PAGE_TYPE == "student_sel.interview_schedule"
+       ||PAGE_TYPE == "job_short_list"
+       ||PAGE_TYPE == "student_interviews"
+       ||PAGE_TYPE == "student_ranking_open"
+       ||PAGE_TYPE == "job_search_component"
+      ){
+         $("form").eq(1).prepend("<button class='PSPUSHBUTTON' state='on' onclick='return false;' id='toggleHighlight' popup='false'>Hide Highlighting</button><br/><br/>");
+         $("#toggleHighlight").click(function(){
+            var thisObj = $(this);
+            var state = thisObj.attr("state") == "on";         //True if highlight is on
+            if(state){
+               thisObj.attr("state","off");
+               thisObj.html("Show Highlighting");
+            }else{
+               thisObj.attr("state","on");
+               thisObj.html("Hide Highlighting");
+            }
+            updateTableHighlighting(!state);
+         });
+      }
+      
       if (tables.size()) {
          $("table:not('.PSGROUPBOX')").css("width","100%");
-         tables.each(function() {$(this).prepend($("<thead></thead>").append($(this).find("tr:first").remove()));	});
+         tables.each(function(tableNum) {
+            var thisObj = $(this);
+            thisObj.prepend($("<thead></thead>").append($(this).find("tr:first").remove()));	
+         });
          tables.addClass("tablesorter");
 
          //Applies the sorting dependent on the page
@@ -991,6 +979,7 @@ l*        _JQUERY_FUNCTION               |
             default:
                tables.tablesorter();   break;
          }
+         
          tables.find("td, th").css("border-bottom","1px solid #999").css("width","auto");
       }
       return tables;
@@ -1043,80 +1032,6 @@ l*        _REDIRECTION                   |
      }
      return;
    }
-   
-/*
- *    Applications - below if else is in an iframe and it try to grab the IDs
- */
-   else if(IS_IN_IFRAME && document.title == "Job Details" )
-   {
-      var foundJobID = 0;                                                   //Holds the id if found on the page, if not it is 0
-
-      //We hit the search page and we want to hurry and press the button
-      if(doesUrlContain("https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&Page=UW_CO_STU_JOBDTLS&UW_CO_JOB_TITLE=")){
-         //Firefox or Chrome?
-         window.location = ISFIREFOX ? "javascript:submitAction_main(document,'main', '#ICSearch')" : "javascript:submitAction_main(document.main, '#ICSearch')";
-         return;
-         //After this it will run one of the two if else statements below
-      }
-      /*
-       *    1. Check if the page is a search page (lookup for jobs)
-       */
-      else if(document.body.className.indexOf("PSSRCHPAGE") != -1){        
-         //Init Variables
-         var nextNode = {};                                               //Cycles through later on and holds the current object     
-         var index =  0;                                                     //Cycling index
-         var term = getCurrentTerm();                                 //Gets the term
-         var nodes = document.getElementsByTagName("a");   //Holds all the a-tags on the page, we look in this
-
-         //Look for a link (a-tag) for the hyperlink of the correct term
-         while (foundJobID == 0 && nodes[++index])
-         {    //If we find the term in the text of an a-tag, we have found it!
-            if(nodes[index].firstChild && term == nodes[index].firstChild.nodeValue){
-               //Grab the job Title
-               var jobTitle = nodes[index+1].firstChild.nodeValue;
-               
-               //If the next row has the same term and job title, then the first one is a template version
-               if(  nodes[index+6] && nodes[index+6].firstChild && jobTitle == nodes[index+6].firstChild.nodeValue         //Check if the job titles are the same     
-                  &&nodes[index+5] && term == nodes[index+5].firstChild.nodeValue)                                         //Then check if the terms are the same
-               {
-                  foundJobID = nodes[index+4].firstChild.nodeValue;
-               }
-               //We only have one correct term job listed
-               else
-               {
-                  foundJobID = nodes[index-1].firstChild.nodeValue;    //We set the previous a-tag's value which is the id and not the term                         
-               }
-            }
-         }
-         //We found it, if we haven't then it is Jobmine's fault, we now can make a new tab
-         if(foundJobID == 0){
-            alert("CANNOT FIND ID");
-            return;
-         }
-      }
-      /*
-       *    2. This is when the search for the lookup jobs loads a description instead of a list of indexes
-       */
-      else if(doesUrlContain("?ICType=Panel&Menu=UW_CO_STUDENTS&Market=GBL&PanelGroupName=UW_CO_JOBDTLS"))
-      {                                  
-         //This page is the job details page with a specific url, we grab the job ID and run
-         foundJobID = document.getElementsByTagName("div")[6].firstChild.nodeValue;             //6 is the location of the jobID, jobmine loads this as a template, it will hopefully never change
-
-         //Make sure it is a number
-         if(!isNumeric( foundJobID )){
-            alert("GRABBED THE WRONG THING: you got "+ foundJobID);
-            return;
-         }
-      }
-        
-      //Write the job id in a cookie
-      writeCookie("APP_LAST_ID", foundJobID);
-
-      //Go to a blank page when finished
-      window.location = "about:blank";
-      return;
-   }
-   
 /*
  *    Right when Jobmine logins in
  */
@@ -1240,9 +1155,12 @@ l*        _JOB_DESCRIPTION               |
          jobDescriptionData.description = jobDescriptionData.description.replace(/((http:|https:|www.)[^\s]+)/gi, function(item){
             item = item.replace(/&nbsp;/, "");        //usually this appears at the end of the link
             
-            //Removes random punctuation at the end of the link
+            //Removes random all punctuation at the end of the link
             var endPunctuation = "";
-            if(endPunctuation = item[item.length-1].match(/\W/)){ item = item.slice(0, -1);  }
+            item = item.replace(/([^\/\w])+$/, function(characters){
+               endPunctuation = characters;
+               return "";
+            });
             
             item = item.toUpperCase().indexOf('HTTP') == 0 ? item : "http://"+item;         
             return "<a href='"+item+"' target='_blank'>"+item+"</a>" + (endPunctuation ? endPunctuation : "");
@@ -1256,10 +1174,10 @@ l*        _JOB_DESCRIPTION               |
          
          var popup = "<div id='popupContainer' class='printHide' style='display:none;'><link type='text/css' rel='stylesheet' href='popup.css'/><div id='overlay'><!-- --></div><div id='popupWrapper'><div id='popupContent'><input type='button' class='button jobmineButton' value='Close' onclick='document.body.style.marginRight = \"0\";document.getElementById(\"popupContainer\").style.display = \"none\";document.body.style.overflow = \"auto\"'/><span class='title'>Employer Profile</span><iframe id='hiddenIframe' style='margin-top:10px;' name='hiddenIframe' src='test.html' frameborder='0' width='100%' height='360px'></iframe></div></div></div>";
          
-         var newBody =  "<table class='page' id='jobDetails' cellspacing='0' cellpadding='0'><tr><td valign='top' id='header'><span class='title'>Employer: <a class='printHide' target='_blank' title='Google search "+jobDescriptionData.employerName+"' href='http://www.google.ca/#hl=en&q="+jobDescriptionData.employerName.replace(/\s/g,"+")+"'>"+(jobDescriptionData.employerName.length > 48 ? jobDescriptionData.employerName.substring(0,48)+"..." : jobDescriptionData.employerName)+"</a><a class='printshow' href='#'>"+jobDescriptionData.employerName+"</a></span>"+
+         var newBody =  "<table class='page' id='jobDetails' cellspacing='0' cellpadding='0'><tr><td valign='top' id='header'><span class='title'>Employer: <a class='printHide' target='_blank' title='Google search "+jobDescriptionData.employerName+"' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"'>"+(jobDescriptionData.employerName.length > 48 ? jobDescriptionData.employerName.substring(0,48)+"..." : jobDescriptionData.employerName)+"</a><a class='printshow' href='#'>"+jobDescriptionData.employerName+"</a></span>"+
                         "<input class='button printHide' onclick='window.print();' type='button' value='Print Job Description'/><br/><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'>"+
                         "<tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Job Title:</td><td valign='top'>"+jobDescriptionData.position+"</td></tr><tr>"+
-                        "<td valign='top' class='category'>Work Location:</td><td valign='top'><a target='_blank' href='http://maps.google.ca/maps?hl=en&q="+jobDescriptionData.employerName.replace(/\s/g,"+")+"+"+jobDescriptionData.location.replace(/\s/g,"+")+"' title='Search location' class='location'>"+jobDescriptionData.location+"</a></td></tr><tr>"+
+                        "<td valign='top' class='category'>Work Location:</td><td valign='top'><a target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"+"+encodeURIComponent(jobDescriptionData.location)+"' title='Search location' class='location'>"+jobDescriptionData.location+"</a></td></tr><tr>"+
                         "<td valign='top' class='category'>Available Openings:</td><td valign='top'>"+jobDescriptionData.openings+"</td></tr></table></td><td valign='top' class='right'>"+
                         "<table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Levels:</td><td valign='top'>"+jobDescriptionData.jobLevels+"</td></tr><tr>"+
                         "<td valign='top' class='category'>Grades:</td><td valign='top'>"+jobDescriptionData.grades+"</td></tr></table>"+
@@ -1356,7 +1274,7 @@ l*        _JOB_SEARCH_PAGE               |
       
       var tableBody = null;
       
-      //If This page is not the loop up page
+      //If This page is not the look up page
       if(!$("form > span").html() || $("form > span").html().search(/Lookup/i) == -1)
          {
          $('form > table > tbody > tr:first-child > td:first-child').html("<div style='margin-bottom:30px;' class='PAPAGETITLE'><span style='position:absolute;margin-left:10px;'>Job Search Criteria</span></div>");
@@ -1382,6 +1300,97 @@ l*        _JOB_SEARCH_PAGE               |
          $('form > table > tbody > tr:last-child').remove();
          $('table.PSGROUPBOX').parent().prev().attr("colspan",2).parent().prev().children(":first-child").attr("height","30");
          $('form:last').append("<table id='searchTable' cellspacing='0' cellpadding='0'><tr><td>"+appsRemaining+"</td></tr>"+searchTable+"</table>").css("margin-bottom","30px");              //full width table
+         
+         /*
+          *    Object that manages the visited list
+          *       This object manages the visited job descriptions using localStorage. 
+          */        
+         var JOB_VISITED_MANAGER = {
+         //Variables
+            KEYPREFIX : "visited_",
+            termInput : $("#UW_CO_JOBSRCH_UW_CO_WT_SESSION").attr("value").trim(),
+            
+         //Checks to see if we need to remove all of the jobs first from viewed history
+            validateDate :    function(){
+               var currentTerm = getCurrentTerm();
+               
+               //Write the last time we accessed it and today's date for comparison
+               var now = new Date();
+               var today = now.getFullYear()+"|"+now.getMonth()+"|"+now.getUTCDate();
+               var lastAccessDate = (localStorage.getItem("searchPageLastAccess") ? localStorage.getItem("searchPageLastAccess") : today).split("|");
+               localStorage.setItem("searchPageLastAccess", today);
+               
+               today = today.split("|");
+               var differenceInMonths = (Date.UTC(today[0], today[1], today[2]) - Date.UTC(lastAccessDate[0], lastAccessDate[1], lastAccessDate[2]) )/1000/60/60/24/30;
+               
+               //It has been about 2 months since you accessed job search, clear everything
+               if(differenceInMonths >= 2)
+               {  
+                  alert("Clear all");
+                  this.clear();
+               }
+               else if(parseInt(this.termInput) > parseInt(currentTerm)    //If the guessed term is smaller than the term we are search through
+                     && parseInt(today[1]) >= parseInt(currentTerm[3] )     //AND if we have passed a certain date with the old term, eg. if winter term, the last date is may
+               ){
+                  alert("Clear old");
+                  this.clearOldTerms();
+               }
+            },
+         //Sets the Job ID in storage, returns true if it works and false if it failed
+            addID:            function(id){   
+               //If it doesnt exist, put it into the array as well right our new list of keys
+               if( !this.IDExists(id) ){
+                  //Try to store the item
+                  try{
+                     localStorage.setItem(this.KEYPREFIX + id, this.termInput);
+                  }catch(e){
+                     alert("Failed to write to storage:\n"+e); return false;
+                  }
+               }
+               return true;
+            },
+         //Returns if the key exists
+            IDExists:         function(id){    
+               return this.readID(id) != false;
+            },
+         //Read an ID or return false if not found
+            readID:           function(id){          
+               var value = localStorage.getItem(this.KEYPREFIX + id);
+               return value != null && value != "" ? value : false;
+            }, 
+         //Deletes all of the old terms that have been expired
+            clearOldTerms:    function()
+            {
+               if(this.termInput != "" && this.termInput.length == 4)         //Redundency
+               {
+                  //Cycle through all keys in storage
+                  for(var key in localStorage)
+                  {
+                     //if the key is associated with viewed and is not the specified term, remove it!
+                     if(key.substring(0,8) == this.KEYPREFIX && localStorage.getItem(key) != this.termInput)
+                     {
+                        localStorage.removeItem(key);
+                     }
+                  }
+               }else{
+                  alert("Something broke.");
+               }
+            },
+         //Clear all keys that have anything to do with job visits
+            clear:            function()
+            {
+               //Cycle through all keys in storage
+               for(var key in localStorage)
+               {
+                  //if the key is associated with reading, then remove all
+                  if(key.substring(0,8) == this.KEYPREFIX)
+                  {
+                     localStorage.removeItem(key);
+                  }
+               }
+            }
+         };
+         JOB_VISITED_MANAGER.validateDate();
 
          //Playing with the table; details below
          tableBody = $("#searchTable tr tr:eq(1) td.tablepanel table.PSLEVEL1GRID tr");
@@ -1404,7 +1413,18 @@ l*        _JOB_SEARCH_PAGE               |
                 */
                   var jobStatusCol = obj.eq(0);
                   var jobID = obj.eq(0).plainText();
-                  var status = obj.eq(6).find("div:contains('Already Applied')").length == 0 ? (JOB_VISITED_MANAGER.IDExists(jobID) ? "Viewed" : "New") : "Applied";
+                  
+                  //Find what the status of the job is
+                  var status;
+                  if(obj.eq(7).find("div").plainText().indexOf('Already Applied') != -1){
+                     status = "Applied";
+                  }else if(obj.eq(7).find("div").plainText().indexOf('On Short List') != -1){
+                     status = "On Shortlist";
+                  }else if(JOB_VISITED_MANAGER.IDExists(jobID)){
+                     status = "Viewed/Read";
+                  }else{
+                     status = "New";
+                  }
                   jobStatusCol.before("<td class='PSLEVEL1GRIDODDROW' align='left'>"+status+"</td>");
 
                /*
@@ -1428,9 +1448,9 @@ l*        _JOB_SEARCH_PAGE               |
                   var location = obj.eq(4).html().trim();
 
                   //This is the Google search for the company
-                  obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
+                  obj.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!'  target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(company)+"'/>");            
                   //This is for google map the location
-                  obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+company.replace(/\s/g,"+")+"+"+location.replace(/\s/g,"+")+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
+                  obj.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!'  target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(company)+"+"+encodeURIComponent(location)+"+"+$("#UW_CO_JOBSRCH_UW_CO_LOCATION").attr("value").replace(/\s/g,"+")+"'/>"); 
 
                /*
                 *   CHANGE JOB DESCRIPTIONS
@@ -1446,10 +1466,10 @@ l*        _JOB_SEARCH_PAGE               |
                      JOB_VISITED_MANAGER.addID(thisObj.attr("jobID"));
                      
                      //Mark down that we have seen this job
-                     thisObj[0].parentNode.parentNode.parentNode.firstChild.nextSibling.firstChild.nodeValue = "Viewed";
+                     thisObj[0].parentNode.parentNode.parentNode.firstChild.nextSibling.firstChild.nodeValue = "Viewed/Read";
                      
                      //Update the state of the row
-                     updateTableHighlighting();
+                     updateTableHighlighting( $("#toggleHighlight").attr("state") == "on" );
                      TABLES_OBJ.trigger("update");
                   }
                   
@@ -1463,9 +1483,22 @@ l*        _JOB_SEARCH_PAGE               |
                }         
             });
          }
+         
+         //Clears the viewing history
+         function clearingHistory(){
+            if(confirm("Are you sure you would like to clear you viewed history? This page will refresh after it clears the history."))
+            {
+               loadPopupMsg("Clearing the viewed history.<br/><span style='color:red;font-size:20px;'>This cannot be cancelled, please do not try.<br/>Really I mean it.</span>")
+               showLoadingPopup();
+               JOB_VISITED_MANAGER.clear();
+               refresh();
+            }
+         }
 
          var TABLES_OBJ = applyTableSorting("table table table.PSLEVEL1GRID",PAGE_TYPE);
          $("body > form > table").css("width","auto");
+         $("form").eq(1).append("<input id='clearViewedHistoryBtn' popup='false' class='PSPUSHBUTTON' type='button' title='What this does is clears the history of your searches that you have viewed/read already.' oncick='return false;' value='Clear Viewed History'/><br/>");
+         $("#clearViewedHistoryBtn").click(clearingHistory);
       }else{
          $("form").css("margin-bottom","20px");
       }
@@ -1559,8 +1592,8 @@ l*        _JOB_SHORT_LIST_PAGE           |
             //Add company and location href
             var company = child.eq(2).html().trim();
             var location = child.eq(4).html().trim();                         
-            child.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+company.replace(/\s/g,"+")+"'/>");            
-            child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+location.replace(/\s/g,"+")+"+"+company.replace(/\s/g,"+")+"'/>"); 
+            child.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(company)+"'/>");            
+            child.eq(4).wrapInner("<a class='mapsSearch' title='Google Maps that Company!!!' target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(location)+"+"+encodeURIComponent(company)+"'/>"); 
 
             //Change the hyperlink for the job descriptions
             child.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+child.eq(0).html().trim()).attr("target","_blank");
@@ -1704,7 +1737,7 @@ l*        _APPLICATIONS_PAGE             |
          if(row[0].nodeName.toUpperCase() != "TH")   
          {          
             //Add the Google Search for company names
-            row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+row.eq(2).plainText().replace(/\s/g,"+")+"'/>");  
+            row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(row.eq(2).plainText())+"'/>");  
             
             //Add link to get tabbed job description
             row.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+row.eq(0).plainText()).attr("target","_blank");
@@ -1775,7 +1808,7 @@ l*        _APPLICATIONS_PAGE             |
 
             //Check to see all fields are valid before we add the calendar, else leave it blank
             if(month && time != "" && type && jobTitle){
-               row.eq(12).after('<td title="Click to add to Google Calendar!" class="PSLEVEL1GRIDODDROW" align="left"><a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+company+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a></td>');
+               row.eq(12).after('<td title="Click to add to Google Calendar!" class="PSLEVEL1GRIDODDROW" align="left"><a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+encodeURIComponent(company)+'&dates='+dateStr+'&details='+details+'&location='+encodeURIComponent(location)+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a></td>');
             }else{
                row.eq(12).after('<td class="PSLEVEL1GRIDODDROW" align="left">&nbsp;</td>');
             }
@@ -1804,7 +1837,7 @@ l*        _HINT_SYSTEM                    |
    HINT_ARRAY["com"]     = [];
    HINT_ARRAY["com"].    push({page:  "com",  percentage: 0.4, text : "Check out the settings tab to customize your experience. You can remove the timer and/or set the default page Jobmine Plus loads.", obj:$("#settings_nav")[0] });
    HINT_ARRAY["com"].    push({page:  "com",  percentage: 0.3, text : "Click the header a column to sort jobs and other information.", obj:TABLES_OBJ.find("th.PSLEVEL1GRIDCOLUMNHDR.header")[2]  });
-   HINT_ARRAY["com"].    push({page:  "com",  percentage: 0.4, text : "Send me an email if you have any questions, concerns or wanted features.", obj:$("#about_nav")[0] });
+   HINT_ARRAY["com"].    push({page:  "com",  percentage: 0.4, text : "Send me an email if you have any questions, concerns or wanted features. You can also check out the FAQ.", obj:$("#about_nav")[0] });
 
    //Applications hints
    HINT_ARRAY["apps"]    = [];
@@ -1819,6 +1852,7 @@ l*        _HINT_SYSTEM                    |
    HINT_ARRAY["search"]. push({page: "search",percentage: 0.4, text : "You can now select the location and Jobmine Plus will Google Maps it for you.", obj:TABLES_OBJ.find("a.mapsSearch")[0]  });
    HINT_ARRAY["search"]. push({page: "search",percentage: 0.3, text : "This is hiring chances. Note: you need to be skilled to get the job, I am not responsible for incorrect statistics.", obj:TABLES_OBJ.find("th.PSLEVEL1GRIDCOLUMNHDR:contains('Hiring Chances*')")[0]  });
    HINT_ARRAY["search"]. push({page: "search",percentage: 1.0, text : "It seems the term is incorrect.<br/><br/>Jobmine Plus suggests that the term is <a popup='false' onclick='document.getElementById(\"UW_CO_JOBSRCH_UW_CO_WT_SESSION\").value = \"1115\"'>"+getCurrentTerm()+" (Click to change)</a>.", obj: document.getElementById("UW_CO_JOBSRCH_UW_CO_WT_SESSION"), funct: function(){if($("#UW_CO_JOBSRCH_UW_CO_WT_SESSION").attr("value") != getCurrentTerm()){return true}else{return false}}  });
+   HINT_ARRAY["search"]. push({page: "search",percentage: 0.7, text : "This is the status column. This keeps track of viewed/read, new, applied and shortlisted jobs. Clear history using the button at the below the table.", obj:TABLES_OBJ.find("th:contains('Status')")[0]   });
 
    //Map the hints depending on the page
    var tempPageHint;
