@@ -251,13 +251,11 @@ l*        _JOB_SEARCH_PAGE               |
                //It has been about 2 months since you accessed job search, clear everything
                if(differenceInMonths >= 2)
                {  
-                  alert("Clear all");
                   this.clear();
                }
                else if(parseInt(this.termInput) > parseInt(currentTerm)    //If the guessed term is smaller than the term we are search through
                      && parseInt(today[1]) >= parseInt(currentTerm[3] )     //AND if we have passed a certain date with the old term, eg. if winter term, the last date is may
                ){
-                  alert("Clear old");
                   this.clearOldTerms();
                }
             },
@@ -297,8 +295,6 @@ l*        _JOB_SEARCH_PAGE               |
                         localStorage.removeItem(key);
                      }
                   }
-               }else{
-                  alert("Something broke.");
                }
             },
          //Clear all keys that have anything to do with job visits
@@ -654,8 +650,7 @@ l*        _APPLICATIONS_PAGE             |
    {
       var TABLES_OBJ = applyTableSorting("table table table.PSLEVEL1GRID");
       TABLES_OBJ.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
-      TABLES_OBJ.eq(0).find("td:contains('Ranking Completed')").html("Ranked or Offer").parent().attr("title","This means that the company you had an interview with has either ranked or offered you a job.");
-      
+
       $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
          //Do something on each row
          var row = $(this).children();
@@ -664,8 +659,20 @@ l*        _APPLICATIONS_PAGE             |
             //Add the Google Search for company names
             row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(row.eq(2).plainText())+"'/>");  
             
+            //Get Job ID
+            var jobID = row.eq(0).plainText();
+            
+            //Check to see if they have an interview with this company, if they do then we can say it is ranked or offer
+            if(row.eq(5).plainText().indexOf("Ranking Complete") != -1)
+            {
+               if(localStorage.getItem("interviewID_"+jobID) != null)
+               {
+                  row.eq(5).html("Ranked or Offer").attr("title","This means that the company you had an interview with has either ranked or offered you a job. This used to be 'Ranking Completed'.");
+               }               
+            }
+            
             //Add link to get tabbed job description
-            row.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+row.eq(0).plainText()).attr("target","_blank");
+            row.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
          }
       });
    }
@@ -678,6 +685,16 @@ l*        _APPLICATIONS_PAGE             |
       tableBody = $("table table table.PSLEVEL1GRID:eq(0) tr");
       if(tableBody.length > 2)      //Must have something in the table
       {
+         //Remove all old interview ids
+         var interviewPrefix = "interviewID_";
+         for(var key in localStorage)
+         {
+            if(key.substring(0, interviewPrefix.length) == interviewPrefix)
+            {
+               localStorage.removeItem(key);
+            }
+         }
+         
          tableBody.each(function(rowNum){                                                
          var row = $(this).children();                         
          if(rowNum == 0)   //Header
@@ -687,9 +704,14 @@ l*        _APPLICATIONS_PAGE             |
          }
          else      //Pull information and make the Google Calendars button
          {    
+            var jobID = row.eq(1).html().trim();
+            
             //Change the hyperlink for the job descriptions
-            row.eq(3).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+row.eq(1).html().trim()).attr("target","_blank");
-
+            row.eq(3).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
+            
+            //Write this jobId as the user has a job that they have this as an interview
+            localStorage.setItem(interviewPrefix+""+jobID, 1);
+            
             //Parse the date
             var date    = row.eq(4).html().trim().split(" ");
             var day     = date[0];
@@ -767,6 +789,7 @@ l*        _HINT_SYSTEM                    |
    //Applications hints
    HINT_ARRAY["apps"]    = [];
    HINT_ARRAY["apps"].   push({page: "apps",  percentage: 0.4, text : "You can now select the company name and Jobmine Plus will Google search it for you in a new tab.", obj:TABLES_OBJ.find("a.googleSearch")[0]  });
+   HINT_ARRAY["apps"].   push({page: "apps",  percentage: 1.0, text : "'Ranked or Offer' means that the interview you had is either ranked or offered. This used to be 'Ranking Completed'. Please wait till rankings are out.", obj:TABLES_OBJ.eq(0).find("td:contains('Ranked or Offer')")[0]  });
 
    //Shortlist hints
    HINT_ARRAY["short"]   = [];
@@ -906,3 +929,11 @@ l*        _HIGHLIGHTING                  |
    //Apply the highlighting for the tables
    updateTableHighlighting();
    
+
+
+
+
+
+
+
+

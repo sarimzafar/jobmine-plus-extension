@@ -433,7 +433,7 @@ l*        _FUNCTIONS                     |
             }
          }
       }
-      writeCookie("TOOLTIP", cookieQuery);         //alert(cookieQuery);
+      writeCookie("TOOLTIP", cookieQuery);       
    }
    
    //Position the tooltip that points to an object; it will auto determine the orientation depending on where the object is
@@ -500,7 +500,7 @@ l*        _FUNCTIONS                     |
          var randomIndex = Math.floor(Math.random()*array.length+1)-1;
          var hint = array[randomIndex];      
          var chosenIndex = Math.floor(Math.random()*101);
-         
+      
          //See if we display it based on the percentage probability
          var probability = hint.percentage*100;
 
