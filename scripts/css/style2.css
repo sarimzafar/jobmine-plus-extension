@@ -213,7 +213,7 @@ body:not(.job_search_component, .student_data) form table{
 }
 #popupContent div div.cell div.field{
    width:30%;
-   padding-top:10px;
+   padding-top:5px;
 }
 #popupContent div div.cell div{
    text-align:left;
