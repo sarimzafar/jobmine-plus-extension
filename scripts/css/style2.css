@@ -206,20 +206,20 @@ body:not(.job_search_component, .student_data) form table{
    padding: 0 20px;
    font-size:13px;
 }
-#popupContent div div.cell span.label{
+#popupContent div div.cell div.label{
    width:70%;
    padding-top:5px;
    color:#444;
 }
-#popupContent div div.cell span.field{
+#popupContent div div.cell div.field{
    width:30%;
    padding-top:10px;
 }
-#popupContent div div.cell span{
+#popupContent div div.cell div{
    text-align:left;
 }
 
-#popupContent div div.cell span.field input, #settingsContent div div.cell span.field select{
+#popupContent div div.cell div.field input, #settingsContent div div.cell div.field select{
    width:auto;
    margin:0px;
    margin-top:2px;
