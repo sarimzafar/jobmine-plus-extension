@@ -1,4 +1,6 @@
-/* tables */
+/*=================
+   Table Clean up
+ *=================*/
 body, .PSPAGE, html, .PSSRCHPAGE {
 	margin: 0px;
 	padding: 0px;
@@ -97,7 +99,9 @@ body:not(.job_search_component, .student_data) form table{
      text-align:center;
 }
 
-/*Black Overlay*/
+/*================
+   Black Overlay
+ *================*/
 #overlay{
      position:fixed;
      width:100%;
@@ -154,7 +158,9 @@ body:not(.job_search_component, .student_data) form table{
      color:#cccccc;
 }
 
-/* Settings */
+/*============
+   Settings
+ *============*/
 #popupContent #settingsLeft{
      width:150px;
      -moz-box-shadow:2px 0 10px #333333;
@@ -195,31 +201,34 @@ body:not(.job_search_component, .student_data) form table{
      overflow:auto;
 }
 
-#popupContent div table.cell{
+/* Settings -> Pages */
+#popupContent div div.cell{
    padding: 0 20px;
    font-size:13px;
 }
-#popupContent div table.cell td.label{
+#popupContent div div.cell span.label{
    width:70%;
    padding-top:5px;
    color:#444;
 }
-#popupContent div table.cell td.field{
+#popupContent div div.cell span.field{
    width:30%;
    padding-top:10px;
 }
-#popupContent div table.cell td{
+#popupContent div div.cell span{
    text-align:left;
 }
 
-#popupContent div table.cell td.field input, #settingsContent div table.cell td.field select{
+#popupContent div div.cell span.field input, #settingsContent div div.cell span.field select{
    width:auto;
    margin:0px;
    margin-top:2px;
 }
 
 
-/* TOOLTIP */ 
+/*============
+   Tooltip
+ *============*/
 #popupContent input.tooltipChkbx{
      width:auto;
      margin-bottom:0px;
@@ -234,7 +243,9 @@ body:not(.job_search_component, .student_data) form table{
      font-size:12px;
 }
 
-/*Hint Popup*/
+/*================
+   Hint Popup
+ *================*/
 #hintmsg{
      visibility:visible !important;
      font-family:Verdana, Arial;
