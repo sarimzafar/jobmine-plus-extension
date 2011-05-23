@@ -70,7 +70,7 @@ l*        _CONSTANTS                     |
 /*
  *    Contents used all over the script
  */
-   var CURRENT_VERSION = 1.08;                                                                                                 //Current version of Jobmine Plus
+   var CURRENT_VERSION = 1.09;                                                                                                 //Current version of Jobmine Plus
    var GLOBAL_TIMER    = null;                                                                                                //Global timer id, used to stop the Jobmine timer
    var SCRIPTSURL      = "https://jobmine-plus.googlecode.com/svn/trunk/scripts";                                             //URL location of scripts folder
    var ISFIREFOX       = unsafeWindow.toString().indexOf("[object Window]")!=-1;                                              //Is firefox?
@@ -97,8 +97,11 @@ l*        _CONSTANTS                     |
  */   
    var SETTINGS_GENERAL = '<table cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><!-- <option value="wr">Work Report Evaluations</option> --></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" class="textField" id="popupText" type="text"></td></tr></tbody></table>';
    
-   var SETTINGS_PAGES   = "<span class='heading'>Job Details Page</span><table class='cell' cellpadding='0' cellspacing='0'><tr><td class='label' v-align='top'>Show Old Job Details Page</td><td class='field' v-align='top'><input id='detail_dtl_showOldPage' type='checkbox'></td></tr></table>";
+  var SETTINGS_PAGES    = "<span class='heading'>Job Details Page</span><div class='cell'><div class='label'>Show Old Job Details Page</div><div class='field'><input id='pgSettings_showOldPage' type='checkbox'/></div></div>";
+      SETTINGS_PAGES   += "<br/><br/><span class='heading'>Job Search Page</span><div class='cell'><div class='label'>Autorun last saved search</div><div class='field'><input id='pgSettings_runLastSrch' type='checkbox'/></div></div>";
   
+  
+
 /*======================================*\
 l*        _FUNCTIONS                     |
 \*======================================*/
@@ -148,7 +151,7 @@ l*        _FUNCTIONS                     |
 
       // Add a CSS stylesheets
       var style = document.createElement( "style" ); 
-      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
+      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style2.css';") );
       
       //Update CSS Stylesheet
       if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
@@ -348,7 +351,8 @@ l*        _FUNCTIONS                     |
  */
    
    //Shows the loading Popup
-   function showLoadingPopup(){
+   function showLoadingPopup( msg ){
+      if(msg != null && (typeof msg == "string") && msg != ""){loadPopupMsg(msg);}    //Change message if inputted
       if($("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
       $("#popupWhiteContainer").css("display","block");	
       $("body").css("overflow","hidden");
@@ -441,7 +445,7 @@ l*        _FUNCTIONS                     |
          header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
          header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
          header +=     '"><tr><td valign="top"><div style="width:228px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
-         header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:820px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
+         header +=     '<td valign="top"><div id="jobmineplus_links" class="links" style="margin-top:30px;width:820px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
          header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
          header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
          header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SEARCH_PAGE +'>Job Search</a> | ';
@@ -510,10 +514,12 @@ l*        _FUNCTIONS                     |
    //Saves settings for the pages nav
    function savePageSettings()
    {
-      var show_oldDtlPage  = $("#detail_dtl_showOldPage")   .attr("checked");
+      var show_oldDtlPage  = $("#pgSettings_showOldPage")   .attr("checked");
+      var run_lastSearch   = $("#pgSettings_runLastSrch")   .attr("checked");
       
       //Write Cookies
       writeCookie('SHOW_OLD_DETAILS', show_oldDtlPage ? 1 : 0);
+      writeCookie('RUN_LAST_SEARCH' , run_lastSearch  ? 1 : 0);
    }
    
 /*
@@ -764,7 +770,8 @@ l*        _FUNCTIONS                     |
             /*
              *    Get pages settings cookies
              */
-            $("#detail_dtl_showOldPage")  .attr("checked",  (getCookieValue('SHOW_OLD_DETAILS') ==  1 ? true : false)); 
+            $("#pgSettings_showOldPage")  .attr("checked",  (getCookieValue('SHOW_OLD_DETAILS') ==  1 ? true : false)); 
+            $("#pgSettings_runLastSrch")  .attr("checked",  (getCookieValue('RUN_LAST_SEARCH')  ==  1 ? true : false)); 
           
             /*
              *    Set toggles for settings panel
@@ -1010,7 +1017,7 @@ l*        _REDIRECTION                   |
       //FIREFOX - saves the password and username like any other login
       if(ISFIREFOX)
       {
-         newNode.innerHTML = "<input id='rememberUser' type='checkbox'/><span style='font-size:11px;'>Remember User<br/> <span style='color:red;'>(DO NOT CHECK ON PUBLIC PC)</span></span>";     
+         newNode.innerHTML = "<input id='rememberUser' type='checkbox'/><label for='rememberUser' style='font-size:11px;'>Remember User<br/> <span style='color:red;'>(DO NOT CHECK ON PUBLIC PC)</span></label>";     
          document.getElementById("rememberUser").addEventListener("click",function(){writeCookie('REMEMBERUSER', this.checked ? 1 : 0);},false);
 
          //If the user wants to save passwords
@@ -1022,14 +1029,28 @@ l*        _REDIRECTION                   |
       //CHROME - because of how Chrome handles userscripts, it will not allow me to save passwords (that you will have to use an external extension and uncheck "Save User ID")
       else
       {
+         
+         
          newNode.innerHTML = "<input id='autoCheckID' type='checkbox' title='Click to auto input user ID next time. Cannot save password for security reasons.'/><label for='autoCheckID' style='font-size:11px;'>Save User ID</label>";     
          document.getElementById("autoCheckID").addEventListener("click",function(){writeCookie('LASTUSER', this.checked ? "1|"+ getCookieValue('LASTUSER').split("|")[1] : 0);},false);
+         $("input[name=submit]").bind("click",function(){$(this).unbind("click");writeCookie('LASTUSER', document.getElementById("autoCheckID").checked ? "1|"+ document.getElementById("userid").value : 0);});
          
          //Save userID in Cookies and the check or uncheck the checkbox
          var user = getCookieValue('LASTUSER');
          if(user != "NaN" && user != -1 && user[0] != 0 && document.getElementById("userid")){
-            document.getElementById("userid").value = user.substr(2);
             document.getElementById("autoCheckID").checked = "checked";
+            if(user.substr(2) != "undefined")
+            {
+               document.getElementById("userid").value = user.substr(2);
+               $("#userid").bind("focus", function(){
+                  $(this).unbind("focus");
+                  $("#pwd").focus();      //focus password field
+               });
+               $("#pwd").bind("focus", function(){
+                  $("#userid").unbind("focus");
+                  $(this).unbind("focus");
+               });
+            }
          }
      }
      return;
@@ -1042,6 +1063,10 @@ l*        _REDIRECTION                   |
       document.getElementsByTagName("html")[0].innerHTML = "<body>"+white_overlay("<div style='text-align:justify;'>Welcome to Jobmine Plus! No Jobmine Plus is not slower than Jobmine (well only by a bit since it does extra enhancements after), it is about the same timing. If you don't like this because it is slower, then you will miss out on all the great features. By the time you read this, the next page would have loaded.</div>",21,false)+"</body>";	
       document.getElementById('popupWhiteContainer').style.display = "block";
       document.getElementById('popupWhiteContent').style.top = "-130px";
+      if(!ISFIREFOX){   //Put username in cookie only (Chrome only)
+         var user = getCookieValue('LASTUSER');
+         if(user!=0){writeCookie("LASTUSER", getCookieValue('LASTUSER')[0] + "|" + getCookieValue("SignOnDefault").toLowerCase());}
+      }     
       window.stop();
           
       setTimeout(function(){
@@ -1278,7 +1303,24 @@ l*        _JOB_SEARCH_PAGE               |
       
       //If This page is not the look up page
       if(!$("form > span").html() || $("form > span").html().search(/Lookup/i) == -1)
+      {
+         //Autorun the search if: 1. checked in settings and 2. this is not a results page
+         var hasSearched = document.body.getAttribute("onload").indexOf("self.scroll") != -1;
+         if(getCookieValue("RUN_LAST_SEARCH") == 1 && !hasSearched)        
          {
+            window.stop();
+            showLoadingPopup("Running the last saved search.");
+            $("#jobmineplus_links a").css("color", "white");
+            $("body, html").css("padding","0px").css("margin","0px");
+            if(ISFIREFOX){
+               unsafeWindow.submitAction_main0(document, "main0", "UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN");
+            }else{   
+               runJS('submitAction_main0(document.forms["main0"], "UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN")');
+            }
+            return;
+         }
+         
+         
          $('form > table > tbody > tr:first-child > td:first-child').html("<div style='margin-bottom:30px;' class='PAPAGETITLE'><span style='position:absolute;margin-left:10px;'>Job Search Criteria</span></div>");
 
          /*
@@ -1300,9 +1342,11 @@ l*        _JOB_SEARCH_PAGE               |
          queryAreaElements.eq(21).remove();    
          queryAreaElements.eq(-2).remove();
          queryAreaElements.eq(-2).remove();
+         queryAreaElements.eq(22).find("div").remove();
          $('form > table > tbody > tr:last-child').remove();
          $('table.PSGROUPBOX').parent().prev().attr("colspan",2).parent().prev().children(":first-child").attr("height","30");
          $('form:last').append("<table id='searchTable' cellspacing='0' cellpadding='0'><tr><td>"+appsRemaining+"</td></tr>"+searchTable+"</table>").css("margin-bottom","30px");              //full width table
+         $(document.getElementById("$ICField22")).remove();    //Remove view shortlist, its on top, no reason for this button
          
          /*
           *    Replace the old input field with a readable dropdown
@@ -1326,7 +1370,7 @@ l*        _JOB_SEARCH_PAGE               |
             var termDigit = currentTerm[3];
             if(termDigit == 9)
             {
-               options = "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Fall "+year+" - ("+currentTerm+")</option>" + options;
+               options = "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Fall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+year+" - ("+currentTerm+")</option>" + options;
                currentTerm = currentTerm.substring(0, 3) + "5";
             }
             else if(termDigit == 5)
@@ -1350,7 +1394,7 @@ l*        _JOB_SEARCH_PAGE               |
             var termDigit = currentTerm[3];
             if(termDigit == 9)
             {
-               if(i!=0){options += "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Fall "+year+" - ("+currentTerm+")</option>";}
+               if(i!=0){options += "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Fall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "+year+" - ("+currentTerm+")</option>";}
                currentTerm = "1" + ( parseInt(currentTerm.substr(1, 2) ) + 1) + "1";
               
             }
@@ -1501,7 +1545,7 @@ l*        _JOB_SEARCH_PAGE               |
                   var applications = parseInt( numApps.html() ) + 1;
                   var hcPercentage = Math.round( ( parseInt( obj.eq(5).html() ) / (isNaN( applications ) ? 1 : applications) ) * 10000 ) / 100;
                   hcPercentage = hcPercentage > 99.99 ? 99.99 : hcPercentage;      //Limit it to 99.9, now you can never get 100%
-                  numApps.after("<td title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+hcPercentage+"%</td>");
+                  numApps.after("<td title='You must be skilled to get the job, this is NOT AN ACCURATE EQUATION therefore it does not include your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+hcPercentage+"%</td>");
 
                   if(obj.eq(7).children().html().trim() == "&nbsp;"){
                      obj.eq(7).children().html("Not Able to Shortlist").attr("title","Jobmine has a thing where if you delete a job from shortlist, you cannot shortlist the job again. Sorry.");

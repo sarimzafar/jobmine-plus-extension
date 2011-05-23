@@ -1,20 +1,26 @@
 Issues:
-- fix for smaller screens
+- chrome login screen doesnt save username
 
 Optional Fixes:
 
 Features:
+- allow people to customize highlighting
 - checkboxes on applications to update or use a newer or different resume
-- click the back to change the colour of a row
+- hotkeys
+- change the skills inventory UI
+- apply the add to shortlist and apply on a job -> Search: apply and shortlist, applications -> edit application, shortlist -> edit application, apply
+- auto apply
+   - skip warning message
+   - head back to same page
 
-
-Added in this release (1.07)
-- changed the password to save and user name
-- fixed all (ones i can find) date sorting
-- added viewed/new and colouring to the fields in search page
-- made all job descriptions as tabs
-- allowed to hide highlighting
-- changed the job description page
+Added in this release (1.09)
+- Popup fixed to "does not include your skill level"
+- cap the percent on hiring chances
+- recalculated hiring chances
+- term should be a dropdown
+- changed the way you can update (added a decimal)
+- run last search 
+- fixed Chrome to save password
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html

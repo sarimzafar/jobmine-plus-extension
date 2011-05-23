@@ -1,4 +1,3 @@
-  
 /*======================================*\
 l*        _FUNCTIONS                     |
 \*======================================*/
@@ -48,7 +47,7 @@ l*        _FUNCTIONS                     |
 
       // Add a CSS stylesheets
       var style = document.createElement( "style" ); 
-      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
+      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style2.css';") );
       
       //Update CSS Stylesheet
       if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
@@ -162,9 +161,9 @@ l*        _FUNCTIONS                     |
       if(i == 12) return false;
       return (parseInt(i+1)+"").length < 2 ? "0"+parseInt(i+1) : parseInt(i+1);
    }
-
+   
    //Guess your current term and compares it to the term specified in Job Search
-   function getCurrentTerm()          
+   function getCurrentTerm( strict )            //Strict means that it takes the term without consideration of whats in search
    {     
       var date       = new Date();
       var year       = date.getFullYear() + "";
@@ -184,7 +183,9 @@ l*        _FUNCTIONS                     |
          middleDigit++;             //Add one more for the next year
       }
       var guessTerm = firstDigit+""+middleDigit+""+lastDigit;
-
+      
+      if(strict) return guessTerm;
+         
       //Algorithm to return the correct term
       var curTermInCookie = getCookieValue("CURTERM");
       if(curTermInCookie != -1)          //Cookie exists
@@ -246,7 +247,8 @@ l*        _FUNCTIONS                     |
  */
    
    //Shows the loading Popup
-   function showLoadingPopup(){
+   function showLoadingPopup( msg ){
+      if(msg != null && (typeof msg == "string") && msg != ""){loadPopupMsg(msg);}    //Change message if inputted
       if($("body").scrollTop() != 0){$("#whiteOverlay").css("top",0);};
       $("#popupWhiteContainer").css("display","block");	
       $("body").css("overflow","hidden");
@@ -339,7 +341,7 @@ l*        _FUNCTIONS                     |
          header +=     '"><table cellspacing="0" cellpadding="0" style="background-repeat: repeat-x;';
          header +=     'background-image: url(data:image/gif;base64,R0lGODlhAQB9AOYAAFdXmlhYm+3v+mBgoF1dnmRkorW10nJyq1panGhopWpqpnZ2rW1tqPHx9/T0+IWFtoeHt4mJuPr6/JmZwpubw7Cw0KSkyLm51WdnpKKix8PD21xcncHB2s/P4qyszdfX566uz9nZ6OXl8Nzc6tXV5qioy/X1+f39/qamybe31Ozs83t7sL2915OTvltbnZWVv2xsp8nJ34GBs4+PvOjo8Xl5r9PT5W9vqJGRvXR0rIuLuaqqzH19sbKy0bu71p2dxHh4rnFxqs3N4dvb6WNjof7+/uDg7J+fxo2NumFhoOfn8FZWmllZm39/smVlo/n5+/j4++rq8r+/2fPz+HeAt/z8/YODtO3t9OLi7ff3+t7e619fn/v7/cvL4JeXwe/v9fDw9uPj7tHR5FVVmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAABAH0AAAdsgGOCg4SFhoVLAAFMCC4bBFsDSUQFThgJCjAMN0EHOQtANSs8TTJWDxAROkgzOC0vXhMUP0cZFiglOx4gFT0GKRc+LFIcGlQCMV1CHWI2JB8hQyNaRlhhIko0USpXX2ANUw4mWVBPElxVJ0WBADs=);';
          header +=     '"><tr><td valign="top"><div style="width:228px;color:white;height:88px;padding:15px;padding-left:30px;text-shadow: black -2px -2px 5px, black 2px 2px 5px;font-family:Verdana,Arial;background-image:url('+SCRIPTSURL+'/images/left.png);background-repeat:no-repeat;"><span style="font-size:30px;">Jobmine Plus</span><br/><div style="margin-left:20px;">Browse jobs your way.</div></div></td>';
-         header +=     '<td valign="top"><div class="links" style="margin-top:30px;width:820px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
+         header +=     '<td valign="top"><div id="jobmineplus_links" class="links" style="margin-top:30px;width:820px;color:#CCCCCC;font-family: Arial, Verdana;outline: none; text-decoration:none;">'; 
          header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+PROFILE_PAGE+'>Profile</a> | ';
          header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+DOCUMENT_PAGE+'>Documents</a> | ';
          header +=     '<a style="text-shadow: black -2px -2px  5px,black 2px 2px  5px;text-decoration:none;" href='+JOB_SEARCH_PAGE +'>Job Search</a> | ';
@@ -359,7 +361,7 @@ l*        _FUNCTIONS                     |
          header +=      '</div><button class="button PSPUSHBUTTON" id="saveSettings">Save and Refresh</button><button style="float: right;" class="button PSPUSHBUTTON closePopup">Cancel</button></td></tr></table></div>';
 
          //About Popup
-         header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION/100+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>FAQ:<a href='http://userscripts.org/topics/70845' target='_blank'>http://userscripts.org/topics/70845</a><br/><br/>Any problems/issues/wanted features email me at:<br/><span class='details'>Email: <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
+         header +=     "<div style='display:none;padding:20px;' class='panels' id='About'><b>Jobmine Plus v"+CURRENT_VERSION+"</b><br/><br/><span class='details'>Written by Matthew Ng<br/><br/>Website: <a href='http://userscripts.org/scripts/show/80771' target='_blank'>http://userscripts.org/scripts/show/80771</a><br/><br/>FAQ:<a href='http://userscripts.org/topics/70845' target='_blank'>http://userscripts.org/topics/70845</a><br/><br/>Any problems/issues/wanted features email me at:<br/><span class='details'>Email: <a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a></span><br/></span><br/><br/><br/><br/><br/><br/><br/><br/><br/><button style='float:right;' class='button closePopup PSPUSHBUTTON'>Cancel</button></div>";
 
          header +=     "</span></div></div></div>";
 
@@ -408,10 +410,12 @@ l*        _FUNCTIONS                     |
    //Saves settings for the pages nav
    function savePageSettings()
    {
-      var show_oldDtlPage  = $("#detail_dtl_showOldPage")   .attr("checked");
+      var show_oldDtlPage  = $("#pgSettings_showOldPage")   .attr("checked");
+      var run_lastSearch   = $("#pgSettings_runLastSrch")   .attr("checked");
       
       //Write Cookies
       writeCookie('SHOW_OLD_DETAILS', show_oldDtlPage ? 1 : 0);
+      writeCookie('RUN_LAST_SEARCH' , run_lastSearch  ? 1 : 0);
    }
    
 /*
@@ -662,7 +666,8 @@ l*        _FUNCTIONS                     |
             /*
              *    Get pages settings cookies
              */
-            $("#detail_dtl_showOldPage")  .attr("checked",  (getCookieValue('SHOW_OLD_DETAILS') ==  1 ? true : false)); 
+            $("#pgSettings_showOldPage")  .attr("checked",  (getCookieValue('SHOW_OLD_DETAILS') ==  1 ? true : false)); 
+            $("#pgSettings_runLastSrch")  .attr("checked",  (getCookieValue('RUN_LAST_SEARCH')  ==  1 ? true : false)); 
           
             /*
              *    Set toggles for settings panel

@@ -1,4 +1,3 @@
-
 /*======================================*\
 l*        _PAGE_CLEAN_UP                 |
 \*======================================*/
@@ -201,7 +200,24 @@ l*        _JOB_SEARCH_PAGE               |
       
       //If This page is not the look up page
       if(!$("form > span").html() || $("form > span").html().search(/Lookup/i) == -1)
+      {
+         //Autorun the search if: 1. checked in settings and 2. this is not a results page
+         var hasSearched = document.body.getAttribute("onload").indexOf("self.scroll") != -1;
+         if(getCookieValue("RUN_LAST_SEARCH") == 1 && !hasSearched)        
          {
+            window.stop();
+            showLoadingPopup("Running the last saved search.");
+            $("#jobmineplus_links a").css("color", "white");
+            $("body, html").css("padding","0px").css("margin","0px");
+            if(ISFIREFOX){
+               unsafeWindow.submitAction_main0(document, "main0", "UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN");
+            }else{   
+               runJS('submitAction_main0(document.forms["main0"], "UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN")');
+            }
+            return;
+         }
+         
+         
          $('form > table > tbody > tr:first-child > td:first-child').html("<div style='margin-bottom:30px;' class='PAPAGETITLE'><span style='position:absolute;margin-left:10px;'>Job Search Criteria</span></div>");
 
          /*
@@ -218,13 +234,80 @@ l*        _JOB_SEARCH_PAGE               |
          var number = $('form > table > tbody > tr').eq(22).html().replace(/<.*?>|\n/gi,"");
          appsRemaining = "<div class='PSTEXT' style='margin-bottom:15px;'><span style='position:absolute;margin-left:10px;'>"+appsRemaining.replace("(","</span>  "+number+"  (")+"</span></div>";
          //Remove left over tr's and fix layouts
-         $('form > table > tbody > tr').eq(21).remove();
-         $('form > table > tbody > tr').eq(21).remove();    
-         $('form > table > tbody > tr').eq(-2).remove();
-         $('form > table > tbody > tr').eq(-2).remove();
+         var queryAreaElements = $('form > table > tbody > tr');
+         queryAreaElements.eq(21).remove();
+         queryAreaElements.eq(21).remove();    
+         queryAreaElements.eq(-2).remove();
+         queryAreaElements.eq(-2).remove();
+         queryAreaElements.eq(22).find("div").remove();
          $('form > table > tbody > tr:last-child').remove();
          $('table.PSGROUPBOX').parent().prev().attr("colspan",2).parent().prev().children(":first-child").attr("height","30");
          $('form:last').append("<table id='searchTable' cellspacing='0' cellpadding='0'><tr><td>"+appsRemaining+"</td></tr>"+searchTable+"</table>").css("margin-bottom","30px");              //full width table
+         $(document.getElementById("$ICField22")).remove();    //Remove view shortlist, its on top, no reason for this button
+         
+         /*
+          *    Replace the old input field with a readable dropdown
+          *       Simple but hardcoded-ish dropdown that allows you to easily choose a term
+          */ 
+         var placeNewInputHere = $('#UW_CO_JOBSRCH_UW_CO_WT_SESSION').css("display", "none").next().css("display", "none").parent().append("<select style='position:absolute;' id='termdropdown'></select>");
+         queryAreaElements.eq(6).find("div").css("display", "none");
+         
+         //Make some variables
+         var termDropdown = $("#termdropdown");
+         var originalCurrentTerm = getCurrentTerm(true);
+         var currentTerm = originalCurrentTerm;
+         var inOldInputField = $('#UW_CO_JOBSRCH_UW_CO_WT_SESSION').attr("value");
+         
+         //Count down 3 terms
+         var options = "";
+         for(var i=2; i>=0; i--)
+         {
+            var year = "20" + currentTerm.substr(1, 2);
+            var selected = inOldInputField == currentTerm;
+            var termDigit = currentTerm[3];
+            if(termDigit == 9)
+            {
+               options = "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Fall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+year+" - ("+currentTerm+")</option>" + options;
+               currentTerm = currentTerm.substring(0, 3) + "5";
+            }
+            else if(termDigit == 5)
+            {
+               options = "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Spring "+year+" - ("+currentTerm+")</option>" + options;
+               currentTerm = currentTerm.substring(0, 3) + "1";
+            }
+            else
+            {
+               options = "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Winter "+year+" - ("+currentTerm+")</option>" + options;
+               currentTerm = "1" + ( parseInt(currentTerm.substr(1, 2) ) - 1) + "9";
+            }
+         }
+         
+         //Count up
+         currentTerm = originalCurrentTerm;
+         for(var i=0; i<3; i++)
+         {
+            var year = "20" + currentTerm.substr(1, 2);
+            var selected = inOldInputField == currentTerm;
+            var termDigit = currentTerm[3];
+            if(termDigit == 9)
+            {
+               if(i!=0){options += "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Fall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "+year+" - ("+currentTerm+")</option>";}
+               currentTerm = "1" + ( parseInt(currentTerm.substr(1, 2) ) + 1) + "1";
+              
+            }
+            else if(termDigit == 5)
+            {
+               if(i!=0){options += "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Spring "+year+" - ("+currentTerm+")</option>";}
+               currentTerm = currentTerm.substring(0, 3) + "9";
+            }
+            else
+            {
+               if(i!=0){options += "<option "+(selected ? "selected='true'" : "")+" value='"+currentTerm+"'>Winter "+year+" - ("+currentTerm+")</option>";}
+               currentTerm = currentTerm.substring(0, 3) + "5";
+            }
+         }
+         termDropdown.append(options);    //Append the options
+         $("#termdropdown").change(function(){$('#UW_CO_JOBSRCH_UW_CO_WT_SESSION').attr("value", this.value)});      //Changes the original input field
          
          /*
           *    Object that manages the visited list
@@ -325,7 +408,7 @@ l*        _JOB_SEARCH_PAGE               |
 
                   //Adds new columns (status and hiring)
                   obj.eq(0).before("<th class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Status</th>");
-                  obj.eq(8).after("<th title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Hiring Chances*</th>");
+                  obj.eq(8).after("<th title='You must be skilled to get the job, this is NOT AN ACCURATE EQUATION therefore it does not include your skill level.' class='PSLEVEL1GRIDCOLUMNHDR' align='left' scope='col'>Hiring Chances*</th>");
                
                //Cells
                }else{
@@ -356,7 +439,10 @@ l*        _JOB_SEARCH_PAGE               |
                         var openings = parseInt(obj.eq(5).html());
                         var applications = parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1));
                   */
-                  numApps.after("<td title='You must be skilled to get the job, this is equation does not included your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+Math.round((parseInt(obj.eq(5).html())/parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1)))*10000)/100+"%</td>");
+                  var applications = parseInt( numApps.html() ) + 1;
+                  var hcPercentage = Math.round( ( parseInt( obj.eq(5).html() ) / (isNaN( applications ) ? 1 : applications) ) * 10000 ) / 100;
+                  hcPercentage = hcPercentage > 99.99 ? 99.99 : hcPercentage;      //Limit it to 99.9, now you can never get 100%
+                  numApps.after("<td title='You must be skilled to get the job, this is NOT AN ACCURATE EQUATION therefore it does not include your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+hcPercentage+"%</td>");
 
                   if(obj.eq(7).children().html().trim() == "&nbsp;"){
                      obj.eq(7).children().html("Not Able to Shortlist").attr("title","Jobmine has a thing where if you delete a job from shortlist, you cannot shortlist the job again. Sorry.");
@@ -928,12 +1014,3 @@ l*        _HIGHLIGHTING                  |
 \*======================================*/    
    //Apply the highlighting for the tables
    updateTableHighlighting();
-   
-
-
-
-
-
-
-
-

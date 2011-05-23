@@ -70,7 +70,7 @@ l*        _CONSTANTS                     |
 /*
  *    Contents used all over the script
  */
-   var CURRENT_VERSION = 107;                                                                                                 //Current version of Jobmine Plus
+   var CURRENT_VERSION = 1.09;                                                                                                 //Current version of Jobmine Plus
    var GLOBAL_TIMER    = null;                                                                                                //Global timer id, used to stop the Jobmine timer
    var SCRIPTSURL      = "https://jobmine-plus.googlecode.com/svn/trunk/scripts";                                             //URL location of scripts folder
    var ISFIREFOX       = unsafeWindow.toString().indexOf("[object Window]")!=-1;                                              //Is firefox?
@@ -97,5 +97,6 @@ l*        _CONSTANTS                     |
  */   
    var SETTINGS_GENERAL = '<table cellpadding="0" cellspacing="0"><tbody><tr><td valign="top">Login Default Page:</td><td valign="top"><select id="popupSelect"><option selected="selected" value="ap">Applications</option><option value="in">Interviews</option><option value="js">Job Search</option><option value="dc">Documents</option><option value="jl">Job Short List</option><option value="rk">Rankings</option><option value="pr">Profile</option><!-- <option value="wr">Work Report Evaluations</option> --></select></td></tr><tr><td valign="top">Load Message Off:</td><td valign="top"><input id="loadCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Do not Show Updates:</td><td valign="top"><input id="updateCheckbox" class="chkbox" type="checkbox"></td></tr><tr><td valign="top">Remove Timer:</td><td valign="top"><input checked="checked" id="removeTimerChkbx" class="chkbox" type="checkbox"></td></tr><tr><td class="" style="color: black;" valign="top">Auto-Refresh Duration (min):<br><span id="removeTimerDetails" class="details">The time specified (minutes) would allow the page to refresh when the page is on idle. If 0 or any time above 19 minutes is specified, there will be a timer for 19 minutes to avoid the php timer.</span></td><td valign="top"><input value="0" style="background-color: white; color: black;" onkeypress="return decimalOnly(event)" class="textField" id="popupText" type="text"></td></tr></tbody></table>';
    
-   var SETTINGS_PAGES   = "<span class='heading'>Job Details Page</span><table class='cell' cellpadding='0' cellspacing='0'><tr><td class='label' v-align='top'>Show Old Job Details Page</td><td class='field' v-align='top'><input id='detail_dtl_showOldPage' type='checkbox'></td></tr></table>";
-   
+  var SETTINGS_PAGES    = "<span class='heading'>Job Details Page</span><div class='cell'><div class='label'>Show Old Job Details Page</div><div class='field'><input id='pgSettings_showOldPage' type='checkbox'/></div></div>";
+      SETTINGS_PAGES   += "<br/><br/><span class='heading'>Job Search Page</span><div class='cell'><div class='label'>Autorun last saved search</div><div class='field'><input id='pgSettings_runLastSrch' type='checkbox'/></div></div>";
+ 

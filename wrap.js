@@ -1,4 +1,3 @@
-
 /*======================================*\
 l*        _DEBUG_UNIT                    |
 \*======================================*/
@@ -30,12 +29,12 @@ l*        _DEBUG_UNIT                    |
       dropdown += "</select>";
 
       dContainer = document.getElementById("debugContainer");
-      dContainer.innerHTML += "<style>#debugContainer{position:fixed;width:300px;min-height:100px;right:0px;top:0px;background:rgba(0,0,0,0.6) none;padding:10px;color:white;}</style>";
-      dContainer.innerHTML += "<button onclick='window.location=window.location;'>Refresh</button>";
+      dContainer.innerHTML += "<style>#debugContainer{position:fixed;overflow:auto;width:300px;min-height:30px;right:0px;top:0px;background:rgba(0,0,0,0.6) none;padding:10px;color:white;}</style>";
+      dContainer.innerHTML += "<button onclick='window.location=window.location;'>Refresh</button><button onclick='var obj = document.getElementById(\"debugContainer\");if(obj.style.height == \"30px\"){obj.style.height = \"auto\"; obj.style.overflow = \"auto\";}else{obj.style.height = \"30px\"; obj.style.overflow = \"hidden\";}' id='minimizeDebug'>Minimize</button>";
       dContainer.innerHTML += "<br/><br/>Cookies:<br/>";
       dContainer.innerHTML += dropdown;
       dContainer.innerHTML += "<button id='alertCookie'>Read Cookie</button>";
-
+      
       //STORAGE STUFF
       var items = new Array();
       var ddStorage = "<select id='debugDDStorage'>";
@@ -231,7 +230,7 @@ l*        _REDIRECTION                   |
       //FIREFOX - saves the password and username like any other login
       if(ISFIREFOX)
       {
-         newNode.innerHTML = "<input id='rememberUser' type='checkbox'/><span style='font-size:11px;'>Remember User<br/> <span style='color:red;'>(DO NOT CHECK ON PUBLIC PC)</span></span>";     
+         newNode.innerHTML = "<input id='rememberUser' type='checkbox'/><label for='rememberUser' style='font-size:11px;'>Remember User<br/> <span style='color:red;'>(DO NOT CHECK ON PUBLIC PC)</span></label>";     
          document.getElementById("rememberUser").addEventListener("click",function(){writeCookie('REMEMBERUSER', this.checked ? 1 : 0);},false);
 
          //If the user wants to save passwords
@@ -243,14 +242,28 @@ l*        _REDIRECTION                   |
       //CHROME - because of how Chrome handles userscripts, it will not allow me to save passwords (that you will have to use an external extension and uncheck "Save User ID")
       else
       {
-         newNode.innerHTML = "<input id='autoCheckID' type='checkbox' title='Click to auto input user ID next time. Cannot save password for security reasons.'/><span style='font-size:11px;'>Save User ID<span>";     
+         
+         
+         newNode.innerHTML = "<input id='autoCheckID' type='checkbox' title='Click to auto input user ID next time. Cannot save password for security reasons.'/><label for='autoCheckID' style='font-size:11px;'>Save User ID</label>";     
          document.getElementById("autoCheckID").addEventListener("click",function(){writeCookie('LASTUSER', this.checked ? "1|"+ getCookieValue('LASTUSER').split("|")[1] : 0);},false);
+         $("input[name=submit]").bind("click",function(){$(this).unbind("click");writeCookie('LASTUSER', document.getElementById("autoCheckID").checked ? "1|"+ document.getElementById("userid").value : 0);});
          
          //Save userID in Cookies and the check or uncheck the checkbox
          var user = getCookieValue('LASTUSER');
          if(user != "NaN" && user != -1 && user[0] != 0 && document.getElementById("userid")){
-            document.getElementById("userid").value = user.substr(2);
             document.getElementById("autoCheckID").checked = "checked";
+            if(user.substr(2) != "undefined")
+            {
+               document.getElementById("userid").value = user.substr(2);
+               $("#userid").bind("focus", function(){
+                  $(this).unbind("focus");
+                  $("#pwd").focus();      //focus password field
+               });
+               $("#pwd").bind("focus", function(){
+                  $("#userid").unbind("focus");
+                  $(this).unbind("focus");
+               });
+            }
          }
      }
      return;
@@ -263,6 +276,10 @@ l*        _REDIRECTION                   |
       document.getElementsByTagName("html")[0].innerHTML = "<body>"+white_overlay("<div style='text-align:justify;'>Welcome to Jobmine Plus! No Jobmine Plus is not slower than Jobmine (well only by a bit since it does extra enhancements after), it is about the same timing. If you don't like this because it is slower, then you will miss out on all the great features. By the time you read this, the next page would have loaded.</div>",21,false)+"</body>";	
       document.getElementById('popupWhiteContainer').style.display = "block";
       document.getElementById('popupWhiteContent').style.top = "-130px";
+      if(!ISFIREFOX){   //Put username in cookie only (Chrome only)
+         var user = getCookieValue('LASTUSER');
+         if(user!=0){writeCookie("LASTUSER", getCookieValue('LASTUSER')[0] + "|" + getCookieValue("SignOnDefault").toLowerCase());}
+      }     
       window.stop();
           
       setTimeout(function(){
