@@ -47,14 +47,14 @@ l*        _FUNCTIONS                     |
 
       // Add a CSS stylesheets
       var style = document.createElement( "style" ); 
-      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style2.css';") );
+      style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/style.css';") );
       
       //Update CSS Stylesheet
       if(getCookieValue('HIDE_UPDATES') != 1){style.appendChild( document.createTextNode("@import '"+SCRIPTSURL+"/css/update.css';") );};
       document.getElementsByTagName( "body" ).item(0).appendChild( style );	
 
       //Adds current version to the body class
-      $('body').addClass("v"+CURRENT_VERSION);
+      $('body').addClass("v"+CURRENT_VERSION.replace(".", "_"));
 
       //Removing useless parts
       $("#WAIT_main0").remove();
