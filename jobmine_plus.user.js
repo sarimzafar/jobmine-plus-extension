@@ -28,7 +28,7 @@ l*        _CONSTANTS                     |
 /*
  *    Contents used all over the script
  */
-   var CURRENT_VERSION = 1.09;                                                                                                 //Current version of Jobmine Plus
+   var CURRENT_VERSION = "1.09";                                                                                               //Current version of Jobmine Plus
    var GLOBAL_TIMER    = null;                                                                                                //Global timer id, used to stop the Jobmine timer
    var SCRIPTSURL      = "https://jobmine-plus.googlecode.com/svn/trunk/scripts";                                             //URL location of scripts folder
    var ISFIREFOX       = unsafeWindow.toString().indexOf("[object Window]")!=-1;                                              //Is firefox?
