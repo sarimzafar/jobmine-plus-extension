@@ -398,9 +398,11 @@ l*        _JOB_SEARCH_PAGE               |
 
          //Playing with the table; details below
          tableBody = $("#searchTable tr tr:eq(1) td.tablepanel table.PSLEVEL1GRID tr");
-         if(tableBody.length > 2)
-         {
-            tableBody.each(function(row){ var obj = $(this).children();          
+         if(   tableBody.length > 1                                                             //More than 1 table
+            && tableBody.eq(1).find("td:eq(1) div:contains('No Matches Found')").length == 0    //Table must have some results
+         ){
+            tableBody.each(function(row){ 
+               var obj = $(this).children();          
                //HEADER
                if(row == 0){
                   //Tells the table that the results are up
@@ -420,7 +422,7 @@ l*        _JOB_SEARCH_PAGE               |
                   
                   //Find what the status of the job is
                   var status;
-                  if(obj.eq(7).find("div").plainText().indexOf('Already Applied') != -1){
+                  if(obj.eq(6).find("div").plainText().indexOf('Already Applied') != -1){
                      status = "Applied";
                   }else if(obj.eq(7).find("div").plainText().indexOf('On Short List') != -1){
                      status = "On Shortlist";
@@ -439,7 +441,7 @@ l*        _JOB_SEARCH_PAGE               |
                         var openings = parseInt(obj.eq(5).html());
                         var applications = parseInt(isNaN(parseInt(numApps.html()+1)) ? 1 : parseInt(numApps.html()+1));
                   */
-                  var applications = parseInt( numApps.html() ) + 1;
+                  var applications = parseInt( numApps.html() ) + (obj.eq(6).find("div").plainText().indexOf('Already Applied') != -1 ? 0 : 1); //If already applied, we do not add 1
                   var hcPercentage = Math.round( ( parseInt( obj.eq(5).html() ) / (isNaN( applications ) ? 1 : applications) ) * 10000 ) / 100;
                   hcPercentage = hcPercentage > 99.99 ? 99.99 : hcPercentage;      //Limit it to 99.9, now you can never get 100%
                   numApps.after("<td title='You must be skilled to get the job, this is NOT AN ACCURATE EQUATION therefore it does not include your skill level.' class='PSLEVEL1GRIDODDROW' align='left'>"+hcPercentage+"%</td>");
@@ -737,29 +739,33 @@ l*        _APPLICATIONS_PAGE             |
       var TABLES_OBJ = applyTableSorting("table table table.PSLEVEL1GRID");
       TABLES_OBJ.find("div.PSHYPERLINKDISABLED:contains('Edit Application')").html("Cannot Edit Application");
 
-      $("body > form > table td.tablepanel table.PSLEVEL1GRID tr:last-child td tr").each(function(rowNum){
-         //Do something on each row
-         var row = $(this).children();
-         if(row[0].nodeName.toUpperCase() != "TH")   
-         {          
-            //Add the Google Search for company names
-            row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(row.eq(2).plainText())+"'/>");  
-            
-            //Get Job ID
-            var jobID = row.eq(0).plainText();
-            
-            //Check to see if they have an interview with this company, if they do then we can say it is ranked or offer
-            if(row.eq(5).plainText().indexOf("Ranking Complete") != -1)
-            {
-               if(localStorage.getItem("interviewID_"+jobID) != null)
-               {
-                  row.eq(5).html("Ranked or Offer").attr("title","This means that the company you had an interview with has either ranked or offered you a job. This used to be 'Ranking Completed'.");
-               }               
+      $("body > form > table table table.tablesorter").each(function(tableNum)
+      {
+         $(this).find("tr").each(function(rowNum){
+            //Do something on each row
+            var row = $(this).children();
+            if(row[0].nodeName.toUpperCase() != "TH")   
+            {          
+               //Add the Google Search for company names
+               var companyName = row.eq(2).plainText();
+               if(companyName != "" && companyName != "-"){       //Company name must exist to make a link
+                  row.eq(2).wrapInner("<a class='googleSearch' title='Google Search that Company!!!' target='_blank' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(companyName)+"'/>");  
+               }
+               //Get Job ID
+               var jobID = row.eq(0).plainText();
+               
+               //Check to see if they have an interview with this company, if they do then we can say it is ranked or offer
+               if(tableNum == 0                                                  //In first table
+                  && row.eq(5).plainText().indexOf("Ranking Complete") != -1     //Table cell says ranking complete
+                  && localStorage.getItem("interviewID_"+jobID) != null         //localstorage says that you had an interview with this company
+               ){
+                     row.eq(5).html("Ranked or Offer").attr("title","This means that the company you had an interview with has either ranked or offered you a job. This used to be 'Ranking Completed'.");
+               }
+               
+               //Add link to get tabbed job description
+               row.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
             }
-            
-            //Add link to get tabbed job description
-            row.eq(1).find("a").attr("href","https://jobmine.ccol.uwaterloo.ca/servlets/iclientservlet/SS/?Menu=UW_CO_STUDENTS&Component=UW_CO_JOBDTLS&UW_CO_JOB_ID="+jobID).attr("target","_blank");
-         }
+         });
       });
    }
    /*======================================*\
@@ -769,8 +775,11 @@ l*        _APPLICATIONS_PAGE             |
    {  
       //Add an extra column for google calendars
       tableBody = $("table table table.PSLEVEL1GRID:eq(0) tr");
-      if(tableBody.length > 2)      //Must have something in the table
-      {
+      
+      //Must have something in the table
+      if(   tableBody.length > 1                                                    //More than 1 value in the table
+         && tableBody.eq(1).find("td").eq(1).html().replace(/\s/g,"") != "&nbsp;"   //Must have a value as the id for the first job listed
+      ){
          //Remove all old interview ids
          var interviewPrefix = "interviewID_";
          for(var key in localStorage)
@@ -781,7 +790,7 @@ l*        _APPLICATIONS_PAGE             |
             }
          }
          
-         tableBody.each(function(rowNum){                                                
+         tableBody.each(function(rowNum){    
          var row = $(this).children();                         
          if(rowNum == 0)   //Header
          {

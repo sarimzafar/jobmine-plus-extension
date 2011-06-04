@@ -121,7 +121,7 @@ l*        _JQUERY_PLUGINS                |
    //Simple function to get the text of something: .plainText();
    (function($){
       $.fn.plainText = function() {
-         return this.text().trim().replace(/\xA0/g, " ");
+         return this == null ? "" : this.text().trim().replace(/\xA0/g, " ");
       };
    })(jQuery);
 /*======================================*\

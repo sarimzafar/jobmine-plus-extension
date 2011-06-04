@@ -99,4 +99,4 @@ l*        _CONSTANTS                     |
    
   var SETTINGS_PAGES    = "<span class='heading'>Job Details Page</span><div class='cell'><div class='label'>Show Old Job Details Page</div><div class='field'><input id='pgSettings_showOldPage' type='checkbox'/></div></div>";
       SETTINGS_PAGES   += "<br/><br/><span class='heading'>Job Search Page</span><div class='cell'><div class='label'>Autorun last saved search</div><div class='field'><input id='pgSettings_runLastSrch' type='checkbox'/></div></div>";
- 
+

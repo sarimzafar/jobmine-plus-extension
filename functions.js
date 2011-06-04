@@ -54,7 +54,7 @@ l*        _FUNCTIONS                     |
       document.getElementsByTagName( "body" ).item(0).appendChild( style );	
 
       //Adds current version to the body class
-      $('body').addClass("v"+CURRENT_VERSION.replace(".", "_"));
+      $('body').addClass("v"+CURRENT_VERSION.replace(/\./g, "_"));
 
       //Removing useless parts
       $("#WAIT_main0").remove();

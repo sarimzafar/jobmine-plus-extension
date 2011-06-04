@@ -1,5 +1,4 @@
 Issues:
-- chrome login screen doesnt save username
 
 Optional Fixes:
 
@@ -13,14 +12,10 @@ Features:
    - skip warning message
    - head back to same page
 
-Added in this release (1.09)
-- Popup fixed to "does not include your skill level"
-- cap the percent on hiring chances
-- recalculated hiring chances
-- term should be a dropdown
-- changed the way you can update (added a decimal)
-- run last search 
-- fixed Chrome to save password
+Added in this release (1.09.1)
+- fixed the ranked or offer that it does not go onto the 2nd table in apps
+- after application has been applied, hiring chances should decrease by 1 for that user.
+- adds the new/viewed stuff to job search when only 1 application avaible
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html
