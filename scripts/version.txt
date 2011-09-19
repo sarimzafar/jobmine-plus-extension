@@ -1,4 +1,0 @@
-{
-	"version"       : 105,
-	"date"          : "January 17 2011"
-}

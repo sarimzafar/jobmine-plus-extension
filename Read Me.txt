@@ -3,27 +3,10 @@ Issues:
 Optional Fixes:
 
 Features:
-- allow people to customize highlighting
-- checkboxes on applications to update or use a newer or different resume
-- hotkeys
-- change the skills inventory UI
-- apply the add to shortlist and apply on a job -> Search: apply and shortlist, applications -> edit application, shortlist -> edit application, apply
-- auto apply
-   - skip warning message
-   - head back to same page
 
-Added in this release (1.09.1)
-- fixed the ranked or offer that it does not go onto the 2nd table in apps
-- after application has been applied, hiring chances should decrease by 1 for that user.
-- adds the new/viewed stuff to job search when only 1 application avaible
+Added in this release
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html
 2. Then use notepad++ to do a regex on "\r\n" and replace that with nothing
      Error: then check the file make sure semicolons and brakets are applied
-     
-
-
-oh ok....after your interview..when your employer finishes their ranking, go to your ranking page. If there's a drop-down, then it means you got ranked.
-
-To see if you've been offered, a job, go to the applications page, see how many active applications you have. Then, go to Job Inquiry and see how many available applications you have. Add the two together and if you have more than 50, then the difference from 50 = the number of offers.
