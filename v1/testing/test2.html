@@ -1,0 +1,130 @@
+<script language="javascript">
+     var infiniteloopCounter = 0;
+     
+     function clicked()
+     {    
+          infiniteloopCounter = 0;
+           document.getElementById("output").value = "";
+          var number = parseInt(document.getElementById("input").value);
+         //var out = decToBase62(number);
+         var out = IdecToBase62(number);
+          //alert(getBase62Char(number))
+          //alert(("Z").charCodeAt())
+         document.getElementById("output").value += "Final -> "+out+"\n";
+         document.getElementById("output").value += "Compression: "+out.length+"/"+document.getElementById("input").value.length+"   =>  "+(100-Math.round(parseFloat(out.length/document.getElementById("input").value.length)*1000)/10)+"%";
+     }
+     
+     function getBase62Char(num,out)        //from 0 - 61
+     {
+          if(out != false)
+          document.getElementById("output").value += "Converting: "+num+"\n"
+          
+          var BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          return BASE62[num];
+     }
+     
+     
+     function IdecToBase62(num)
+     {          
+          var base = 62;
+          var returnString = "";
+          var nextNum = num;
+          var lastExponent = null;
+          var exponent = 0;
+          while(nextNum >= base)
+          {
+               infiniteloopCounter++;
+               if(infiniteloopCounter > 100) 
+               {
+                    alert("infinite loop")
+                    return 0;
+               }
+               document.getElementById("output").value += "Number: "+nextNum+"\n"
+               exponent = 0;
+               
+               //See if when we have the correct exponent
+               while(nextNum >= Math.pow(base,parseInt(exponent+1)))
+               {   
+                    exponent++;
+               }
+               
+               var baseExponentBound = Math.pow(base,exponent);
+               var value = Math.floor(nextNum/baseExponentBound);
+               nextNum = nextNum % baseExponentBound;
+               document.getElementById("output").value += "Next: "+nextNum+" Push=> "+value+"  =>  EXP: "+exponent+"\n"
+               
+               //Push 0's if the exponents have large differences
+               if(lastExponent != undefined)
+               {
+                    //We now append 0's because of the spacing of the exponents
+                    for(var i=0;i < (lastExponent-1) - exponent; i++)
+                    {
+                         returnString += "0";
+                    }
+               }
+               lastExponent = exponent;
+               returnString += getBase62Char(value);
+          }
+          returnString += getBase62Char(nextNum);
+          return returnString;
+     }
+     
+     
+     function decToBase62(num, lastExponent)
+     {
+          infiniteloopCounter++;
+          if(infiniteloopCounter > 150) 
+          {
+               alert("infinite loop")
+               return 0;
+          }
+     
+          var ounter = 0;
+          var base = 62;
+          var exponent = 0;
+     
+          num = parseInt(num);
+          
+          
+          if(num < base )
+          {
+               document.getElementById("output").value += "Return small number: "+num+"\n"
+               return getBase62Char(num);
+          }
+       
+          
+          //See if when we have the correct exponent
+          while(num >= Math.pow(base,parseInt(exponent+1)))
+          {              
+               exponent++;
+               ounter++;
+          }
+          
+          var lowerBound = Math.pow(base,exponent);
+          var value = Math.floor(num/lowerBound);
+          var nextNum = num - value*lowerBound;
+          document.getElementById("output").value += "Next: "+nextNum+" Push=> "+value+"  =>  EXP: "+exponent+"\n"
+          
+          var spacing = "";
+          if(lastExponent != undefined)
+          {
+               //We now append 0's because of the spacing of the exponents
+               for(var i=0;i < (lastExponent-1) - exponent; i++)
+               {
+                    spacing += "0";
+               }
+          }
+          
+          
+          //Return #...0...next digits
+          return getBase62Char(value)+spacing+decToBase62(nextNum, exponent);
+     }
+     
+     
+</script>
+
+Input number<input id='input' style='margin-right:100px;width:400px;' type='text'/>Single-Digit base10 -> base62<input maxlength='2' onblur='document.getElementById("output2").innerHTML = getBase62Char(this.value,false);' style='margin-right:50px;' type='text'/>Output: <span id='output2' type='text'></span>
+<br/>
+Output Base 62<textarea id='output' style='width:100%; height:80%;min-height:200px;'></textarea>
+<br/>
+<button onclick='clicked()'>Equate</button>

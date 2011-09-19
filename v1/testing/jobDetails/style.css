@@ -1,0 +1,41 @@
+input.button{
+     float:right;
+}
+
+.important{
+     color:red;
+}
+
+.jobDescriptionArea td, #comments td{
+     font-size:14px;
+}
+
+.jobDescriptionArea .left{
+     width:100%;
+}
+
+.jobDescriptionArea .right td{
+     white-space:nowrap;     
+}
+
+.jobDescriptionArea a.location{
+     color: #3333cc;
+     text-decoration: none;
+}
+
+.jobDescriptionArea .category{
+     font-weight:bold;
+     padding-right:10px;
+     white-space:nowrap;   
+     width:10px;
+}
+
+#comments{
+     margin-top:10px;
+}
+
+#comments .category{
+     font-weight:bold;
+     padding-right:30px;
+}
+
