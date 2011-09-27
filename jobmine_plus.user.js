@@ -2,10 +2,11 @@
 // @name           Jobmine Plus
 // @namespace      http://eatthis.iblogger.org/
 // @description    Makes jobmine even better and looks good too!
-// @include        https://jobmine.ccol.uwaterloo.ca/psp/SS/*
-// @include        https://jobmine.ccol.uwaterloo.ca/psc/SS/*
+// @include        https://jobmine.ccol.uwaterloo.ca/psp/SS*
+// @include        https://jobmine.ccol.uwaterloo.ca/psc/SS*
 // @exclude        *WEBLIB_UW_DOCS.UW_CO_DOC_TEXT*
 // @exclude        *UW_CO_STUDENTS.UW_CO_EVALUATION*
+// @exclude        *UW_CO_STUDENTS.UW_CO_JOBDTLS*
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -51,6 +52,13 @@ var LINKS = {
    APPLICATIONS: CONSTANTS.PAGESIMILAR + "c/UW_CO_STUDENTS.UW_CO_APP_SUMMARY",
    INTERVIEWS  : CONSTANTS.PAGESIMILAR + "c/UW_CO_STUDENTS.UW_CO_STU_INTVS",
    RANKINGS    : CONSTANTS.PAGESIMILAR + "c/UW_CO_STUDENTS.UW_CO_STU_RNK2",
+   JOB_DESCR   : CONSTANTS.PAGESIMILAR + "c/UW_CO_STUDENTS.UW_CO_JOBDTLS?UW_CO_JOB_ID=",
+};
+
+var COLOURS = {
+   ROW_HIGHLIGHT        : "#f0f1ac",
+   HOVER                : "skyblue",
+   LINK_HIGHLIGHT_HOVER : "green",
 };
 
 var OBJECTS = {
@@ -64,6 +72,9 @@ var IMAGES = {
    UWBANNER       : "data:image/gif;base64,R0lGODlhaAAWAMQAAAAAAP///7+/v0BAQICAgO/v78/PzyAgII+Pj2BgYN/f35+fnzAwMHBwcBAQEK+vr1BQUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAABoABYAAAX/YEAAQzAAQCCQJiqixYMqBioE+Arc+II6hhyqdCLghMbELnBAOQEIXKExPL6e2KxrRHSJuqkRYMEsKXeGwYBhUxAerRKBgKieBgSF6GwoJK5PDQEPEEF3AQtzJ1qMWyyLR0aQYgwBDQsFDjYFAgJnAmmSAJUxi2BLTyUBNVkCCj8vJQadjbUBdWC3ei1hTgYKBT6bnZ9HOgAQDwVMj043WGSLWK6wXKu0tYzAEDdsYZW8gH8B3mhq3qB/MiQKCVGH0s9PRoxGhIbN2Y0Qy7dOL38mOXFQgJUNYzZWRIEwapeOU/Kc0GMUJYAfO/oyatzIsaPHjyBDihxJsqTJkyEf/3QqB0ClsCGd6sAUIGZUp5s4deTE+SnnggZNnCBYyejA0E4PzmBx0OBmUk0oyPhDAY5ZVBxUUMDBAVWVFStevuIQI/aIUh7SApU1EBRFgn5WFHiDgMNgRUtO+gU9YEWM17JhxZItiyMo2ixGCGdCQVexN70zjrACZzcu4rFYhDA64mTALjGHn/DF8SCooB4ACNZd9FazVCpVC0PB+mNZMBxKUSSu6eVYFs4SMS/hJbQultMBmEqBWgUHm8YKc9DeFXQcAlW+AezObDGnUuBahYd2hjvLrgFbZT4JghdAPwd6Coxmazwys10stz8hXNNYp13kHERcWGkJOMB4wV0hVdVFPrBXUVaqFDAHDy9pJ9w/ZfXHH3kDAsAeQ1iwdyBtWGwlRmNHMIScbGMQllyCvKWgQiOEZWUgNJp1dsQBib0i2hHSwFUACqPVV2RZNuqHYXb74RDeKk8gyAJqVPWzQpELQHUAez5eRaWHR2SVmHpTdqmkF5x4F1ZtF/IwC04tHaFAJ0cU4M1daVqRForSIBcUZE/sAuKZMma4JmNHoENYajx8ZecTUjmaW0Lr/NCJMAcKQCZjnYiRADHT7ATqDtigcJRMR+3kxKdyIsBcZ1tZtEBbIQAAOw==",
    HEADER_POINTER : "data:image/gif;base64,R0lGODlhFAAKAMQAAAAAALCwsMDAwM/Pz9vb2+jo6AMDA/Pz8/z8/P///6WlpQICAmNjY4uLi1lZWZOTk6Ojo3p6eqKiop2dnY+Pj3BwcIODg3l5eYSEhJeXl5+fn5ycnG5ubgAAAAAAAAAAACH5BAAAAAAALAAAAAAUAAoAAAVGICCOoqFIBqmuZpJoawy0brLJpAEhfJ/hs8lhSBxSZIZHYclsWlgNgnRKlV5IC8xgy+12OaJFREAum88CBqASaLvfcLcjBAA7",
    DELETE         : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAdZJREFUeNqklctOwkAUhqe1Ie50o9G9kSCoiW7gAQS64SV8CEQFFZaufQPd60ZQH4AHUGNko4CXlZfExCgJqf8xf83YlFLrJF+YMtMvM2fO6RiO46jXTMZSSk2ON5sP+JVnFbFNgWd4eialR2Af/byK3nLgABzCEzPRmQCjYBls4087onSdjjEwa2LZj+jsgiuQADvA/qN0AyyCW1CF80JWrNBpUHgN4jII8iGlZbAA2mANnMiA6c6AvI6fLdCSrYDaEHkWVEAKdEAJNNxBU59JedkjtwOkSdBlfI/1Cab3DYZFl3tj7m4/RWnJK5VmDdimyA1K4wyRA/pc3TxjKtI6x0KJFV9QlCa49R5P/wbcDZIOEyvtxQqFDkN0DwqDpL4x9ml9rtTh/E+wFyQNs+KslvwtSuekQnkG9ShikW4y+SWmRTBCqVuhapDcCpH8bUrPOKZnS5UhaQwV4yO0wkxIsqKkTE99sqWqFZHyyq0AaZfSekC21DT5r5hbmjSrVVQnQKo8K6xpFfqzI4vSnKeiin5xC1mh33LjJZ2e5pd/SauowrA89TRbq9BzsCorfgIf4FLuqwhS/UAlPd/kfAxepjE8zMgtgq+b84/LVFbchuP9S4ABAIyroRf/scQTAAAAAElFTkSuQmCC",
+   DELETE_DISABLE : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAdlJREFUeNqclc1OwkAURkttjDtXGt0bCIq44BlE2BCfRkCUiixd+wa61w0FfQXYYYxsEH9XujExSkLqd803ZNJMoTDJSUuZnLlz59421m63LQwHrII3a8aRyWTG951OZw2XTzwb2pRegwuQs+YckO7hcgmucL8o4hWwJIuDE5CfU3pIxzKIi/gdnIF7kAS1WeSUVsAOeASnSEXX4f9NEKM0IX8Cn88nDZEegxQYgBKkLXVoani8ijQO6tqippEFVbAFnkAZ0vFcJzDZY6R1TR7TFjVJnyW/kDb0CY4hErWqktcCO5LtH3H7Ii2DRlDihGwzmHOXOxnx9LeZU5F6iNaPKtYjdFktsvUhT78PXsKk08R6zqsUyn0PvIICfxuHHaFUR4zU5/xfcD5JGiXirFb8PUo32aGmaokkzvL008xpESxQmjRUS6RUqDpN8/RFestqEeGD6lC0dC6qeJeVkGJHlcBN4EBdpua/iUxyO0SqOqoUslWP7whdng8Tq+2rSIuTDodp0eU1XW5rbVrROuqAbepPqZomg1E5d5VcxOuMTnWURNua4dOkcq7e5xXIEyL+AD/gjm1aiBCpSS7V0gVfcj4Ou2ofbHBV35pjiByRyhdkgPvvPwEGAC74pOSa7O0XAAAAAElFTkSuQmCC",
+   TABLE_ASCEND   : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAECAYAAAC6Jt6KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAChJREFUeNpi/P//PwMSAHEYGfAAJjTFyDReDeiK/uPTgEsSqzhAgAEA5doJ/2fPKB8AAAAASUVORK5CYII=",
+   TABLE_DESCEND  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAECAYAAAC6Jt6KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAChJREFUeNpi/A8EDLgBI7oAEzZBXIphGrBJ4jIErgFZESMeJzIABBgACYsEC30vZjwAAAAASUVORK5CYII=",
 };
 
 /*===============================*\
@@ -76,7 +87,6 @@ String.prototype.empty = function(){
    return this == null || this.length == 0 || this == "";
 }
 Array.prototype.empty = function(){
-alert("sd2s")
    return this.length == 0;
 }
 
@@ -90,8 +100,15 @@ var UTIL = {
    idExists: function(idName) {
       return this.getID(idName) != null;
    },
-   isNumeric : function(input) {
-      return typeof input != "object" && (input - 0) == input && input.length > 0;
+   isNumeric : function(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+
+   },
+   isArray : function(o) {
+      return Object.prototype.toString.call(o) === '[object Array]';
+   },
+   isFunction : function(o) {
+      return Object.prototype.toString.call(o) === '[object Function]';
    },
    inRange : function(low_OR_mid, mid_OR_high, high_OR_null) {
       if (arguments.length == 2) {
@@ -110,7 +127,7 @@ if (!('localStorage' in window) || window['localStorage'] === null){
    return;
 }
 //Avoids stupid errors
-if (document.body == null) {
+if (document.body == null || document.body.className == "PSSRCHPAGE") {
    return;
 }
 
@@ -128,7 +145,7 @@ var PAGES = {
    DOCUMENTS   : "DOCUMENTS",
    PROFILE     : "PROFILE",
    SEARCH      : "SEARCH",
-   LIST        : "LIST",
+   LIST        : "SHORT_LIST",
    APPLICATIONS: "APPLICATIONS",
    INTERVIEWS  : "INTERVIEWS",
    RANKINGS    : "RANKINGS",
@@ -142,7 +159,7 @@ if (PAGEINFO.TITLE === "JobMine | University of Waterloo" && UTIL.idExists("user
 } else if (PAGEINFO.URL.contains("?tab=DEFAULT")) {
    PAGEINFO.TYPE = PAGES.HOME;
 } else if (PAGEINFO.TITLE.contains("Student Ranking")) {
-   PAGEINFO.TYPE = PAGES.HOME; 
+   PAGEINFO.TYPE = PAGES.RANKINGS; 
 } else {
    switch(PAGEINFO.TITLE) {
       case "Resumes":               PAGEINFO.TYPE = PAGES.DOCUMENTS;    break;
@@ -189,7 +206,7 @@ var BRIDGE = {
    init: function()
    {
       //Do allow the init to happen if the object exists
-      if(document.getElementById("USERSCRIPT_BRIDGE")) return;
+      if(document.getElementById("USERSCRIPT_BRIDGE")){return;}
       
       //Add the passing function
       var pass = document.createElement("div");
@@ -199,24 +216,20 @@ var BRIDGE = {
      
       //Attach detecting function events to page
       this.addJS(function(){
-         if(bridge_evt1 == null)
-         {
+         if(bridge_evt1 == null) {
             var bridge_evt1 = document.createEvent("Event");
             bridge_evt1.initEvent("BRIDGE_RETURN", true, true);
          }
-         if(bridge_evt2 == null)
-         {
+         if(bridge_evt2 == null) {
             var bridge_evt2 = document.createEvent("Event");
             bridge_evt2.initEvent("BRIDGE_RUNFUNCTION", true, true);
          }
-         if(bridge_evt3 == null)
-         {
+         if(bridge_evt3 == null) {
             var bridge_evt3 = document.createEvent("Event");
             bridge_evt3.initEvent("BRIDGE_RUNNEXTCOMMAND", true, true);
          }
          //Throws and returns a value
-         function throwBridgeEvent(value)
-         {
+         function throwBridgeEvent(value) {
             if (value != null) {
                document.getElementById("USERSCRIPT_BRIDGE").setAttribute("return", value);
             } else {
@@ -224,25 +237,50 @@ var BRIDGE = {
             }
             document.dispatchEvent(bridge_evt1);
          }
-         function runNextBridgeFunction()
-         {
+         function runNextBridgeFunction() {
             document.dispatchEvent(bridge_evt3);
+         }
+         function convertArgumentsToBridgePass(obj) { 
+            if(Object.prototype.toString.call(obj) != "[object Arguments]" || arguments.length == 0) {
+               return null;
+            }
+            //Check each arguement and form a string to pass
+            var returnStr = '';
+            var currentObj = obj[0];
+            if (currentObj != null) {
+               if((typeof currentObj).toLowerCase() != "object") {
+                  returnStr += currentObj;
+               } else {
+                  return null;
+               }
+            }
+            for(var i=1; i<obj.length;i++) {
+               returnStr += "[|||]";
+               currentObj = obj[i];
+               if (currentObj != null) {
+                  if((typeof currentObj).toLowerCase() != "object") {
+                     returnStr += currentObj;
+                  } else {
+                     return null;
+                  }
+               }
+            }
+            return returnStr;
          }
       });
       
       //Attach event and define the callback
-      function bridgeReturnSimpleValue()
-      {  //Save and send the data
-         if(BRIDGE.callback)
-         {
+      function bridgeReturnSimpleValue() {  
+         //Save and send the data
+         if(BRIDGE.callback) {
             var value = BRIDGE.returnObj.getAttribute("return");
             if (value) {
                //Parse the value by type
-               if(value*1 == value){               //Int
+               if(value*1 == value) { //Int
                   value *= 1;
-               }else{
-                  switch( value.toUpperCase() )    //Boolean
-                  {
+               } else {
+                  switch( value.toUpperCase() ) {
+                     //Boolean
                      case "FALSE":  value = false; break;
                      case "TRUE":   value = true;  break;
                   }
@@ -252,11 +290,19 @@ var BRIDGE = {
             BRIDGE.callback = null;
          }
       }
-      function handleGMFunction()
-      {
+      function handleGMFunction() {
+         //Pass arguments into the new function
+         var args = BRIDGE.returnObj.getAttribute("pass");
+         if (args != null) {
+            args = args.split("[|||]");
+            BRIDGE.returnObj.removeAttribute("pass");
+         } else {
+            args = null;
+         }
          var value = BRIDGE.returnObj.getAttribute("run");
          BRIDGE.returnObj.removeAttribute("run");
-         var returnVal = BRIDGE.GMFunctions[value]();
+         //Run the function here
+         var returnVal = BRIDGE.GMFunctions[value].apply(this,args);
          if (returnVal != null) {
             BRIDGE.returnObj.setAttribute("return", returnVal);
          } else {
@@ -268,22 +314,26 @@ var BRIDGE = {
       document.addEventListener("BRIDGE_RUNNEXTCOMMAND", this.runNextQueueCommand, false);
    },
    //Registers a function in the userscript namespace and can be called from the page
-   registerFunction : function(name, function_code)
-   {
+   registerFunction : function(name, function_code) {
       this.GMFunctions[name] = function_code;
       
       //Place the a copy of the function on the dom but still calls up here
       this.addFunction(name, function(){
-         document.getElementById("USERSCRIPT_BRIDGE").setAttribute("run", function_name);
+         var args = convertArgumentsToBridgePass(arguments);
+         var bridge = document.getElementById("USERSCRIPT_BRIDGE");
+         if(args != null) {
+            bridge.setAttribute("pass", args);
+         }
+         bridge.setAttribute("run", function_name);
          document.dispatchEvent(bridge_evt2);
-         var value = document.getElementById("USERSCRIPT_BRIDGE").getAttribute("return");
+         var value = bridge.getAttribute("return");
          if (value) {
             //Parse the return value by type
             if(value*1 == value){               //Int
                value *= 1;
             }else{
-               switch( value.toUpperCase() )    //Boolean
-               {
+               switch( value.toUpperCase() ) {
+                  //Boolean
                   case "FALSE":  value = false; break;
                   case "TRUE":   value = true;  break;
                }
@@ -294,10 +344,8 @@ var BRIDGE = {
       
    },
    //Unregisters a userscript function
-   unregisterFunction : function(name)
-   {
-      if(this.GMFunctions.hasOwnProperty(name))
-      {
+   unregisterFunction : function(name) {
+      if(this.GMFunctions.hasOwnProperty(name)) {
          this.GMFunctions[name] = null;
          
          //Nulls the function on the page
@@ -307,24 +355,22 @@ var BRIDGE = {
       return false;
    },
    //Adds a function to the page
-   addFunction : function(name, function_code, arguments)
-   {  
+   addFunction : function(name, function_code, arguments) {  
       if (function_code == null){ function_code = function(){}; }
       //Add the function with the name and function
       function_code = this.handleArguments(function_code, arguments);
       
-      if(function_code == null || name == null) return;
+      if(function_code == null || name == null) {return;}
       var code = (function_code+"").replace("function", "function " + name);
       this.appendScript(code);
    },
    //Adds some javascript to the page
-   addJS : function( code, arguments )
-   {
-      code = this.handleArguments(code, arguments);
-      if(code == null) return;
+   addJS : function( code, arguments ) {
+      if(code == null) {return;}
       //Check to see if its a function then remove the function part and the last }
-      if(typeof(code) == "function")
-      {  
+      if(typeof(code) == "function") {  
+         code = this.handleArguments(code, arguments);
+         
          //Strips the function(){} wrapper
          code =  (code+"").replace(/\n/g, "");    //Convert to string
          code = code.replace(/^[^{]*?{/, "");
@@ -333,23 +379,20 @@ var BRIDGE = {
       }
    },
    //Simulate a click
-   click : function ( obj )
-   {
-      if(obj == null) return false;
+   click : function ( obj ) {
+      if(obj == null){return false;}
       var evt = document.createEvent("HTMLEvents"); 
       evt.initEvent("click", true, true);
       obj.dispatchEvent(evt);
    },
    //Get a variable from the namespace of the page, asynchonized
-   read : function ( _global_var, _callback, _arguments )
-   {
+   read : function ( _global_var, _callback, _arguments ) {
       this.run("function(){throwBridgeEvent(" + _global_var + ");}", _callback, _arguments);
    },
    //Execute code on the webpage
-   run : function( _function_code, _callback, _arguments )
-   {
+   run : function( _function_code, _callback, _arguments ) {
       _function_code = this.handleArguments(_function_code, _arguments);
-      if(_function_code == null) return;
+      if(_function_code == null) {return;}
       
       //escape() is a workaround so that code is not interpreted incorrectly
       if(_callback != null && typeof(_callback) == "function"){
@@ -367,16 +410,13 @@ var BRIDGE = {
       this.runNextQueueCommand();
    },
    //Miscellaneous - Internal
-   runNextQueueCommand : function(evt)
-   {
+   runNextQueueCommand : function(evt) {
       //IF there was an event, this was called via last queue item was finished
-      if(evt)
-      {
+      if(evt) {
          BRIDGE.isRunningCommand = false;
       }
       //Run something in the queue
-      if(BRIDGE.runQueue.length > 0 && !BRIDGE.isRunningCommand)     
-      {
+      if(BRIDGE.runQueue.length > 0 && !BRIDGE.isRunningCommand) {
          BRIDGE.isRunningCommand = true;
          var item = BRIDGE.runQueue.shift();
          
@@ -394,21 +434,20 @@ var BRIDGE = {
       script.innerHTML = _code;
       document.body.appendChild(script)
    },
-   handleArguments : function(_code, _arguments)
-   {
-      if(_code       == null) return null;
-      if(_arguments  == null) return _code;
+   handleArguments : function(_code, _arguments) {
+      if(_code       == null) {return null;}
+      if(_arguments  == null) {return _code;}
       
       //Loop through each and place the initial varibles
       var initVar = "";
-      for(var variable in _arguments)     
-      {
+      for(var variable in _arguments) {
          var value = _arguments[variable];
          var isArray = Object.prototype.toString.call( value ) === '[object Array]';
-         if(isArray)
+         if(isArray){
             value = "('" + escape(value.join("|||")) + "').split('%7C%7C%7C')";     //each '%7C' is '|'
-         else if(typeof(value) == "string" || typeof(value) == "object")
+         } else if (typeof(value) == "string" || typeof(value) == "object") {
             value = "'" + escape(value) + "'";
+         }
          initVar += "var " + variable + " = " + value + ";";
       }
       return (_code + "").replace(/^[^{]*?{/, "function(){" + initVar);
@@ -555,14 +594,66 @@ function removeTimer() {
    }
    });
    BRIDGE.addFunction("setupTimeout");
+   BRIDGE.addFunction("refreshOnExpired");
 }
 
+/**
+ *    Ajax complete on webpage
+ */
+function ajaxComplete() {  
+   
+}
 
 /*================================*\
 |*             _TABLE_            *|
 \*================================*/
 
 {/*===== Expand to see the table functions/class =====*/
+
+/**
+ *    Table filters: used to apply the filters before building
+ */
+var TABLEFILTERS = {
+   normal : function(cell){
+      return cell;
+   },
+   deleteRow : function(cell, row, rowData, reverseLookup){
+      var element = cell.substring(1, cell.indexOf(" ")).toUpperCase();
+      if (element == "A") {
+         var start = cell.indexOf(" onclick");
+         var onclick = cell.substring(start, cell.indexOf(";\"", start)) + ";\"";
+         return "<span class='delete noselect' "+onclick+"></span>";
+      } else if (element == "IMG") {
+         return "<span class='delete noselect disabled'></span>";
+      } else {
+         return cell;
+      }
+   },
+   jobDescription : function(cell, row, rowData, reverseLookup){
+      if (reverseLookup.hasOwnProperty("Job Identifier")) {
+         var columnNumber = reverseLookup["Job Identifier"];
+         var link = LINKS.JOB_DESCR + rowData[columnNumber];
+         var end = cell.lastIndexOf("<");
+         var jobDescription = cell.substring(cell.lastIndexOf("\">", end) + 2, end);
+         return "<a target='_blank' class='PSHYPERLINK' href='"+link+"'>"+jobDescription+"</a>";
+      }
+      return cell;
+   },
+   googleSearch : function(cell, row, rowData, reverseLookup){ 
+      return "<a href='http://www.google.ca/#sclient=psy-ab&q="+cell.replace(/\s/g,"+")+"' title='Google search that company!' target='_blank' class='PSHYPERLINK'>"+cell+"</a>";
+   },
+   googleMap : function(cell, row, rowData, reverseLookup){ 
+      var search;
+      if (reverseLookup.hasOwnProperty("Employer Name")) {
+         var columnIndex = reverseLookup["Employer Name"];
+         search = rowData[columnIndex] + ",+" + cell;
+      } else {
+         search = cell;
+      }
+      return "<a href='http://maps.google.ca/maps?q="+(search.replace(/\s/g,"+"))+"' title='Google maps that company!' target='_blank' class='PSHYPERLINK'>"+cell+"</a>";
+   },
+}; 
+
 /**
  *    Class declaration: default
  */
@@ -571,12 +662,12 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    this.id;
    this.tableID;
    this.name = defaultName;
-   this.headers = []
+   this.headers = [];
    this.controls = null;
    this.excel = "";
    this.data = [];
    this.html = null;
-   this.filters = [];
+   this.filters = {};
    
    //Getter for rows and columns
    this.__defineGetter__("rows", function(){
@@ -596,8 +687,8 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    });
    
    //Try to build the table if the rest of the arguments are present
-   if (tableID != null && tableID != "" && objectToAppendTo != null) {
-      if( this.parseTable(tableID) ) {
+   if (tableID != null && tableID != "") {
+      if( this.parseTable(tableID) && objectToAppendTo != null ) {
          this.appendTo(objectToAppendTo);
       }
    }
@@ -656,10 +747,14 @@ JbmnplsTable.prototype.parseTable = function(tableID) {
    var tableRows = table.find("table.PSLEVEL1GRID tr");
    var listOfHeaderObjs = tableRows.eq(0).find("th.PSLEVEL1GRIDCOLUMNHDR");
    var headers = [];
+   var filters = {};
    listOfHeaderObjs.each(function(a){
-      headers.push($(this).plainText());
+      var header = $(this).plainText();
+      filters[header] = TABLEFILTERS.normal;
+      headers.push(header);
    });
    this.headers = headers;
+   this.filters = filters;
    
    //Get the body cells information
    for(var r = 1; r < tableRows.length; r++) {     //Each Row
@@ -699,7 +794,7 @@ JbmnplsTable.prototype.parseTable = function(tableID) {
    headers = null;
    bodyData = null;
    this.parsed = true;
-   return true;
+   return this;
 };
 
 /**
@@ -711,16 +806,40 @@ JbmnplsTable.prototype.empty = function() {
 };
 
 /**
+ *    Change a header's name
+ */
+JbmnplsTable.prototype.setHeaderAt = function(index, newName) {
+   if (this.empty() || newName == null || newName == "" || !UTIL.isNumeric(index)) {
+      return false;
+   }
+   Assert(UTIL.inRange(index, this.columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
+   //Hold old info and apply the new ones to the header and the filter
+   var oldHeader = this.headers[index];
+   
+   //No need to update header
+   if (oldHeader == newName) {
+      return this;
+   }
+   var oldFilter = this.filters[oldHeader];
+   this.headers[index] = newName;
+   delete this.filters[oldHeader];
+   this.filters[newName] = oldFilter;
+   return this;
+}
+
+/**
  *    Inserts a column
  *       Option 1: headerName = [String:header text]; index_OR_Array_Filter = DATA or index to insert column; data_Array_OR_Filter = DATA
  *       Option 2: headerName = [String:header text]; index_OR_Array_Filter = DATA     
- *       - DATA = [Array:list of values in that column|Function:a function that returns a value, passes the rowArray as argument]
+ *       - DATA = [Array:list of values in that column|Function:a function that returns a value, passes the rowArray then the rowNumber as the arguments]
  *       - Option 2 appends the column to the end
  */
 JbmnplsTable.prototype.insertColumn = function(headerName, index_OR_Array_Filter, data_Array_OR_Filter) {
-   if (this.empty() || index_OR_Array_Filter == null || headerName.empty()) {
+   //Last one is if we have the header name already
+   if (this.empty() || index_OR_Array_Filter == null || headerName.empty() || this.filters.hasOwnProperty(headerName)) {   
       return false;
    }
+  
    //Parse the inputs
    var index, data;
    //If inputted an array or function, then append the data
@@ -736,15 +855,16 @@ JbmnplsTable.prototype.insertColumn = function(headerName, index_OR_Array_Filter
       return false;
    }
    var dataIsArray;
-   if ($.isArray(data) && data.length > 0) {
+   if (UTIL.isArray(data) && data.length > 0) {
       dataIsArray = true;
-   } else if(typeof data == "function") {
+   } else if(UTIL.isFunction(data)) {
       dataIsArray = false;
    } else {
       return false;
    }
    //Add the column now
    this.headers.splice(index, 0, headerName);
+   this.filters[headerName] = TABLEFILTERS.normal;
    for(var r = 0; r < this.rows; r++) {
       var cellData = "";
       if (dataIsArray) {
@@ -752,12 +872,12 @@ JbmnplsTable.prototype.insertColumn = function(headerName, index_OR_Array_Filter
             cellData = data[r];
          }
       } else {
-         cellData = data.call(null, this.data[r]);
+         cellData = data.call(null, r, this.data[r]);
       }
       this.data[r].splice(index, 0, cellData);
    }
    data = null;
-   return true;
+   return this;
 };
 
 /**
@@ -765,7 +885,7 @@ JbmnplsTable.prototype.insertColumn = function(headerName, index_OR_Array_Filter
  *       intoIndex = [header stays!] any index that the new info goes to (does not have to be smaller than fromIndex)
  *       fromIndex = [header is deleted!] any index that the information is retrieved
  *       headerName (optional) = name of the new merged column; if null, then takes original name
- *       filterFunction (optional) = a function that reads in (intoCell, fromCell) and you return the value placed in the merged cell
+ *       filterFunction (optional) = a function that reads in (intoCell, fromCell, rowNumber) and you return the value placed in the merged cell
  */
 JbmnplsTable.prototype.merge = function(intoIndex, fromIndex, headerName, filterFunction) {
    if (this.empty() || intoIndex == null || fromIndex == null) {
@@ -773,14 +893,19 @@ JbmnplsTable.prototype.merge = function(intoIndex, fromIndex, headerName, filter
    }
    var columns = this.columns;
    Assert(UTIL.inRange(intoIndex, columns-1) && UTIL.inRange(intoIndex, columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
-   if (filterFunction == null || typeof filterFunction != "function") {
+   if (filterFunction == null || !UTIL.isFunction(filterFunction)) {
       filterFunction = function(a, b){
          return a + " | " + b;
       }
    }
+   //Delete the filters
+   delete this.filters[this.headers[fromIndex]];
+   
    //Set new header
    if (headerName != null && headerName.length > 0){
       this.headers[intoIndex] = headerName;
+      delete this.filters[this.headers[intoIndex]];
+      this.filters[headerName] = TABLEFILTERS.normal;
    };
    this.headers.splice(fromIndex, 1);
    for(var r = 0; r < this.rows; r++) {
@@ -788,7 +913,7 @@ JbmnplsTable.prototype.merge = function(intoIndex, fromIndex, headerName, filter
       var rowData = this.data[r];
       var a = rowData[intoIndex];
       var b = rowData[fromIndex];
-      var value = filterFunction.call(null, a, b);
+      var value = filterFunction.call(null, a, b, r);
       this.data[r][intoIndex] = value;
       
       //Remove the old column
@@ -796,6 +921,7 @@ JbmnplsTable.prototype.merge = function(intoIndex, fromIndex, headerName, filter
    }
    rowData = null;
    filterFunction = null;
+   return this;
 }
 
 /**
@@ -806,11 +932,12 @@ JbmnplsTable.prototype.deleteColumn = function(index) {
       return false;
    }
    Assert(index >= 0 && index < this.columns, MESSAGE.ARRAY_OUT_OF_BOUNDS);
+   delete this.filters[this.headers[index]];
    this.headers.splice(index, 1);
    for(var r = 0; r < this.rows; r++) {
       this.data[r].splice(index, 1);
    }
-   return true;
+   return this;
 };
 
 /**
@@ -822,7 +949,7 @@ JbmnplsTable.prototype.deleteColumnRange = function(startIndex_deleteArr, endInd
    if (this.empty() || startIndex_deleteArr == null || endIndex == null) {
       return false;
    }
-   if ($.isArray(startIndex_deleteArr)) { //If one input: array of indexes
+   if (UTIL.isArray(startIndex_deleteArr)) { //If one input: array of indexes
       var toDelete = startIndex_deleteArr.sort();
       for (var i = toDelete.length -1; i >= 0; i++) { 
          var index = toDelete[i];
@@ -832,14 +959,20 @@ JbmnplsTable.prototype.deleteColumnRange = function(startIndex_deleteArr, endInd
       var startIndex = startIndex_deleteArr;
       Assert(startIndex <= endIndex, MESSAGE.INDEX_RANGE_INCORRECT);
       Assert(startIndex >= 0 && endIndex < this.columns, MESSAGE.ARRAY_OUT_OF_BOUNDS);
-      
-      //Delete now
       var amountToDelete = endIndex - startIndex + 1;
+      
+      //Delete filters
+      for(var i = startIndex; i < amountToDelete; i++) {
+         delete this.filters[this.headers[i]];
+      }
+      
+      //Delete rows
       this.headers.splice(startIndex, amountToDelete);
       for(var r = 0; r < this.rows; r++) {
          this.data[r].splice(startIndex, amountToDelete);
       }
    }
+   return this;
 };
 
 /**
@@ -851,7 +984,7 @@ JbmnplsTable.prototype.deleteRow = function(index) {
    }
    Assert(index >= 0 && index < this.rows, MESSAGE.ARRAY_OUT_OF_BOUNDS);
    this.data.splice(index, 1);
-   return true;
+   return this;
 };
 
 /**
@@ -863,7 +996,7 @@ JbmnplsTable.prototype.deleteRowRange = function(startIndex_deleteArr, endIndex)
    if (this.empty() || startIndex_deleteArr == null || endIndex == null) {
       return false;
    }
-   if ($.isArray(startIndex_deleteArr)) { //If one input: array of indexes
+   if (UTIL.isArray(startIndex_deleteArr)) { //If one input: array of indexes
       var toDelete = startIndex_deleteArr.sort();
       for (var i = toDelete.length -1; i >= 0; i--) {       //Delete backwards
          var index = toDelete[i];
@@ -879,7 +1012,7 @@ JbmnplsTable.prototype.deleteRowRange = function(startIndex_deleteArr, endIndex)
       alert(amountToDelete)
       this.data.splice(startIndex, amountToDelete);
    }
-   return true;
+   return this;
 };
 
 /**
@@ -899,7 +1032,47 @@ JbmnplsTable.prototype.trim = function() {
          this.deleteColumn(c);
       }
    }
+   return this;
 };
+
+/**
+ *    Apply a filter so it filters columns when it builds
+ */
+JbmnplsTable.prototype.applyFilter = function(columnInput, filterFunction) {
+   if (this.empty() || columnInput == null || !UTIL.isFunction(filterFunction)) {
+      return false;
+   }
+   if (this.filters.hasOwnProperty(columnInput)) {
+       //We inputted a header
+      this.filters[columnInput] = filterFunction;
+   } else if(UTIL.isNumeric(columnInput)) {
+      //We inputted a Number
+      Assert(UTIL.inRange(columnInput, this.columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
+      var header = this.headers[columnInput];
+      alert(header)
+      this.filters[header] = filterFunction;
+   }
+   return this;
+}
+
+/**
+ *    Removes a filter for a column
+ */
+JbmnplsTable.prototype.removeFilter = function(columnInput) {
+   if (this.empty() || columnInput == null) {
+      return false;
+   } 
+   if (this.filters.hasOwnProperty(columnInput)) {
+       //We inputted a header
+      this.filters[columnInput] = TABLEFILTERS.normal;
+   } else if(UTIL.isNumeric(columnInput)) {
+      //We inputted a Number
+      Assert(UTIL.inRange(columnInput, this.columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
+      var header = this.headers[columnInput];
+      this.filters[header] = TABLEFILTERS.normal;
+   }
+   return this;
+}
 
 /**
  *    Builds the table into html and returns it
@@ -910,25 +1083,31 @@ JbmnplsTable.prototype.build = function() {
    }
    this.id = "jbmnpls" + this.name.replace(/\s/g,"_");
    this.tableID = this.id + "Table";
-   var html =  "<div id='"+this.id+"' class='jbmnplsTable'><div class='jbmnplsTableHeader noselect'><div class='jbmnplsTableName'>" + this.name + "</div><div class='jbmnplsTableControls'>";
-   html +=     "<span class='pages'>"+(this.controls != null ? this.controls : "")+"</span><a class='options' href='#'>Customize</a> | <a class='options' href='#'>Export</a>";
+   var html =  "<div id='"+this.id+"' class='jbmnplsTable'><div class='jbmnplsTableHeader noselect'><div class='jbmnplsTableName'>" + this.name + (this.rows==0?"":" ("+this.rows+" Rows)");
+   html +=     "</div><div class='jbmnplsTableControls'><span class='pages'>"+(this.controls != null ? this.controls : "")+"</span><a class='options' href='#'>Customize</a> | <a class='options' href='#'>Export</a>";
    html +=     "</div></div><table class='fullWidth tablesorter' id='"+this.tableID+"' cellspacing=0 cellpadding=0 width='100%' height='auto'>";
    //Parse Header
    html +=     "<thead><tr row='header' class='noselect'>";
+   var inverseHeaderLookup = {};
    for (var h = 0; h < this.columns; h++) {
       if (h < this.headers.length) {
-         html +=  "<th col='" + h + "'>" + this.headers[h] + "</th>";
+         var header = this.headers[h];
+         inverseHeaderLookup[header] = h;
+         html +=  "<th col='" + h + "'>" + header + "</th>";
       } else {
          html +=  "<th></th>";
       }
    }
    html +=     "</tr></thead><tbody>";
+   
    //Each row
    for(var r = 0; r < this.data.length; r++) {
       html += "<tr row='" + r + "'>";
       var rowData = this.data[r];
       for (var c = 0; c < this.columns; c++) {
-         html += "<td col='" + c + "'>" + rowData[c] + "</td>";
+         var header = this.headers[c];
+         var cellData = this.filters[header].call(null, rowData[c], r, rowData, inverseHeaderLookup);
+         html += "<td col='" + c + "'>" + cellData + "</td>";
       }
       html += "</tr>";
    }
@@ -957,10 +1136,26 @@ JbmnplsTable.prototype.appendTo = function(obj) {
    }
    obj.append(this.html);
    obj = $("#" + this.tableID);
-   if (this.rows > 0) {
+   if (this.rows > 1) {
       obj.tablesorter();
    }
-   return;
+   // Implement the click highlight technique
+   // must kill with die when changing content of the table before updating contents
+   $("#" + this.tableID + " tbody tr").live("click", function (){
+      var obj = $(this);
+      //Clicked the same row, ignore
+      var thisID = obj.attr("id");
+      if (thisID != null && thisID == "lastClickedRow"){  
+         return;
+      }
+      //Removed the last clicked hightlight
+      var lastObj = $("#lastClickedRow");
+      if (lastObj.exists()) {
+         lastObj.removeAttr("id");
+      }
+      obj.attr("id", "lastClickedRow");
+   });
+   return obj;
 }
 
 }
@@ -983,7 +1178,7 @@ if (PAGEINFO.IN_IFRAME) {
 switch (PAGEINFO.TYPE) {
    case PAGES.HOME:
       if (!PAGEINFO.IN_IFRAME) {
-         var currentPage = LINKS.APPLICATIONS;
+         var currentPage = LINKS.LIST;
          //Cancel the load for the item
          BRIDGE.addFunction("loadAllPgltData");
          
@@ -1020,33 +1215,67 @@ switch (PAGEINFO.TYPE) {
          return;
       } else {
          //Apply the header for the page
-         $("body").prepend("<div class='pageTitle noselect'>"+PAGEINFO.TYPE+"</div>");
+         $("body").prepend("<div class='pageTitle noselect'>"+PAGEINFO.TYPE.replace(/_/g, " ")+"</div>");
          var form = $("form:eq(0)");
          
          //Parse Individual pages here
          switch(PAGEINFO.TYPE){
             case PAGES.PROFILE:
-               var table0 = new JbmnplsTable("Profile", "UW_CO_STDTERMVW$scroll$0", document.body);
+               var table0 = new JbmnplsTable("Profile", "UW_CO_STDTERMVW$scroll$0");
+               table0.applyFilter(0,function(cell, row, rowData){
+                  return cell * 2;
+               });
+               table0.appendTo(form);
                form.children("div:not('.jbmnplsTable')").remove();
+               break;
+            case PAGES.LIST:
+               //var saveButton = $(UTIL.getID('#ICSave')).outerHTML();
+              // form.find("div").css("display", "none");
+               var table = new JbmnplsTable("Jobs", "UW_CO_STUJOBLST$scrolli$0");
+               table.applyFilter("", TABLEFILTERS.deleteRow)
+                    .applyFilter("Job Title", TABLEFILTERS.jobDescription)
+                    .applyFilter("Employer Name", TABLEFILTERS.googleSearch)
+                    .applyFilter("Location", TABLEFILTERS.googleMap)
+                    .setHeaderAt(7, "Delete")
+                    .appendTo(form);
+               
+               BRIDGE.registerFunction("ajaxComplete", ajaxComplete);
+               
+               BRIDGE.addJS(function(){
+                  net.ContentLoader.prototype.onReadyState = function() {
+                     var req = this.req;
+                     var name = this.name;
+                     //Loaded
+                     if (req.readyState == 4 && req.status == 200) {
+                        try{
+                           //alert("something happened "+name)
+                           alert("finished")
+                           ajaxComplete();
+                        }catch(e){alert(e)}
+                        this.onload.call(this);
+                     }
+                  }
+               });
                break;
             case PAGES.DOCUMENTS:
                var table0 = new JbmnplsTable("Resumes");
                table0.parseTable("UW_CO_RESUMES$scrolli$0");
                var code = table0.build();
                $("body").css("padding", "0px 50px").append(code)
-               //table0.parseTable("UW_CO_STU_APPSV$scroll$0");
                break;
             case PAGES.SEARCH:
-               break;
-            case PAGES.LIST:
+                //Override this function
                break;
             case PAGES.APPLICATIONS:
-               var code = $(UTIL.getID('#ICSave')).outerHTML();
+               var saveButton = $(UTIL.getID('#ICSave')).outerHTML();
+               var table1 = new JbmnplsTable(null, "UW_CO_STU_APPSV$scroll$0");
+               table1.applyFilter(9, TABLEFILTERS.deleteRow).appendTo(form);
+               var table0 = new JbmnplsTable(null, "UW_CO_APPS_VW2$scrolli$0");
+               table0.applyFilter(11, TABLEFILTERS.deleteRow).appendTo(form);
+               
                //Clean up all webpage :P
-               var table1 = new JbmnplsTable(null, "UW_CO_STU_APPSV$scroll$0", form);
-               var table0 = new JbmnplsTable(null, "UW_CO_APPS_VW2$scrolli$0", form);
                form.children("div:not('.jbmnplsTable')").remove();
-               form.append(code);
+               form.append(saveButton);
                break;
             case PAGES.INTERVIEWS:
                break;
@@ -1069,6 +1298,25 @@ var CSSOBJ = {
       padding  : '0',
       margin   : '0',
       height   : "100%",
+   },
+   /**
+    *    Random Styles
+    */
+   "div.pageTitle" : {
+      "font-family"     : "Verdana, Arial",
+      "font-size"       : "30px",
+      "letter-spacing"  : "15px",
+      "color"           : "#555555",
+      "margin-bottom"   : "40px",
+   },
+   "body.iframe"  : {
+      "padding"   : "30px 50px 20px",
+      "-moz-box-sizing" : "border-box",
+      "-webkit-box-sizing" : "border-box",
+      "box-sizing" : "border-box",
+   },
+   "a.PSHYPERLINK" : {
+      "outline" : "none",
    },
    /**
     *    Cannot select any text with this
@@ -1196,7 +1444,7 @@ var CSSOBJ = {
       "empty-cells" : "show",
       "min-width" : "100%",
       "display" : "inline-block",
-      "margin-top" : "40px",
+      "margin-bottom" : "40px",
    },
    "div.jbmnplsTable *" : {
       "font-family" : "Verdana, Arial",
@@ -1224,7 +1472,7 @@ var CSSOBJ = {
       "vertical-align" : "middle",
    },
    "div.jbmnplsTable table td" : {
-      "padding" : "0 10px",
+      "padding" : "0px 15px",
       "border-bottom" : "1px #929292 solid",
    },
    "div.jbmnplsTable table tr[row='header']" : {
@@ -1235,8 +1483,14 @@ var CSSOBJ = {
       "background-color" : " white",
       "height" : "40px",
    },
-   "div.jbmnplsTable table tr:not([row='header']):hover" : {
-      "background-color" : " skyblue",
+   "div.jbmnplsTable table tr#lastClickedRow td" : {
+      "background-color" : COLOURS.ROW_HIGHLIGHT + " !important",
+   },
+   "div.jbmnplsTable table tr:hover td" : {
+      "background-color" : COLOURS.HOVER,
+   },
+   "div.jbmnplsTable table tr td a:hover" : {
+      "color" : COLOURS.LINK_HIGHLIGHT_HOVER,
    },
    "div.jbmnplsTable table tr th" : {
       "color" : "white",
@@ -1245,17 +1499,28 @@ var CSSOBJ = {
       "border-bottom" : "2px solid black",
       "height" : "20px",
       "text-align" : "left",
-      "padding" : "5px 10px",
+      "padding" : "5px 15px",
+   },
+   "div.jbmnplsTable table tr th.headerSortDown" : {
+      background : "right center no-repeat url('"+IMAGES.TABLE_DESCEND+"')",
+   },
+   "div.jbmnplsTable table tr th.headerSortUp" : {
+      background : "right center no-repeat url('"+IMAGES.TABLE_ASCEND+"')",
    },
    "div.jbmnplsTable table tr th:hover" : {
       "background-color" : "#AAAAAA",
       "cursor" : "pointer",
    },
-   "div.jbmnplsTable table td a.delete" : {
+   "div.jbmnplsTable table td span.delete" : {
       "background" : "url('"+IMAGES.DELETE+"')",
       "height" : "22px",
       "width" : "22px",
       "display" : "block",
+      "cursor" : "pointer",
+   },
+   "div.jbmnplsTable table td .delete.disabled" : {
+      "background" : "url('"+IMAGES.DELETE_DISABLE+"')",
+      "cursor" : "default",
    },
    "div.jbmnplsTable div.jbmnplsTableControls" : {
       "float" : "right",
@@ -1287,19 +1552,6 @@ var CSSOBJ = {
     div.jbmnplsTable.hideColumn14 *[col='14']": {
       display : "none",
    },
-   /**
-    *    Random Styles
-    */
-   "div.pageTitle" : {
-      "font-family"     : "Verdana, Arial",
-      "font-size"       : "30px",
-      "letter-spacing"  : "15px",
-      "margin-top"      : "30px",
-      "color"           : "#555555",
-   },
-   "body.iframe"  : {
-      "padding"   : "0 50px 20px",
-   }
 };
 var cssString = "";
 for(var selector in CSSOBJ) {
