@@ -67,11 +67,12 @@ var COLOURS = {
 };
 
 var OBJECTS = {
-   HIGHLIGHT : null,
+   HIGHLIGHT      : null,
+   ONPOPUPCLOSE   :  null,
 };
 
 var LARGESTRINGS = {
-   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div class='content'><div class='title'></div><div class='body'></div></div></div></div>",
+   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div class='content noselect'><div id='jbmnplsPopupTitle' class='title'></div><div id='jbmnplsPopupBody' class='body'></div><div id='jbmnplsPopupFooter' class='footer'><span class='fakeLink save' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
 };
 
 var IMAGES = {
@@ -682,14 +683,16 @@ function redirect(newURL) {
  *    Navigation Pointer/Selection
  */
 function setTitle(name){
-  if(name == null) {
+   try{
+   if(name == null) {
       return;
-  }
-  if (PAGEINFO.IN_IFRAME) {
+   }
+   if (PAGEINFO.IN_IFRAME) {
       /*window.parent.document.title = name;*/
-  } else {
+   } else {
       document.title = name;
-  }
+   }
+   }catch(e){alert(e)}
 }
 function setNavSelection(linkObj) {
    Debug(function(){
@@ -731,7 +734,7 @@ function addHeader() {
 /**
  *    Popup
  */
-function showPopup(isBlack, message, title, width, height){
+function showPopup(isBlack, body, title, width, height, onCloseFunction){
    var popup = $("#jbmnplsPopup");
    if (!popup.exists()) {
       $("body").append(LARGESTRINGS.POPUP);
@@ -739,6 +742,10 @@ function showPopup(isBlack, message, title, width, height){
    if (isBlack == null) {isBlack = true;}
    $("body").addClass("showPopup");
    popup = $("#jbmnplsPopup");
+   popup.css("display", "block");
+   if (isBlack) {
+      popup.attr("name", title.toLowerCase().replace(/\s/g,"_"));
+   }
    popup[0].className = isBlack ? "black" : "white";
    var content = popup.find("div.content:eq(0)");
    if(width!=null) {
@@ -749,24 +756,75 @@ function showPopup(isBlack, message, title, width, height){
       content.css("top", -height/2 + "px");
       content.css("height", height + "px");
    }
-   var node = content.find(":first-child")
+   var node = $("#jbmnplsPopupTitle");
    if(title!=null){
       node.text(title);
    }
    if(node!=null) {
-      node.next().html(message);
+      node.next().html(body);
+   }
+   if(onCloseFunction != null && UTIL.isFunction(onCloseFunction)) { 
+      OBJECTS.ONPOPUPCLOSE = onCloseFunction;
+   } else {
+      OBJECTS.ONPOPUPCLOSE = null;
    }
 }
-function hidePopup() {
+function hidePopup(arg) {
    var popup = $("#jbmnplsPopup");
    if (popup.exists()) {
-      $("body").removeClass("showPopup");
+      popup.css("display", "none");
+      popup.removeAttr("name");
+      //Lag time when closing window
+      setTimeout(function(){$("body").removeClass("showPopup");},100);
+   }
+   if(OBJECTS.ONPOPUPCLOSE != null) { 
+      OBJECTS.ONPOPUPCLOSE.call(this,arg);
    }
 }
+BRIDGE.registerFunction("hidePopup", hidePopup);
 function isPopupShown(strictIsBlack){
    if (strictIsBlack==null) {strictIsBlack = false;}
-   return $("body").hasClass("showPopup") && (!strictIsBlack || strictIsBlack && $("#jbmnplsPopup").hasClass("white"));
+   return $("#jbmnplsPopup").css("display") == "block" && (!strictIsBlack || strictIsBlack && $("#jbmnplsPopup").hasClass("black"));
 }
+
+/**
+ *    Handles customizing tables on the page
+ */
+function handleCustomize(tableNum, columnNum) {
+   if (tableNum == null || !UTIL.isNumeric(tableNum) || TABLES.length <= tableNum) {
+      return;
+   }
+   var table = TABLES[tableNum];
+   function onClose(name){
+      switch(name) {
+         case "cancel":
+            //Reload the preferences, do this when you write the preferences api
+            break;
+      }
+   }
+   if (isPopupShown(true) && columnNum != null && UTIL.isNumeric(columnNum)) {
+      if(table.isHeaderShown(columnNum)) {
+         table.hideColumns([columnNum]);
+      } else {
+         table.showColumns([columnNum]);
+      }
+   } else {
+      var height = 42 + 42 + 36;
+      var hiddenColumns = table.hiddenHeaders;
+      var html = "<div class='customizeEntry instructions'><span class='row'>Click/check to hide columns</span></div>";
+      for(var i=0; i<table.headers.length; i++) {
+         var hidden = !table.isHeaderShown(i);
+         var name = table.headers[i];
+         name = name == "" ? "Column #"+(i+1) : name;
+         if (!(name.charAt(0) == "{" && name.charAt(name.length-1))) {
+            html += "<div class='customizeEntry' title='Click to hide' "+(hidden?"selected='true'":"")+"><input class='checkbox' type='checkbox' "+(hidden?"checked='true'":"")+"/><span class='row' onclick='var chbx=this.previousSibling;chbx.checked = !chbx.checked;this.parentNode.setAttribute(\"selected\",chbx.checked);handleCustomize("+tableNum+","+i+")'>"+name+"<span class='hiddenMsg'>(Hidden)</span></span></div>";
+            height += 36;
+         }
+      }
+      showPopup(true,html,"Customize",300,height,onClose);
+   }
+}
+BRIDGE.registerFunction("handleCustomize", handleCustomize);
 
 /**
  *    Renumbers the checkboxes, usually after content is missing or table is sorted
@@ -853,13 +911,14 @@ function ajaxComplete(name, url) {
          //Clicked search button
          if(name == "UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN") {
             //Recrawl and update data
-            var table = TABLES['results'];
+            var table = TABLES[0];        //Results table
             table.update();
          }
          break;
       //Deleting shortlists
       case PAGES.APPLICATIONS:
       case PAGES.LIST:
+      try{
          if (name.contains("$delete$")) {
             if (whitePopupShown) {
                setTitle("Saving...");
@@ -881,11 +940,11 @@ function ajaxComplete(name, url) {
          } else if (name == "#ICSave") {
             //Popup up for deleting multiple checkboxes
             if (whitePopupShown) {
-               //Finished saving and deleting checkboxes
-               var tableObj = TABLES["deletable"];
+               //Finished saving and deleting checkboxes    
+               var tableObj = TABLES[TABLES.length-1];      //Last table
                tableObj.deleteRowRange(item.copyList);
                if (PAGEINFO.TYPE == PAGES.APPLICATIONS) {
-                  TABLES["active"].deleteRowRange(item.copyList);
+                  TABLES[0].deleteRowRange(item.copyList);     //Active Table
                   setTitle("Applications");
                } else {
                   setTitle("Job Short List");
@@ -893,10 +952,10 @@ function ajaxComplete(name, url) {
                hidePopup();
                jobFinished = true;
             } else {
-               if (item != null && TABLES.hasOwnProperty("deletable")) {
+               if (item != null && !TABLES.isEmpty()) {
                   //Delete the row and reorganize
                   var deletedRowNumber = JOBQUEUE.number;
-                  var tableObj = TABLES["deletable"];
+                  var tableObj = TABLES[TABLES.length-1];      //Last table
                   //Clean up
                   var deleteObjs = tableObj.jInstance.find("tbody div.delete");
                   deleteObjs.removeAttr("disabled");
@@ -905,7 +964,7 @@ function ajaxComplete(name, url) {
                      //Delete the job listed in the all applications table when it is deleted
                      alert("#row_"+tableObj.name+"_"+deletedRowNumber)
                      var id = $("#row_"+tableObj.cname+"_"+deletedRowNumber).children(":first").plainText();
-                     var activeTable = TABLES["active"];
+                     var activeTable = TABLES[0];     //Active table
                      var rowToDelete = $("#"+activeTable.tableID+" tbody td:contains('"+id+"')").parent().attr("row");
                      activeTable.deleteRow(rowToDelete);
                   }
@@ -915,6 +974,7 @@ function ajaxComplete(name, url) {
                }
             }
          } 
+         }catch(e){alert(e)}
          break;
    }
    if (jobFinished) {
@@ -977,8 +1037,17 @@ function applyHighlight(){
 /**
  *    Object that holds all the table objects
  */
-var TABLES = {};
+var TABLES = [];
 {/*===== Expand to see the table functions/class =====*/
+
+/**
+ *    Make a Jobmine Plus table and puts it in an array
+ */
+function makeTable(defaultName, tableID, objectToAppendTo) {
+   var table = new JbmnplsTable(defaultName, tableID, objectToAppendTo);
+   TABLES.push(table);
+   return table;
+}
 
 /**
  *    Table filters: used to apply the filters before building
@@ -1055,7 +1124,7 @@ var TABLEFILTERS = {
 }; 
 
 /**
- *    Class declaration: default
+ *    Class declaration: call makeTable instead
  */
 function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    //Objects
@@ -1080,6 +1149,7 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    this.headers = [];
    this.data = [];
    this.html = null;
+   this.hiddenHeaders = [];
    
    //Controls
    this.controls = {};
@@ -1516,6 +1586,45 @@ JbmnplsTable.prototype.deleteColumn = function(index) {
 };
 
 /**
+ *    Hides an array of columns
+ */
+JbmnplsTable.prototype.hideColumns = function(list) {
+   if (this.empty() || !this.hasBuilt || list == null || !UTIL.isArray(list)) {
+      return this;
+   }   
+   for(var i=0; i<list.length; i++) {
+      this.jInstance.addClass("hideColumn"+list[i]);
+      this.hiddenHeaders[list[i]] = true;
+   }
+   return this;
+}
+
+/**
+ *    Shows an array of columns
+ */
+JbmnplsTable.prototype.showColumns = function(list) {
+   if (this.empty() || !this.hasBuilt || list == null || !UTIL.isArray(list)) {
+      return this;
+   }
+   for(var i=0; i<list.length; i++) {
+      this.jInstance.removeClass("hideColumn"+list[i]);
+      this.hiddenHeaders[list[i]] = false;
+   }
+   return this;
+}
+
+/**
+ *    Sees if a header is shown and not hiding
+ */
+JbmnplsTable.prototype.isHeaderShown = function(index) {
+   if (this.empty() || !this.hasBuilt) {
+      return this;
+   }
+   Assert(index >= 0 && index < this.columns, MESSAGE.ARRAY_OUT_OF_BOUNDS);
+   return this.hiddenHeaders[index] == null || this.hiddenHeaders[index] === false;
+}
+
+/**
  *    Deletes a range of columns
  *       Option 1: table.deleteColumnRange([0,1,3,5]);   <--- deletes these columns
  *       Option 2: table.deleteColumnRange(0, 4);        <--- deletes columns from 0->4
@@ -1740,7 +1849,7 @@ JbmnplsTable.prototype.build = function() {
       return null;
    }
    var html =  "<div id='"+this.id+"' class='jbmnplsTable'><div class='jbmnplsTableHeader noselect'><div class='jbmnplsTableName'>" + this.name + (this.rows==0?"":" (<span id='"+this.rowCounterID+"'>"+this.rows+"</span> Rows)");
-   html +=     '</div><div class="jbmnplsTableControls"><a class="options" href="#">Customize</a> | <a class="options" href="'+this.excel+'">Export</a>';
+   html +=     '</div><div class="jbmnplsTableControls"><span onclick="handleCustomize('+(TABLES.length-1)+')" class="options fakeLink">Customize</span> | <a class="options" href="'+this.excel+'">Export</a>';
    
    var controlsHTML = "";
    for(var name in this.controls) {
@@ -1779,7 +1888,7 @@ JbmnplsTable.prototype.build = function() {
    }
    html +=     "</tbody></table><div class='jbmnplsTableFooter noselect'><div class='jbmnplsTableControls'>";
    //Parse the controls for the bottom
-   html +=     '<a class="options" href="#">Customize</a> | <a class="options" href="'+this.excel+'">Export</a>'+controlsHTML+'</div>';
+   html +=     '<span onclick="handleCustomize('+(TABLES.length-1)+')" class="options fakeLink">Customize</span> | <a class="options" href="'+this.excel+'">Export</a>'+controlsHTML+'</div>';
    html +=     "</div></div>";
    this.html = html;
    this.hasBuilt = true;
@@ -2017,15 +2126,14 @@ switch (PAGEINFO.TYPE) {
          //Parse Individual pages here
          switch(PAGEINFO.TYPE){
             case PAGES.SEARCH:
-               var table0 = new JbmnplsTable("Results", "UW_CO_JOBRES_VW$scroll$0");
+               var table0 = makeTable("Results", "UW_CO_JOBRES_VW$scroll$0");
                table0.applyFilter("Employer Name", TABLEFILTERS.googleSearch)
                      .applyFilter("Location", TABLEFILTERS.googleMap)
                      .addCheckboxes()
                      .appendTo(form);
-               TABLES['results'] = table0;
                break;
             case PAGES.PROFILE:
-               var table0 = new JbmnplsTable("Profile", "UW_CO_STDTERMVW$scroll$0");
+               var table0 = makeTable("Profile", "UW_CO_STDTERMVW$scroll$0");
                table0.appendTo(form);
                form.children("div:not('.jbmnplsTable')").remove();
                break;
@@ -2051,7 +2159,7 @@ switch (PAGEINFO.TYPE) {
                }
                
                form.find("div").css("display", "none");
-               var table = new JbmnplsTable("Jobs", "UW_CO_STUJOBLST$scrolli$0");
+               var table = makeTable("Jobs", "UW_CO_STUJOBLST$scrolli$0");
                table.applyFilter("", TABLEFILTERS.deleteRow)
                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
                     .applyFilter("Employer Name", TABLEFILTERS.googleSearch)
@@ -2067,13 +2175,10 @@ switch (PAGEINFO.TYPE) {
                      .addControlButton("Delete Selected", handleCheckedDelete)
                     .addCheckboxes()
                     .appendTo(form);
-               TABLES["deletable"] = table;
                }break;
             case PAGES.DOCUMENTS:
-               var table0 = new JbmnplsTable("Resumes");
-               table0.parseTable("UW_CO_RESUMES$scrolli$0");
-               var code = table0.build();
-               $("body").css("padding", "0px 50px").append(code)
+               var table0 = makeTable("Resumes", "UW_CO_RESUMES$scrolli$0");
+               table0.appendTo(form);
                break;
             case PAGES.APPLICATIONS:
                //For merging application
@@ -2089,18 +2194,16 @@ switch (PAGEINFO.TYPE) {
                   }
                }
                //Pull and make new tables
-               var activeApp = new JbmnplsTable(null, "UW_CO_STU_APPSV$scroll$0");
+               var activeApp = makeTable(null, "UW_CO_STU_APPSV$scroll$0");
                activeApp.applyFilter("Job Title", TABLEFILTERS.jobDescription)
                         .applyFilter("View Details", TABLEFILTERS.fixEditApplication)
                         .appendTo(form);
-               var allApp = new JbmnplsTable(null, "UW_CO_APPS_VW2$scrolli$0");
+               var allApp = makeTable(null, "UW_CO_APPS_VW2$scrolli$0");
                allApp.merge(7,10,"View/Edit Applications", applicationsMerge)
                      .applyFilter(10, TABLEFILTERS.deleteRow)
                      .applyFilter("Job Title", TABLEFILTERS.jobDescription)
                      .applyFilter("Job Title", TABLEFILTERS.jobDescription)
                      .setHeaderAt(10, "Delete").appendTo(form);
-               TABLES['active'] = activeApp;
-               TABLES['deletable'] = allApp;
                
                //Clean up all webpage :P
                form.children("div:not('.jbmnplsTable')").css("display", "none");
@@ -2307,7 +2410,7 @@ var CSSOBJ = {
       "vertical-align" : "middle",
    },
    "div.jbmnplsTable table td" : {
-      "padding" : "0px 15px",
+      "padding" : "5px 15px",
       "border-bottom" : "1px #929292 solid",
    },
    "div.jbmnplsTable table tr[row='header']" : {
@@ -2388,21 +2491,21 @@ var CSSOBJ = {
    /**
     *    Table column hiding
     */
-   "div.jbmnplsTable.hideColumn0  *[col='0'], \
-    div.jbmnplsTable.hideColumn1  *[col='1'], \
-    div.jbmnplsTable.hideColumn2  *[col='2'], \
-    div.jbmnplsTable.hideColumn3  *[col='3'], \
-    div.jbmnplsTable.hideColumn4  *[col='4'], \
-    div.jbmnplsTable.hideColumn5  *[col='5'], \
-    div.jbmnplsTable.hideColumn6  *[col='6'], \
-    div.jbmnplsTable.hideColumn7  *[col='7'], \
-    div.jbmnplsTable.hideColumn8  *[col='8'], \
-    div.jbmnplsTable.hideColumn9  *[col='9'], \
-    div.jbmnplsTable.hideColumn10 *[col='10'], \
-    div.jbmnplsTable.hideColumn11 *[col='11'], \
-    div.jbmnplsTable.hideColumn12 *[col='12'], \
-    div.jbmnplsTable.hideColumn13 *[col='13'], \
-    div.jbmnplsTable.hideColumn14 *[col='14']": {
+   "table.tablesorter.hideColumn0  *[col='0'], \
+    table.tablesorter.hideColumn1  *[col='1'], \
+    table.tablesorter.hideColumn2  *[col='2'], \
+    table.tablesorter.hideColumn3  *[col='3'], \
+    table.tablesorter.hideColumn4  *[col='4'], \
+    table.tablesorter.hideColumn5  *[col='5'], \
+    table.tablesorter.hideColumn6  *[col='6'], \
+    table.tablesorter.hideColumn7  *[col='7'], \
+    table.tablesorter.hideColumn8  *[col='8'], \
+    table.tablesorter.hideColumn9  *[col='9'], \
+    table.tablesorter.hideColumn10 *[col='10'], \
+    table.tablesorter.hideColumn11 *[col='11'], \
+    table.tablesorter.hideColumn12 *[col='12'], \
+    table.tablesorter.hideColumn13 *[col='13'], \
+    table.tablesorter.hideColumn14 *[col='14']": {
       display : "none",
    },
    /**
@@ -2424,12 +2527,10 @@ var CSSOBJ = {
       display : "block",
    },
    "#jbmnplsPopup.black" : {  
-      "background-color": "black",
-      "opacity"         : "0.6",
+      "background-color": "rgba(0,0,0,0.6)",
    },
    "#jbmnplsPopup.white" : {  
-      "background-color": "white",
-      "opacity"         : "0.8",
+      "background-color": "rgba(255,255,255,0.8)",
    },
    "#jbmnplsPopup div.wrapper" : {
       width    :  "50%",
@@ -2440,10 +2541,12 @@ var CSSOBJ = {
    },
    "#jbmnplsPopup div.wrapper div.content" : {
       position             :  "absolute",
-      padding              :  "10px",
    },
    "#jbmnplsPopup.black div.wrapper div.content" : {  
       "background-color"   :  "white",
+      "border"             :  "black 2px solid",
+      "box-shadow"         :  "0 0 7px black",
+      "position"           :  "relative",
    },
    "#jbmnplsPopup.white div.wrapper div.content .title" : {
       "font-size"       : "50px",
@@ -2458,6 +2561,81 @@ var CSSOBJ = {
       "text-align"         : "center",
       "text-shadow"        : "0 2px 5px transparent, 0 2px 5px black",
    },
+   "#jbmnplsPopup.white div.wrapper div.content .footer" : {
+      "display" : "none",
+   },
+   "#jbmnplsPopup.black div.wrapper div.content .footer .close" : {
+      "display" : "none",
+   },
+   "#jbmnplsPopupTitle" : {
+      height            :  "30px",
+      "border-bottom"   :  "2px solid black",
+      "background"      :  "#333",
+      "font-size"       :  "14px",
+      "font-weight"     :  "bold",
+      "color"           :  "white",
+      "padding-top"     :  "10px",
+      "padding-left"    :  "10px",
+   },
+   "#jbmnplsPopupFooter" : {
+      "position"        :  "absolute",
+      "bottom"          :  "0",
+      height            :  "30px",
+      "border-top"      :  "2px solid black",
+      "background"      :  "#333",
+      "font-size"       :  "12px",
+      "color"           :  "white",
+      "padding-top"     :  "10px",
+      "width"           :  "100%",
+   },
+   "#jbmnplsPopupFooter span.fakeLink" : {
+      "float"           :  "right",
+      "padding-right"   :  "10px",
+   },
+   "#jbmnplsPopupFooter span.save.fakeLink" : {
+      "float"           :  "left",
+      "padding-left"    :  "10px",
+   },
+   /**
+    *    Jobmine Plus Popup: Customize
+    */
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry" : {
+      "border-bottom"   :  "1px solid #929292",
+      "overflow"        :  "hidden",
+      height            :  "35px",
+   },
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry[selected='true']" : {
+      background        :  COLOURS.ROW_SELECT,
+   },
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry.instructions" : {
+      "text-align"      :  "center",
+      "background"      :  "#CCC",
+   },
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry.instructions:hover" : {
+      background        :  "#CCC",
+   },
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry:hover" : {
+      background        :  COLOURS.HOVER,
+   },
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry span.row" : {
+      height            :  "100%",
+      "font-size"       :  "12px",
+      width             :  "100%",
+      display           :  "block",
+      padding           :  "10px 0 0",
+   },
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry span.row span.hiddenMsg" : {
+      "padding-left"    :  "15px",
+      display           :  "none",
+   },
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry[selected='true'] span.row span.hiddenMsg" : {
+      display           :  "inline",
+      color             :  "#777",
+   },
+   "#jbmnplsPopup[name='customize'] #jbmnplsPopupBody div.customizeEntry input.checkbox" : {
+      "margin"          :  "10px 20px 0",
+      "float"           :  "left",
+   },
 };
 var cssString = "";
 for(var selector in CSSOBJ) {
@@ -2471,15 +2649,6 @@ for(var selector in CSSOBJ) {
 $("body").append("<style>" + cssString + "</style>");
 CSSOBJ = null;
 cssString = null;
-
-
-
-
-
-
-
-
-
 
 
 
