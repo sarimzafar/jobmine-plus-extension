@@ -21,9 +21,9 @@
    __PREFERENCES__
    __JOBS_QUEUE__
    __FUNCTIONS__
-   _TABLE_
+   __TABLE__
    __CLEAN_UP__
-   _INDIVIDUAL_PAGES_
+   __INDIVIDUAL_PAGES__
    __CSS__
 
 
@@ -71,7 +71,7 @@ var OBJECTS = {
 };
 
 var LARGESTRINGS = {
-   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' title='I am draggable!' class='title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><div id='jbmnplsPopupFooter' class='footer'><span class='fakeLink save' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
+   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' title='I am draggable!' class='title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><div id='jbmnplsPopupFooter' class='footer'><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
 };
 
 var IMAGES = {
@@ -113,6 +113,9 @@ Array.prototype.empty = function(){
 }
 Array.prototype.clone = function(){
    return this.concat([]);
+}
+Array.prototype.contains = function(index){
+   return this.indexOf(index) != -1;
 }
 
 /**
@@ -553,18 +556,6 @@ var MESSAGE = {
    TABLES_NO_SET_ROW    : "Cannot set table rows, use deleteRow() / insertRow() instead.",
    TABLES_NO_SET_COL    : "Cannot set table columns, use deleteColumn() / insertColumn() instead.",
 };
-//Wrap for try{} catch(e){alert(e)} effect
-function Debug(code) {
-   try{
-      if (code != null && typeof code == "function") {
-         code.call();
-      }
-   }catch(e){
-      if (CONSTANTS.DEBUG_ON) {
-         Log((PAGEINFO.TYPE != null ? PAGEINFO.TYPE : "")+ " Error: " + e);
-      }
-   }
-}
 //Log into firebug
 function Log(message) {
    console.log(message);
@@ -575,99 +566,160 @@ function Throw(message) {
 }
 //Assert a condition
 function Assert(condition, message) {
-   if (!condition && CONSTANTS.DEBUG_ON) {
+   if (!condition) {
       throw new Error("Assert Error: "+ message);
    }
 }
+function attachDebugger() {
+   //Don't need to attach if already attached
+   if(UTIL.getID("jbmnplsDebuggerBtn") != null) {return;}
+   //Add a new nav item
+   $("#jbmnplNav ul:eq(0)").append("<li><span id='jbmnplsDebuggerBtn' class='fakeLink'>Debugger OFF</span></li>");
+   
+   //Append some css
+   var debugCSS = {
+      "body.debugon #jbmnplsLocal_Storage" : {
+         "display"   :  "block",
+      },
+      "#jbmnplsLocal_Storage" : {
+         "position"  :  "fixed",
+         "top"       :  "20%",
+         "display"   :  "none",
+         "min-width" :  "500px",
+         "top"       :  "30%",
+         "left"      :  "20%",
+         "opacity"   :  "0.1",
+         "-moz-transition-property"   :  "opacity",
+         "-moz-transition-duration"   :  "0.5s",
+      },
+      "#jbmnplsLocal_Storage:hover" : {
+         "opacity"   :  "1",
+      },
+      "#jbmnplsLocal_Storage.draggable-move" : {
+         "opacity"   :  "1 !important",
+      },
+   };
+   appendCSS(debugCSS);
+   
+   var LSTable = makeTable("Local Storage");
+   LSTable.insertData(["Blank"], [[""]])
+            .addControlButton("Refresh", function(){refreshLS();})
+            .addControlButton("Clear", function(){PREF.clear();})
+            .appendTo($(document.body))
+            .makeDraggrable();
+   
+   //Refresh the localStorage data
+   refreshLS = function() {
+      var data = [];
+      for(var key in localStorage) {
+         data.push([key, localStorage[key]]);
+      }
+      LSTable.insertData(["Key", "Data"], data).updateCells();
+   }         
+   refreshLS();
+   
+   //Events for the debugger button
+   $("#jbmnplsDebuggerBtn").bind("click", function(){
+      var body = $(document.body);
+      var obj = $(this);
+      if (obj.hasClass("on")) {
+         body.removeClass("debugon");
+         obj.removeClass("on").text("Debugger OFF");
+      } else {
+         body.addClass("debugon");
+         obj.addClass("on").text("Debugger ON");
+      }
+   });
+}
+
 /*================================*\
 |*        __PREFERENCES__         *|
 \*================================*/
 {/*Expand to see the preferences*/
-var PREFERENCES = {
-   KILLTIMER            : false,
-   HIGHLIGHT_LAST_ROW   : true,
-   PAGE : {
-      CUSTOMIZE_HEADERS : [],
-   },
-};
-/*
-   WORK ON THIS
- */
 var PREF = {
-   commonPrefix   : "COMMON",
-   init : function() {
-      //Populate the values into the preferences
-      var key = "";
-      var value = "";
-      for (var item in PREFERENCES) {
-         var node = PREFERENCES[item];
-         if (item == "PAGES") {
-            for (var pageItem in node) {
-               key = PAGEINFO.TYPE + "_" + pageItem;
-               value = localStorage.getItem(key);  
-               if (value != undefined) {
-                  node[pageItem] = value;
-               }
-            }
-         } else {
-            key = this.commonPrefix + "_" + pageItem;
-            value = localStorage.getItem(key);
-            if (value != undefined) {
-               node = value;
-            }
-         }
-      } 
+   DEFAULT : {
+      KILLTIMER            : false,
+      HIGHLIGHT_LAST_ROW   : true,
+      PAGE : {
+         HIDDEN_HEADERS : [],
+      },
    },
-   load : function(name) {
+   onSave : function(){},
+   onLoad : function(){},
+   onClear: function(){},
+   commonPrefix   : "COMMON",
+   parseReturn : function(val) {
+      //Is numerical number?
+      if (val*1 == parseInt(val)) {
+         return val*1;
+      }
+      //Is boolean?
+      switch(val) {
+         case "TRUE":
+         case "true":
+            return true;
+         case "FALSE":
+         case "false":
+            return false;
+      }
+      //Is string or array (as a string)
+      return val;
+   },
+   load : function(name, index, defaultInputVal) {
       if (name == null || name == "") {
          return;
       }
       var key = "";
-      var nameIsPagePref = PREFERENCES.PAGE.hasOwnProperty(name);
-      var nameIsPref = PREFERENCES.hasOwnProperty(name) && name != "PAGE";
+      var defaultValue = "";
       name = name.toUpperCase().underscorize();
+      var nameIsPagePref = this.DEFAULT.PAGE.hasOwnProperty(name);
+      var nameIsPref = this.DEFAULT.hasOwnProperty(name) && name != "PAGE";
       if (nameIsPagePref) {
          Assert(PAGEINFO.TYPE != null, "This page has no type, cannot save");
-         key = PAGEINFO.TYPE + "_" + name;
+         key = index == null ? PAGEINFO.TYPE + "_" + name : PAGEINFO.TYPE + "_" + index + "_" + name;
+         defaultValue = this.DEFAULT.PAGE[name];
       } else {
-         key = this.commonPrefix+ "_" +name;
+         key = index == null ? this.commonPrefix+ "_" +name : this.commonPrefix+"_" + index + "_" +name;
+         defaultValue = this.DEFAULT[name];
       }
       var value = localStorage.getItem(key);
       if (value == undefined) {
-         return null;
-      } else if(nameIsPagePref) {
-         PREFERENCES.PAGE[name] = value;
-      } else if(nameIsPref) {
-         PREFERENCES[name] = value;
-      } else {
-         Error("Failed to load: "+name+" because the name specified was not part of the object list for preferences.");
+         //If there is no value, return the default, if this is null, it returns null
+         return defaultInputVal != null ? defaultInputVal : defaultValue;      
+      } else if(!nameIsPagePref && !nameIsPref) {
+         Throw("Failed to load: "+name+" because the name specified was not part of the object list for this.DEFAULT.");
       }
-      return value;
+      this.onLoad();
+      return this.parseReturn(value);
    },
-   save : function(name, value) {
+   save : function(name, index, value) {
       if (name == null || name == "") {
          return;
       }
       value = value == null ? "" : value;
       var key = "";
       name = name.toUpperCase().underscorize();
-      if (PREFERENCES.PAGE.hasOwnProperty(name)) {
+      if (this.DEFAULT.PAGE.hasOwnProperty(name)) {
          Assert(PAGEINFO.TYPE != null, "This page has no type, cannot save");
-         key = PAGEINFO.TYPE + "_" + name;
-         PREFERENCES.PAGE[name] = value;
-      } else if (PREFERENCES.hasOwnProperty(name) && name != "PAGE") {
-         key = this.commonPrefix+ "_" +name;
-         PREFERENCES[name] = value;
+         key = index == null ? PAGEINFO.TYPE + "_" + name : PAGEINFO.TYPE + "_" + index + "_" + name;
+      } else if (this.DEFAULT.hasOwnProperty(name) && name != "PAGE") {
+         key = index == null ? this.commonPrefix+ "_" +name : this.commonPrefix+"_" + index + "_" +name;
       } else {
-         Error("Failed to save: "+name+" because the name specified was not part of the object list for preferences.");
+         Throw("Failed to save: "+name+" because the name specified was not part of the object list for this.DEFAULT.");
       }
       //Try to save
       try{
          localStorage.setItem(key, value);
       }catch(e){"Cannot save settings because there is an error with localStorage! :(";}
+      this.onSave();
    },
+   clear : function(){
+      if(confirm("You are about to delete all the saved data for Jobmine Plus, is this what you want to do?")) {
+         localStorage.clear();
+         this.onClear();
+      }
+   }
 };
-PREF.init();
 }
 
 /*================================*\
@@ -779,24 +831,22 @@ function setTitle(name){
    }catch(e){alert(e)}
 }
 function setNavSelection(linkObj) {
-   Debug(function(){
-      if(UTIL.idExists("jbmnplNav") && linkObj != null) {
-         unSelectNav();
-         var itemNum = -1;
-         switch(linkObj) {
-            case LINKS.PROFILE:        itemNum = 0;   break;
-            case LINKS.DOCUMENTS:      itemNum = 1;   break;
-            case LINKS.SEARCH :        itemNum = 2;   break;
-            case LINKS.LIST :          itemNum = 3;   break;
-            case LINKS.APPLICATIONS:   itemNum = 4;   break;
-            case LINKS.INTERVIEWS:     itemNum = 5;   break;
-            case LINKS.RANKINGS:       itemNum = 6;   break;
-         }
-         if (itemNum != -1) {
-            $("#jbmnplNav a").eq(itemNum).addClass("selected");
-         }
+   if(UTIL.idExists("jbmnplNav") && linkObj != null) {
+      unSelectNav();
+      var itemNum = -1;
+      switch(linkObj) {
+         case LINKS.PROFILE:        itemNum = 0;   break;
+         case LINKS.DOCUMENTS:      itemNum = 1;   break;
+         case LINKS.SEARCH :        itemNum = 2;   break;
+         case LINKS.LIST :          itemNum = 3;   break;
+         case LINKS.APPLICATIONS:   itemNum = 4;   break;
+         case LINKS.INTERVIEWS:     itemNum = 5;   break;
+         case LINKS.RANKINGS:       itemNum = 6;   break;
       }
-   });
+      if (itemNum != -1) {
+         $("#jbmnplNav a").eq(itemNum).addClass("selected");
+      }
+   }
 }
 function unSelectNav() {
    if(UTIL.idExists("jbmnplNav")) {
@@ -889,7 +939,18 @@ function handleCustomize(tableNum, columnNum) {
    function onClose(name){
       switch(name) {
          case "cancel":
-            //Reload the preferences, do this when you write the preferences api
+            //Reload the preferences, make the load value into an array
+            var hidden = PREF.load("HIDDEN_HEADERS", tableNum);
+            if(UTIL.isNumeric(hidden)) {  //A number
+               hidden = [hidden];
+            }else if(!UTIL.isArray(hidden)){    //An array in a form of string
+               hidden = hidden.split(",");
+            }
+            table.showAllColumns();
+            table.hideColumns(hidden);
+            break;
+         case "save": 
+            PREF.save("HIDDEN_HEADERS", tableNum, table.getHeadersHidden());
             break;
       }
    }
@@ -901,7 +962,6 @@ function handleCustomize(tableNum, columnNum) {
       }
    } else {
       var height = 42 + 42 + 36;
-      var hiddenColumns = table.hiddenHeaders;
       var html = "<div class='customizeEntry instructions'><span class='row'>Click/check to hide columns</span></div>";
       for(var i=0; i<table.headers.length; i++) {
          var hidden = !table.isHeaderShown(i);
@@ -1132,14 +1192,21 @@ function applyHighlight(){
  */
 function initDraggable() {
    $("body .draggable .draggable-region").live("mousedown", function(evt){
+      try{
       var obj = $(this);
+      var clkObj = $(evt.target);
       //Return if disabled
-      if (obj.hasClass("disabled")) {return;}
+      if (obj.hasClass("disabled") || clkObj.hasClass("fakeLink") || clkObj.get(0).tagName.toUpperCase() == "A") {return;}
       var wholeObj = obj.closest(".draggable");
       if (wholeObj.hasClass("disabled")) {return;}
       //Events and Classes
       wholeObj.addClass("draggable-down");
-      $(document.body).bind("mousemove.draggable", function(e){
+      if(UTIL.getID("draggable-overlay-hack") == null) {
+         $(document.body).append("<div id='draggable-overlay-hack' style='height:100%;width:100%;position:fixed;top:0;left:0;'></div>");
+      }
+      var overlay = $("#draggable-overlay-hack");
+      overlay.css({"display" : "block", "z-index" : "1000", "cursor" : "move"});
+      overlay.bind("mousemove.draggable", function(e){
          var wholeObj = obj.closest(".draggable");
          wholeObj.removeClass("draggable-down").addClass("draggable-move");
          //Update Position
@@ -1149,9 +1216,8 @@ function initDraggable() {
          var pos = wholeObj.offset();
          var absX = pos.left;
          var absY = pos.top;
-         pos = wholeObj.position();
-         var relX = pos.left;
-         var relY= pos.top;
+         var relX = parseInt(wholeObj.css("left"),10);
+         var relY = parseInt(wholeObj.css("top"),10);
          var mRelX = e.pageX - absX;
          var mRelY = e.pageY - absY;
          wholeObj.css({"left" : (relX+(mRelX-ancX))+"px", "top" : (relY+(mRelY-ancY))+"px"});
@@ -1159,22 +1225,36 @@ function initDraggable() {
       .bind("mouseup.draggable mouseleave.draggable", function(){
          var wholeObj = obj.closest(".draggable");
          wholeObj.removeClass("draggable-down draggable-move").removeAttr("draggableAnchor");
-         $(this).unbind(".draggable");
+         $(this).unbind(".draggable").css({"display": "none", "cursor" : "auto"});
       });
       //Record the anchor point for the object
-      var pos = wholeObj.offset();
-      var relX = evt.pageX - pos.left;
-      var relY = evt.pageY - pos.top;
+      var relX = evt.layerX ? evt.layerX : evt.offsetX;
+      var relY = evt.layerY ? evt.layerY : evt.offsetY;
       wholeObj.attr("draggableAnchor", relX+","+relY);
+      }catch(e){alert(e)}
    });
 }
- 
+  
 
 /**
  *    Miscellaneous
  */
 function isScrollbarShown() {
    return $(document).height() > $(window).height();
+}
+
+function appendCSS(cssObj) {
+   var cssString = "";
+   for(var selector in cssObj) {
+      var eachSelector = cssObj[selector];
+      var propString = "";
+      for(var property in eachSelector) {
+         propString += property + ":" + eachSelector[property] + ";";
+      }
+      cssString += selector + "{" + propString + "}";
+   }
+   $("body").append("<style>" + cssString + "</style>");
+   cssString = null;
 }
 
 /*================================*\
@@ -1279,18 +1359,19 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    this.jInstance = null;
    
    //ID strings
-   this.rowCounterID;
    this.srcID;
-   this.id;
-   this.tableID;
-   this.name = defaultName;
    this.cname = defaultName != null ? defaultName.underscorize() : null;
+   this.id = defaultName != null ? "jbmnpls" + this.cname : null;
+   this.tableID = defaultName != null ? this.id + "Table" : null;
+   this.name = defaultName;
+   this.rowCounterID = defaultName != null ? "jbmnpls_"+this.cname+"_TableCount" : null;
 
    //Booleans
    this.parsed = false;
    this.hasCheckboxes = false;
    this.hasBuilt = false;
    this.appliedSorting = false;
+   this.draggable = false;
    
    //Data
    this.headers = [];
@@ -1568,6 +1649,31 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
 };
 
 /**
+ *    Insert custom data into a table
+ */
+JbmnplsTable.prototype.insertData = function(headerList, dataList) {
+   Assert(headerList != null && UTIL.isArray(headerList) && dataList != null && UTIL.isArray(dataList), "Inserting data failed, use arrays for headers and data!");
+   var newColumnLength = headerList.length;
+   if( newColumnLength > 0 ){
+      var filters = [];
+      for(var c=0; c<newColumnLength; c++) {
+         filters[headerList[c]] = TABLEFILTERS.normal;
+      }
+      var data = [];
+      for(var r=0; r<dataList.length;r++) {
+         var item = dataList[r];
+         Assert(UTIL.isArray(item) && item.length == newColumnLength, "Inserting data failed, failed to input the correct columns per data entry.");
+         data.push(item);
+      }
+      this.parsed = true;
+      this.data = data;
+      this.filters = filters;
+      this.headers = headerList;
+   }
+   return this;
+}
+
+/**
  *    Tells functions if we can manipulate the table
  *       1. Make sure table is parsed  2. Make sure there is columns
  */
@@ -1747,6 +1853,18 @@ JbmnplsTable.prototype.hideColumns = function(list) {
 }
 
 /**
+ *    Shows all columns
+ */
+JbmnplsTable.prototype.showAllColumns = function() {
+   if (this.empty() || !this.hasBuilt) {
+      return this;
+   }
+   this.instance.className = "tablesorter";
+   this.hiddenHeaders = [];
+   return this;
+}
+
+/**
  *    Shows an array of columns
  */
 JbmnplsTable.prototype.showColumns = function(list) {
@@ -1769,6 +1887,22 @@ JbmnplsTable.prototype.isHeaderShown = function(index) {
    }
    Assert(index >= 0 && index < this.columns, MESSAGE.ARRAY_OUT_OF_BOUNDS);
    return this.hiddenHeaders[index] == null || this.hiddenHeaders[index] === false;
+}
+
+/**
+ *    Sees if a header is shown and not hiding
+ */
+JbmnplsTable.prototype.getHeadersHidden = function() {
+   if (this.empty() || !this.hasBuilt) {
+      return this;
+   } 
+   var val = [];
+   for(var i=0; i<this.columns; i++) {
+      if(!this.isHeaderShown(i)) {
+         val.push(i);
+      }
+   }
+   return val;
 }
 
 /**
@@ -1996,12 +2130,20 @@ JbmnplsTable.prototype.build = function() {
       return null;
    }
    var html =  "<div id='"+this.id+"' class='jbmnplsTable'><div class='jbmnplsTableHeader noselect'><div class='jbmnplsTableName'>" + this.name + (this.rows==0?"":" (<span id='"+this.rowCounterID+"'>"+this.rows+"</span> Rows)");
-   html +=     '</div><div class="jbmnplsTableControls"><span onclick="handleCustomize('+(TABLES.length-1)+')" class="options fakeLink">Customize</span> | <a class="options" href="'+this.excel+'">Export</a>';
+   html +=     '</div><div class="jbmnplsTableControls">';
    
    var controlsHTML = "";
+   if (PAGEINFO.TYPE != PAGES.HOME) {
+      controlsHTML +=  '<span onclick="handleCustomize('+(TABLES.length-1)+')" class="options fakeLink">Customize</span>';
+   }
+   if (!this.excel.empty()) {
+      controlsHTML +=  ' | <a class="options" href="'+this.excel+'">Export</a>';
+   }
    for(var name in this.controls) {
       controlsHTML += " | <span class='options fakeLink' onclick='controlButton_"+name.replace(/\W/gm,"_")+"();'>"+name+"</span>";
    }
+   //Removes the "| " because "customize" doesnt apply to any homepage tables
+   if (PAGEINFO.TYPE == PAGES.HOME) {controlsHTML = controlsHTML.substr(2);}
    html += controlsHTML;
    
    html +=     "</div></div><table name='"+this.name+"' class='tablesorter' id='"+this.tableID+"' cellspacing=0 cellpadding=0 width='100%' height='auto'>";
@@ -2033,9 +2175,8 @@ JbmnplsTable.prototype.build = function() {
       }
       html += "</tr>";
    }
-   html +=     "</tbody></table><div class='jbmnplsTableFooter noselect'><div class='jbmnplsTableControls'>";
+   html +=     "</tbody></table><div class='jbmnplsTableFooter noselect'><div class='jbmnplsTableControls'>" + controlsHTML;
    //Parse the controls for the bottom
-   html +=     '<span onclick="handleCustomize('+(TABLES.length-1)+')" class="options fakeLink">Customize</span> | <a class="options" href="'+this.excel+'">Export</a>'+controlsHTML+'</div>';
    html +=     "</div></div>";
    this.html = html;
    this.hasBuilt = true;
@@ -2062,7 +2203,7 @@ JbmnplsTable.prototype.updateCells = function() {
             this.internalMerge(action.into, action.from, action.name, filter);
             break;
          default:
-            Error("No such action to insert columns: " + action.type);
+            Throw("No such action to insert columns: " + action.type);
             break;
       }
    }
@@ -2110,6 +2251,7 @@ JbmnplsTable.prototype.updateCells = function() {
    }
    
    //Finally Update the table
+   $("#"+this.rowCounterID).text(this.rows);
    this.applyTableSorter();
    this.updateTable();
    return this;
@@ -2134,6 +2276,15 @@ JbmnplsTable.prototype.appendTo = function(obj) {
    this.jInstance = $("#" + this.tableID);
    if (this.rows > 1) {
       this.applyTableSorter();
+   }
+   
+   //Load and turn off some headers
+   var index = TABLES.length-1;
+   var hiddenHeadersList = PREF.load("HIDDEN_HEADERS", index);
+   if(UTIL.isNumeric(hiddenHeadersList)) {     //1 hidden column
+      this.hideColumns([hiddenHeadersList]);
+   } else if(!UTIL.isArray(hiddenHeadersList)) {
+      this.hideColumns(hiddenHeadersList.split(","));
    }
    return this;
 }
@@ -2181,6 +2332,29 @@ JbmnplsTable.prototype.update = function() {
    return this;
 }
 
+/**
+ *    Make the table draggable!
+ */
+JbmnplsTable.prototype.makeDraggrable = function(shouldAllow) {
+   if(this.empty() || this.jInstance == null || !this.hasBuilt) { 
+      return this;
+   }
+   if (shouldAllow == null) {shouldAllow = true;}
+   var wrapper = $("#"+this.id);
+   var header = wrapper.find("div.jbmnplsTableHeader:eq(0)");
+   if (shouldAllow) {
+      wrapper.addClass("draggable");
+      header.addClass("draggable-region")
+   } else {
+      wrapper.removeClass("draggable");
+      header.removeClass("draggable-region")
+   }
+   this.draggable = shouldAllow;
+   return this;
+}
+
+
+
 }
 
 /*================================*\
@@ -2194,7 +2368,7 @@ if (PAGEINFO.IN_IFRAME) {
 }
 
 //Disallow highlighting last row if requested
-if (!PREFERENCES.HIGHLIGHT_LAST_ROW) {
+if (!PREF.load("HIGHLIGHT_LAST_ROW")) {
    $("body").addClass("doNotHighlightLastRow");
 }
 
@@ -2235,7 +2409,7 @@ switch (PAGEINFO.TYPE) {
          setNavSelection(currentPage);
          
          //Appends the iframe that holds the content
-         $("body").append("<iframe src='"+currentPage+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/>");
+         $("body").append("<div id='jbmnplsFrameWrapper'><iframe src='"+currentPage+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div>");
         
          //Set the header's nav to go to certain locations 
          $("#jbmnplNav a").click(function(e){
@@ -2244,6 +2418,12 @@ switch (PAGEINFO.TYPE) {
             var newTitle = e.target.innerHTML;
             changeLocation(newLocation, newTitle);
          });
+         
+         //If debug is on, we can add the debugger window
+         if( CONSTANTS.DEBUG_ON) {
+            attachDebugger();
+            initDraggable();
+         }
       } else {
          //Cannot have itself in its own iframe
          return;
@@ -2379,9 +2559,6 @@ var CSSOBJ = {
       "box-shadow"   :  "0 0 10px white !important",
       cursor         :  "move !important",
    },
-   
-   
-   
     /**
     *    No extra spaces
     */
@@ -2493,7 +2670,7 @@ var CSSOBJ = {
       "margin-left": "25px",
       "list-style-type": "none",
    },
-   "#jbmnplNav ul li a": {
+   "#jbmnplNav ul li a, #jbmnplNav ul li .fakeLink": {
       "color": "white",
       "font-size": "14px",
       "display": "block",
@@ -2502,7 +2679,7 @@ var CSSOBJ = {
    "#jbmnplNav ul li a.selected" : {
       background : "50% 100% no-repeat url('"+IMAGES.HEADER_POINTER+"')",
    },
-   "#jbmnplNav ul li a:hover": {
+   "#jbmnplNav ul li a:hover, #jbmnplNav ul li .fakeLink:hover": {
       "text-shadow": "0 0 0 transparent, #ffffbe 0 0 0.5em, #ffffbe 0 0 0.5em",
    },
    "#jbmnplsBottomGroup": {
@@ -2797,25 +2974,13 @@ var CSSOBJ = {
       "float"           :  "left",
    },
 };
-var cssString = "";
-for(var selector in CSSOBJ) {
-   var eachSelector = CSSOBJ[selector];
-   var propString = "";
-   for(var property in eachSelector) {
-      propString += property + ":" + eachSelector[property] + ";";
-   }
-   cssString += selector + "{" + propString + "}";
-}
-$("body").append("<style>" + cssString + "</style>");
-CSSOBJ = null;
-cssString = null;
+appendCSS(CSSOBJ);
 
 
 
 
 
 
-//handleCustomize(0)
 
 
 
