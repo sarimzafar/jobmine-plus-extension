@@ -44,7 +44,7 @@ var DIMENSIONS = {
 }
 
 var LINKS = {
-   HOME        : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/h/?tab=DEFAULT",
+   HOME        : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/h/?tab=DEFAULT&__JOBMINE_PLUS_says:_'I_HAVE_CONTROL!!'",
    LOGOUT      : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/?cmd=logout",
    DOCUMENTS   : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STUDDOCS",
    PROFILE     : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STUDENT",
@@ -88,6 +88,7 @@ var IMAGES = {
 /*===============================*\
 |*    __PROTOTYPE_FUNCTIONS__    *|
 \*===============================*/
+{/*Expand to see the prototype functions*/
 String.prototype.contains = function(string){
    return this.indexOf(string) >= 0;
 }
@@ -144,7 +145,7 @@ var UTIL = {
       return low_OR_mid <= mid_OR_high && mid_OR_high <= high_OR_null;
    }
 };
-
+}
 /*===============================*\
 |*        __PARSE_PAGE__         *|
 \*===============================*/
@@ -183,7 +184,7 @@ var PAGES = {
  */
 if (PAGEINFO.TITLE === "JobMine | University of Waterloo" && UTIL.idExists("userid") ) {
    PAGEINFO.TYPE = PAGES.LOGIN;
-} else if (PAGEINFO.URL.contains("?tab=DEFAULT")) {
+} else if (PAGEINFO.URL.contains("?tab=DEFAULT&")) {
    PAGEINFO.TYPE = PAGES.HOME;
 } else if (PAGEINFO.TITLE.contains("Student Ranking")) {
    PAGEINFO.TYPE = PAGES.RANKINGS; 
@@ -586,11 +587,14 @@ function attachDebugger() {
          "top"       :  "20%",
          "display"   :  "none",
          "min-width" :  "500px",
+         "width"     :  "500px",
          "top"       :  "30%",
          "left"      :  "20%",
          "opacity"   :  "0.1",
          "-moz-transition-property"   :  "opacity",
          "-moz-transition-duration"   :  "0.5s",
+         "-webkit-transition-property"   :  "opacity",
+         "-webkit-transition-duration"   :  "0.5s",
       },
       "#jbmnplsLocal_Storage:hover" : {
          "opacity"   :  "1",
@@ -620,6 +624,7 @@ function attachDebugger() {
    
    //Events for the debugger button
    $("#jbmnplsDebuggerBtn").bind("click", function(){
+      refreshLS();
       var body = $(document.body);
       var obj = $(this);
       if (obj.hasClass("on")) {
@@ -795,7 +800,7 @@ var JOBQUEUE = {
 /*================================*\
 |*          __FUNCTIONS__         *|
 \*================================*/
-
+{/*Expand to see all the functions*/
 /**
  *    Changes the current location in the iframe to a different location
  */
@@ -1256,7 +1261,7 @@ function appendCSS(cssObj) {
    $("body").append("<style>" + cssString + "</style>");
    cssString = null;
 }
-
+}
 /*================================*\
 |*            __TABLE__           *|
 \*================================*/
@@ -1320,8 +1325,9 @@ var TABLEFILTERS = {
    googleMap : function(cell, row, rowData, reverseLookup){ 
       var search;
       if (reverseLookup.hasOwnProperty("Employer Name")) {
-         var columnIndex = reverseLookup["Employer Name"];
-         search = rowData[columnIndex] + ",+" + cell;
+         search = rowData[reverseLookup["Employer Name"]] + ",+" + cell;
+      } else if (reverseLookup.hasOwnProperty("Employer")) {
+         search = rowData[reverseLookup["Employer"]] + ",+" + cell;
       } else {
          search = cell;
       }
@@ -2032,7 +2038,7 @@ JbmnplsTable.prototype.trim = function() {
    if (this.empty()) {
       return false;
    }
-   for (var c = 0; c < this.columns; c++) {
+   for (var c = this.columns-1; c >= 0; c--) {
       var cellIsEmpty = true;
       for(var r = 0; r < this.rows && cellIsEmpty; r++) {
          cellIsEmpty = this.data[r][c].empty();
@@ -2099,25 +2105,30 @@ JbmnplsTable.prototype.addCheckboxes = function(columnNumber) {
 }
 
 /**
- *    Add checkboxes to a column and enables them to be handled by this class
+ *    Add a custom button (link or an onclick event) in the controls section to do stuff
  */
-JbmnplsTable.prototype.addControlButton = function(name, onclick) {
-   if(this.empty() || name == null || name == "" || !UTIL.isFunction(onclick) || this.controls.hasOwnProperty(name)) {
+JbmnplsTable.prototype.addControlButton = function(name, onclick_OR_location) {
+   if(this.empty() || name == null || name == "") {
       return this;
    }
-   BRIDGE.registerFunction("controlButton_"+name.replace(/\W/gm,"_"), onclick);
-   this.controls[name] = onclick;
+   if(UTIL.isFunction(onclick_OR_location)) {      //If function, if not it is a link
+      BRIDGE.registerFunction("controlButton_"+name.replace(/\W/gm,"_"), onclick_OR_location);
+   }
+   this.controls[name] = onclick_OR_location;
    return this;
 }
 
 /**
- *    Remove checkboxes to a column and enables them to be handled by this class
+ *    Remove the custom button in the controls section
  */
 JbmnplsTable.prototype.removeControlButton = function(name) {
    if(this.empty() || name == null || name == "" || !this.controls.hasOwnProperty(name)) {
       return this;
    }
-   BRIDGE.unregisterFunction("controlButton_"+name);
+   var value = this.controls[name];
+   if(UTIL.isFunction(value)) {     //If function, if not it is a link
+      BRIDGE.unregisterFunction("controlButton_"+name);
+   }
    delete this.controls[name];
    return this;
 }
@@ -2132,6 +2143,7 @@ JbmnplsTable.prototype.build = function() {
    var html =  "<div id='"+this.id+"' class='jbmnplsTable'><div class='jbmnplsTableHeader noselect'><div class='jbmnplsTableName'>" + this.name + (this.rows==0?"":" (<span id='"+this.rowCounterID+"'>"+this.rows+"</span> Rows)");
    html +=     '</div><div class="jbmnplsTableControls">';
    
+   //Build the controls
    var controlsHTML = "";
    if (PAGEINFO.TYPE != PAGES.HOME) {
       controlsHTML +=  '<span onclick="handleCustomize('+(TABLES.length-1)+')" class="options fakeLink">Customize</span>';
@@ -2140,7 +2152,14 @@ JbmnplsTable.prototype.build = function() {
       controlsHTML +=  ' | <a class="options" href="'+this.excel+'">Export</a>';
    }
    for(var name in this.controls) {
-      controlsHTML += " | <span class='options fakeLink' onclick='controlButton_"+name.replace(/\W/gm,"_")+"();'>"+name+"</span>";
+      //Function
+      var value = this.controls[name];
+      if(UTIL.isFunction(value)) {     
+         controlsHTML += " | <span class='options fakeLink' onclick='controlButton_"+name.replace(/\W/gm,"_")+"();'>"+name+"</span>";
+      } else {
+      //A link
+         controlsHTML += " | <a class='options' target='_blank' href='"+value+"'>"+name+"</a>";
+      }
    }
    //Removes the "| " because "customize" doesnt apply to any homepage tables
    if (PAGEINFO.TYPE == PAGES.HOME) {controlsHTML = controlsHTML.substr(2);}
@@ -2434,7 +2453,7 @@ switch (PAGEINFO.TYPE) {
       break;
    default:
       //Redirect to home page if necessary the top is not already at home
-      if (!PAGEINFO.IN_IFRAME) {
+      if (!PAGEINFO.IN_IFRAME) { 
          redirect(LINKS.HOME);
          return;
       } else {
@@ -2450,9 +2469,40 @@ switch (PAGEINFO.TYPE) {
          
          //Append an iframe for whatever reasons needed for it
          $("body").append("<iframe id='slave' style='display:none;visibility:hidden;' width='0'height='0' src='about:blank'></iframe>");
-         
+
          //Parse Individual pages here
          switch(PAGEINFO.TYPE){
+            case PAGES.RANKINGS:
+               var table0 = makeTable("Rankings", "UW_CO_STU_RNKV2$scroll$0");
+               form.children("div").remove();
+               table0.addControlButton("Save", function(){
+                        BRIDGE.run(function(){
+                           setSaveText_win0('Saving...');
+                           submitAction_win0(document.win0, '#ICSave');
+                        });     
+                     })
+                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
+                     .applyFilter("Employer", TABLEFILTERS.googleSearch)
+                     .applyFilter("Work location", TABLEFILTERS.googleMap)
+                     .addControlButton("Rankings Info", "http://www.cecs.uwaterloo.ca/manual/first_cycle/4_11.php").appendTo(form);
+               break;
+            case PAGES.DOCUMENTS:
+               var marks = $("#win0divSHOW_MARKS a.PSHYPERLINK").attr("href");
+               var history = $("#win0divVIEW_WORK_HISTORY a.PSHYPERLINK").attr("href");
+               var newResume = $("#UW_CO_DOC_ADD").attr("href");
+               var table0 = makeTable("Resumes", "UW_CO_RESUMES$scrolli$0");
+               if (table0.rows < 3) {  //Max 3 resumes
+                  table0.addControlButton("New Resume", function(){
+                     BRIDGE.run(function(){aAction0_win0(document.win0,'UW_CO_DOC_ADD');});    
+                  });     
+               }
+               form.children("div").remove();      //Remove useless stuff
+               table0.addControlButton("View Marks", marks).addControlButton("View Work History", history)
+                     .applyFilter("Resume", function(cell, row, rowData, reverseLookup){
+                        return (row == 0 ? cell + "<span class='details noselect'>(Default Resume)</span>" : cell);
+                     })
+                     .appendTo(form);
+               break;
             case PAGES.SEARCH:
                var table0 = makeTable("Results", "UW_CO_JOBRES_VW$scroll$0");
                table0.applyFilter("Employer Name", TABLEFILTERS.googleSearch)
@@ -2504,10 +2554,6 @@ switch (PAGEINFO.TYPE) {
                     .addCheckboxes()
                     .appendTo(form);
                }break;
-            case PAGES.DOCUMENTS:
-               var table0 = makeTable("Resumes", "UW_CO_RESUMES$scrolli$0");
-               table0.appendTo(form);
-               break;
             case PAGES.APPLICATIONS:
                //For merging application
                var applicationsMerge = function(a,b,r){
@@ -2546,7 +2592,6 @@ switch (PAGEINFO.TYPE) {
       break;
 }
   
- 
 /*================================*\
 |*            __CSS__             *|
 \*================================*/
@@ -2640,6 +2685,7 @@ var CSSOBJ = {
       "padding": "0px 20px",
       "padding-top": "9px",
       "background": "black",
+      "overflow": "hidden",
    },
    "#jbmnplsBanner": {
       "background": "url('" + IMAGES.MAINBANNER + "')",
@@ -2776,6 +2822,10 @@ var CSSOBJ = {
       color: "#336699",
       cursor:"pointer",
    },
+   "div.jbmnplsTable table tr td span.details" : {
+      color    : "#999",
+      "float"  : "right",
+   },
    "div.jbmnplsTable table tr td a:hover, div.jbmnplsTable table tr td span.fakeLink:hover" : {
       "color" : COLOURS.LINK_HIGHLIGHT_HOVER,
       "text-decoration" : "underline",
@@ -2820,6 +2870,7 @@ var CSSOBJ = {
    },
    "div.jbmnplsTable div.jbmnplsTableControls *" : {
       "color" : "#cccccc",
+      "outline" : "none",
    },
    "div.jbmnplsTable div.jbmnplsTableControls a:hover, div.jbmnplsTable div.jbmnplsTableControls span.fakeLink:hover" : {
       "color" : "white",
