@@ -23,6 +23,8 @@
    __PREFERENCES__
    __JOBS_QUEUE__
    __FUNCTIONS__
+   __AJAX_FUNCTIONS__
+   __SEARCH_MANAGER__
    __TABLE__
    __CLEAN_UP__
    __INDIVIDUAL_PAGES__
@@ -36,17 +38,21 @@
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION     : "2.0.0",
-   DEBUG_ON    : true,
-   PAGESIMILAR : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
+   VERSION           : "2.0.0",
+   DEBUG_ON          : true,
+   PAGESIMILAR       : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
+   PAGESIMILARTOP    : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
+   EXTRA_URL_TEXT    : "__Jobmine_Plus_has_taken_over_Jobmine",
+   MESSAGE_TIME_OUT  : 8,   //10 sec
+   SEARCH_DAYS_CLEAR : 30,  //30 days before ids will clear out
 };
 
 var DIMENSIONS = {
-   SCROLLBAR_WIDTH : (function(){var scr = null;var inn = null;var wNoScroll = 0;var wScroll = 0;scr = document.createElement('div');scr.style.position = 'absolute';scr.style.top = '-1000px';scr.style.left = '-1000px';scr.style.width = '100px';scr.style.height = '50px';scr.style.overflow = 'hidden';inn = document.createElement('div');inn.style.width = '100%';inn.style.height = '200px';scr.appendChild(inn);document.body.appendChild(scr);wNoScroll = inn.offsetWidth;scr.style.overflow = 'auto';wScroll = inn.offsetWidth;document.body.removeChild(document.body.lastChild);return (wNoScroll - wScroll);})(),
+   SCROLLBAR_WIDTH : null,    //Set later
 }
 
 var LINKS = {
-   HOME        : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/h/?tab=DEFAULT&__JOBMINE_PLUS_says:_'I_HAVE_CONTROL!!'",
+   HOME        : CONSTANTS.PAGESIMILARTOP + "EMPLOYEE/WORK/h/?tab=DEFAULT",
    LOGIN       : CONSTANTS.PAGESIMILAR + "?cmd=login&languageCd=ENG",
    LOGOUT      : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/?cmd=logout",
    DOCUMENTS   : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STUDDOCS",
@@ -61,8 +67,18 @@ var LINKS = {
    BLANK       : "about:blank",
    EMPLYR_TOP  : "jobmine.ccol.uwaterloo.ca/psp/ES",
    EMPLYR_FRAME: "jobmine.ccol.uwaterloo.ca/psc/ES",
-   
+   UPDATE_LINK : "http://userscripts.org/scripts/source/80771.user.js",
 };
+
+var NAVIGATION = {   //The order below will be on the left side
+                     PROFILE        : "Profile",
+                     DOCUMENTS      : "Documents",
+                     SEARCH         : "Job Search",
+                     LIST           : "Job Short List",
+                     APPLICATIONS   : "Applications",
+                     INTERVIEWS     : "Interviews",
+                     RANKINGS       : "Rankings",
+                  };
 
 var COLOURS = {
    ROW_HIGHLIGHT        : "#f0f1ac",      //Light green
@@ -72,8 +88,10 @@ var COLOURS = {
 };
 
 var OBJECTS = {
+   STORAGE        : null, //Set later
    HIGHLIGHT      : null,
    ONPOPUPCLOSE   :  null,
+   MESSAGE_TIMER  :  null,
 };
 
 var LARGESTRINGS = {
@@ -89,6 +107,7 @@ var IMAGES = {
    TABLE_ASCEND   : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAECAYAAAC6Jt6KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAChJREFUeNpi/P//PwMSAHEYGfAAJjTFyDReDeiK/uPTgEsSqzhAgAEA5doJ/2fPKB8AAAAASUVORK5CYII=",
    TABLE_DESCEND  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAECAYAAAC6Jt6KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAChJREFUeNpi/A8EDLgBI7oAEzZBXIphGrBJ4jIErgFZESMeJzIABBgACYsEC30vZjwAAAAASUVORK5CYII=",
    DELETE_LOADING : "data:image/gif;base64,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",
+   MESSAGE_CLOSE  : "data:image/gif;base64,R0lGODlhDQAMANUAAObm5qampn19fX5+fq2trfT09N/f34SEhPf39/n5+XV1dYmJiXNzc2xsbHd3d2JiYlRUVKOjo3x8fIGBgX9/f9vb24uLi9nZ2YyMjIODg9bW1qmpqZGRkc/Pz3FxcY+Pj/X19ZCQkG5ubqqqqqenp4qKiuXl5eLi4unp6aysrN7e3nR0dGtra/Pz8/j4+Pr6+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAANAAwAAAZiwNfJ9CoaExWU8LAgGl0ERwhViLBKTldqJdggXi0SywLQrgaqb7EVYGE6K4nKaAx7Hoc5vZi4rCAfAHsvWgoTJA0lgk8pDBQGBW1YRS4jXHpsVwRCGWh0YSIcSicGgyAaSkEAOw==",
 };
 
 /*===============================*\
@@ -113,7 +132,7 @@ String.prototype.setCharAt = function(index, character) {
    return this.substr(0, index) + character + this.substr(index+character.length);
 }
 String.prototype.startsWith = function(str) {
-   if (str == null || str == "") {return false;}
+   if (str == null || str.length == 0) {return false;}
    return this.substring(0, str.length) == str;
 }
 String.prototype.underscorize = function() {
@@ -216,6 +235,11 @@ var PAGES = {
    APPLICATIONS: "APPLICATIONS",
    INTERVIEWS  : "INTERVIEWS",
    RANKINGS    : "RANKINGS",
+   
+   //Functions
+   isValid     : function(page){
+      return this.hasOwnProperty(page);
+   },
 };
 
 /**
@@ -224,9 +248,9 @@ var PAGES = {
 if(PAGEINFO.URL.contains(LINKS.EMPLYR_TOP) || PAGEINFO.URL.contains(LINKS.EMPLYR_FRAME)) {
    window.location.href = LINKS.LOGIN;    //Forces you to be redirected to the student login page
    return;
-} else if (PAGEINFO.TITLE === "JobMine | University of Waterloo" && UTIL.idExists("userid") ) {
+} else if (PAGEINFO.TITLE.contains("JobMine") && UTIL.idExists("userid") ) {
    PAGEINFO.TYPE = PAGES.LOGIN;
-} else if (PAGEINFO.URL.contains("?tab=DEFAULT&")) {
+} else if (PAGEINFO.URL.contains("?tab=DEFAULT") && PAGEINFO.URL.contains(CONSTANTS.PAGESIMILARTOP)) {
    PAGEINFO.TYPE = PAGES.HOME;
 } else if (PAGEINFO.TITLE.contains("Student Ranking")) {
    PAGEINFO.TYPE = PAGES.RANKINGS; 
@@ -244,9 +268,13 @@ if (PAGEINFO.TYPE != null) {
    var noClasses = document.body.className == "";
    document.body.className += (noClasses ? "" : " ") + PAGEINFO.TYPE;
    if (PAGEINFO.IN_IFRAME) {
-      document.body.className += (noClasses ? "" : " ") + "iframe";
+      document.body.className += " iframe";
    }
 }
+//Set inital stuff
+OBJECTS.STORAGE = (PAGEINFO.BROWSER == BROWSER.FIREFOX ? unsafeWindow.localStorage : localStorage);      //Fixes FF3.5/6
+DIMENSIONS.SCROLLBAR_WIDTH = (function(){var scr = null;var inn = null;var wNoScroll = 0;var wScroll = 0;scr = document.createElement('div');scr.style.position = 'absolute';scr.style.top = '-1000px';scr.style.left = '-1000px';scr.style.width = '100px';scr.style.height = '50px';scr.style.overflow = 'hidden';inn = document.createElement('div');inn.style.width = '100%';inn.style.height = '200px';scr.appendChild(inn);document.body.appendChild(scr);wNoScroll = inn.offsetWidth;scr.style.overflow = 'auto';wScroll = inn.offsetWidth;document.body.removeChild(document.body.lastChild);return (wNoScroll - wScroll);})();
+
 }
 /*==================================*\
 |*      __USERSCRIPTS_BRIDGE__      *|
@@ -271,8 +299,7 @@ var BRIDGE = {
    runQueue          : [],  //Glitch in chrome that window.location has timing issues so it must be synchronized
    isRunningCommand  : false,
    domReady          : false,
-   init: function()
-   {
+   init: function() {
       //Do allow the init to happen if the object exists
       if(document.getElementById("USERSCRIPT_BRIDGE")){return;}
       
@@ -585,6 +612,11 @@ jQuery.fn.plainText = function(){
 //Element exist?
 jQuery.fn.exists = function(){return jQuery(this).length>0;}
 
+//Tagname
+jQuery.fn.tag = function() {
+    return this.get(0).tagName.toUpperCase();
+};
+
 //OuterHTML
 jQuery.fn.outerHTML = function() {
     return $('<div>').append( this.eq(0).clone() ).html();
@@ -597,13 +629,16 @@ jQuery.fn.outerHTML = function() {
 //Error messages
 var MESSAGE = {
    ARRAY_OUT_OF_BOUNDS  : "The index(es) are out of bounds of the array.",
+   INVALID_ARGUMENTS    : "There is an invalid number of arguments.",
    INDEX_RANGE_INCORRECT: "The start index cannot be larger than the end index (startIndex <= endIndex is acceptable).",
    TABLES_NO_SET_ROW    : "Cannot set table rows, use deleteRow() / insertRow() instead.",
    TABLES_NO_SET_COL    : "Cannot set table columns, use deleteColumn() / insertColumn() instead.",
+   JOBID_INVALID        : "jobID inputted is not valid.",
 };
 //Log into firebug
-function Log(message) {
-   console.log(message);
+function Log() {
+   if(arguments == 0) {return;}
+   console.log("JbmnPls Log: ",arguments);
 }
 //Throw an error
 function Throw(message) {
@@ -615,71 +650,100 @@ function Assert(condition, message) {
       throw new Error("Assert Error: "+ message);
    }
 }
-function attachDebugger() {
-   //Don't need to attach if already attached
-   if(UTIL.getID("jbmnplsDebuggerBtn") != null) {return;}
-   //Add a new nav item
-   $("#jbmnplNav ul:eq(0)").append("<li><span id='jbmnplsDebuggerBtn' class='fakeLink'>Debugger OFF</span></li>");
-   
-   //Append some css
-   var debugCSS = {
-      "body.debugon #jbmnplsLocal_Storage" : {
-         "display"   :  "block",
-      },
-      "#jbmnplsLocal_Storage" : {
-         "position"  :  "fixed",
-         "top"       :  "20%",
-         "display"   :  "none",
-         "min-width" :  "500px",
-         "width"     :  "500px",
-         "top"       :  "30%",
-         "left"      :  "20%",
-         "opacity"   :  "0.1",
-         "-moz-transition-property"   :  "opacity",
-         "-moz-transition-duration"   :  "0.5s",
-         "-webkit-transition-property"   :  "opacity",
-         "-webkit-transition-duration"   :  "0.5s",
-      },
-      "#jbmnplsLocal_Storage:hover" : {
-         "opacity"   :  "1",
-      },
-      "#jbmnplsLocal_Storage.draggable-move" : {
-         "opacity"   :  "1 !important",
-      },
-   };
-   appendCSS(debugCSS);
-   
-   var LSTable = makeTable("Local Storage");
-   LSTable.insertData(["Blank"], [[""]])
-            .addControlButton("Refresh", function(){refreshLS();})
-            .addControlButton("Clear", function(){PREF.clear();})
-            .appendTo($(document.body))
-            .makeDraggrable();
-   
-   //Refresh the localStorage data
-   refreshLS = function() {
+var DEBUGGER = {
+   isAttached     : false,
+   storageTable   : null,
+   refresh  :function(){
+      if (!this.isAttached) {
+         return;
+      }
       var data = [];
-      for(var key in localStorage) {
-         data.push([key, localStorage[key]]);
+      var o = OBJECTS.STORAGE.length;     //Glitch in FF, need to explicitly get length for it to update
+      for(var key in OBJECTS.STORAGE) {
+         data.push([key, OBJECTS.STORAGE[key]]);
       }
-      LSTable.insertData(["Key", "Data"], data).updateCells();
-   }         
-   refreshLS();
-   
-   //Events for the debugger button
-   $("#jbmnplsDebuggerBtn").bind("click", function(){
-      refreshLS();
-      var body = $(document.body);
-      var obj = $(this);
-      if (obj.hasClass("on")) {
-         body.removeClass("debugon");
-         obj.removeClass("on").text("Debugger OFF");
-      } else {
-         body.addClass("debugon");
-         obj.addClass("on").text("Debugger ON");
-      }
-   });
-}
+      this.storageTable.insertData(["Key", "Data"], data).updateCells();
+   },
+   init : function(){
+      //RUN ONCE: Don't need to attach if already attached
+      if(UTIL.getID("jbmnplsDebuggerBtn") != null) {return;}
+      DEBUGGER.isAttached = true;
+      //Add a new nav item
+      $("#jbmnplsNav ul:eq(0)").append("<li><span id='jbmnplsDebuggerBtn' class='fakeLink'>Debugger OFF</span></li>");
+      
+      //Append some css
+      var debugCSS = {
+         "body.debugon #jbmnplsLocal_Storage" : {
+            "display"   :  "block",
+         },
+         "#jbmnplsLocal_Storage" : {
+            "position"  :  "fixed",
+            "top"       :  "20%",
+            "display"   :  "none",
+            "min-width" :  "500px",
+            "width"     :  "500px",
+            "top"       :  "30%",
+            "left"      :  "20%",
+            "opacity"   :  "0.1",
+            "-moz-transition-property"   :  "opacity",
+            "-moz-transition-duration"   :  "0.5s",
+            "-webkit-transition-property"   :  "opacity",
+            "-webkit-transition-duration"   :  "0.5s",
+         },
+         "#jbmnplsLocal_Storage:hover" : {
+            "opacity"   :  "1",
+         },
+         "#jbmnplsLocal_Storage.draggable-move" : {
+            "opacity"   :  "1 !important",
+         },
+      };
+      appendCSS(debugCSS);
+      var table = this.storageTable = makeTable("Local Storage");
+      table.insertData(["Blank"], [[""]])
+               .addCheckboxes()
+               .addControlButton("Refresh", function(){DEBUGGER.refresh();})
+               .addControlButton("Clear", function(){PREF.clear();DEBUGGER.refresh();})
+               .addControlButton("Delete Selected", function(){
+                  //Get all the rows to delete
+                  var listToDelete = [];
+                  $("#"+table.tableID+" input.checkbox:checked").each(function(r){
+                     listToDelete.push(this.parentNode.parentNode.getAttribute("row"));
+                  });
+                  if(listToDelete.empty()) {return;}
+                  if(!confirm("Would you like to delete these rows?\nThere are "+listToDelete.length+" rows to delete.")) {
+                     return;
+                  }
+                  listToDelete.sort(function(a,b){return b-a;});     
+                  //Remove the data from storage
+                  for (var i=0;i<listToDelete.length;i++) {
+                     var tr = $("#row_"+table.cname+"_"+listToDelete[i]);
+                     if (tr.exists()) {
+                        var key = tr.children(":eq(1)").text();
+                        OBJECTS.STORAGE.removeItem(key);
+                     }
+                  }
+                  table.deleteRowRange(listToDelete);
+               })
+               .appendTo($(document.body))
+               .makeDraggrable();
+      this.refresh();
+      
+      //Events for the debugger button
+      $("#jbmnplsDebuggerBtn").bind("click", function(){
+         DEBUGGER.refresh();
+         var body = $(document.body);
+         var obj = $(this);
+         if (obj.hasClass("on")) {
+            body.removeClass("debugon");
+            obj.removeClass("on").text("Debugger OFF");
+         } else {
+            body.addClass("debugon");
+            obj.addClass("on").text("Debugger ON");
+         }
+      });
+   },
+};
+
 }
 /*================================*\
 |*        __PREFERENCES__         *|
@@ -689,31 +753,29 @@ var PREF = {
    DEFAULT : {
       KILLTIMER            : false,
       HIGHLIGHT_LAST_ROW   : true,
+      LAST_PAGE            : PAGES.APPLICATIONS,
+      DEFAULT_PAGE         : PAGES.APPLICATIONS,
+      LAST_ACCESSED_SEARCH : new Date().getTime(),
       PAGE : {
          HIDDEN_HEADERS : [],
       },
    },
-   onSave : function(){},
-   onLoad : function(){},
-   onClear: function(){},
+   onSave   : function(){},
+   onLoad   : function(){},
+   onClear  : function(){},
+   onRemove : function(){},
    commonPrefix   : "COMMON",
-   parseReturn : function(val) {
-      //Is numerical number?
-      if (val*1 == parseInt(val)) {
-         return val*1;
-      }
-      //Is boolean?
-      switch(val) {
-         case "TRUE":
-         case "true":
-            return true;
-         case "FALSE":
-         case "false":
-            return false;
-      }
-      //Is string or array (as a string)
-      return val;
-   },
+   /**
+    *    Load Preferences
+    *       Implementation:
+    *          [name]: can be any name but most be a key in DEFAULT (except PAGE)
+    *          [index]: an int that gets added to the name of the key, it is used to separate incremental objects like tables
+    *          [default]: a value that is returned if the name cannot be found
+    *
+    *       PREF.load([name]);
+    *       PREF.load([name], [index]);
+    *       PREF.load([name], [index], [default]);    
+    */
    load : function(name, index, defaultInputVal) {
       if (name == null || name == "") {
          return;
@@ -724,28 +786,72 @@ var PREF = {
       var nameIsPagePref = this.DEFAULT.PAGE.hasOwnProperty(name);
       var nameIsPref = this.DEFAULT.hasOwnProperty(name) && name != "PAGE";
       if (nameIsPagePref) {
-         Assert(PAGEINFO.TYPE != null, "This page has no type, cannot save");
+         Assert(PAGEINFO.TYPE != null, "This page has no type, cannot load");
          key = index == null ? PAGEINFO.TYPE + "_" + name : PAGEINFO.TYPE + "_" + index + "_" + name;
          defaultValue = this.DEFAULT.PAGE[name];
       } else {
          key = index == null ? this.commonPrefix+ "_" +name : this.commonPrefix+"_" + index + "_" +name;
          defaultValue = this.DEFAULT[name];
       }
-      var value = localStorage.getItem(key);
+      //Try to load
+      try{
+         var value = OBJECTS.STORAGE.getItem(key);
+      }catch(e){"Cannot load preferences because there is an error with localStorage! :(";}
       if (value == undefined) {
          //If there is no value, return the default, if this is null, it returns null
          return defaultInputVal != null ? defaultInputVal : defaultValue;      
       } else if(!nameIsPagePref && !nameIsPref) {
          Throw("Failed to load: "+name+" because the name specified was not part of the object list for this.DEFAULT.");
       }
-      this.onLoad();
-      return this.parseReturn(value);
+      
+      //Parse Return
+      if (value*1 == parseInt(value)) {    //Is numerical number?
+         return value*1;
+      }
+      switch(value) {         //Is boolean?
+         case "TRUE":
+         case "true":
+            return true;
+         case "FALSE":
+         case "false":
+            return false;
+      }
+      this.onLoad(value);
+      return value;
    },
-   save : function(name, index, value) {
+   /**
+    *    Save Preferences
+    *       Implementation:
+    *          [name]: can be any name but most be a key in DEFAULT (except PAGE)
+    *          [index]: an int that gets added to the name of the key, it is used to separate incremental objects like tables
+    *          [value]: a value of any type that can be a string that is saved
+    *
+    *       PREF.save([name], [value]);
+    *       PREF.save([name], [index], [value]);    
+    */
+   save : function(name, arg1, arg2) {
       if (name == null || name == "") {
          return;
       }
-      value = value == null ? "" : value;
+      var value, index;
+      //Parse Arguments
+      switch(arguments.length) {
+         case 1:
+            value = "";
+            break;
+         case 2:
+            value = arg1;
+            break;
+         case 3:
+            Assert(UTIL.isNumeric(arg1), "Given index to save is not an integer!");
+            value = arg2;
+            index = arg1;
+            break;
+         default:
+            Throw(MESSAGE.INVALID_ARGUMENTS);
+            return;
+            break;
+      }
       var key = "";
       name = name.toUpperCase().underscorize();
       if (this.DEFAULT.PAGE.hasOwnProperty(name)) {
@@ -758,86 +864,43 @@ var PREF = {
       }
       //Try to save
       try{
-         localStorage.setItem(key, value);
+         OBJECTS.STORAGE.setItem(key, value);
       }catch(e){"Cannot save settings because there is an error with localStorage! :(";}
       this.onSave();
    },
+    /**
+    *    Remove Preferences
+    *       Implementation:
+    *          [name]: can be any name but most be a key in DEFAULT (except PAGE)
+    *          [index]: an int that gets added to the name of the key, it is used to separate incremental objects like tables
+    *
+    *       PREF.remove([name]);
+    *       PREF.remove([name], [index]);
+    */
+   remove : function(name, index) {
+      if (name == null || name == "") { return false; }
+      var key = "";
+      name = name.toUpperCase().underscorize();
+      var nameIsPagePref = this.DEFAULT.PAGE.hasOwnProperty(name);
+      var nameIsPref = this.DEFAULT.hasOwnProperty(name) && name != "PAGE";
+      if (nameIsPagePref) {
+         Assert(PAGEINFO.TYPE != null, "This page has no type, cannot remove");
+         key = index == null ? PAGEINFO.TYPE + "_" + name : PAGEINFO.TYPE + "_" + index + "_" + name;
+      } else {
+         key = index == null ? this.commonPrefix+ "_" +name : this.commonPrefix+"_" + index + "_" +name;
+      }
+      try{
+         var value = OBJECTS.STORAGE.removeItem(key);
+      }catch(e){"Cannot remove preference: "+key+", because there is an error with localStorage! :(";return false;}
+      this.onRemove();
+      return true;
+   },
    clear : function(){
       if(confirm("You are about to delete all the saved data for Jobmine Plus, is this what you want to do?")) {
-         localStorage.clear();
+         OBJECTS.STORAGE.clear();
          this.onClear();
       }
    }
-};
-}
-
-/*================================*\
-|*         __JOBS_QUEUE__         *|
-\*================================*/
-{/*Expand to see the job queue*/
-function Job(commandOutline, listOfIndexes, onComplete) {
-   if(commandOutline == null || commandOutline == "" || !commandOutline.contains("%") 
-    ||listOfIndexes == null || !UTIL.isArray(listOfIndexes) || listOfIndexes.empty()) {
-      Throw("Job queue init is not valid");
-   }
-   this.commandTemplate = commandOutline;
-   this.callback = UTIL.isFunction(onComplete) ? onComplete : null;
-   //Private
-   this.list = listOfIndexes
-   this.copyList = listOfIndexes.clone();
-}
-Job.prototype = {
-   isValid : function(){
-      return this.commandTemplate != null && this.commandTemplate != "" && !this.isEmpty();
-   },
-   isEmpty : function(){
-      if (this.list == null) {
-         this.list = [];
-      }
-      return this.list.empty();
-   },
-   length : function(){
-      return this.list.length;
-   },
-};
-
-var JOBQUEUE = {
-   queue    : [],
-   isRunning: false,
-   command  : null,
-   callback : null,
-   number   : -1,
-   isEmpty  : function(){
-      return this.queue.empty();
-   },
-   addJob  : function(item){
-      if(item == null || !(item instanceof Job) || !item.isValid()) {
-         return;
-      }
-      this.queue.push(item);
-      this.runNextJob();
-   },
-   runNextJob : function(){
-      if (!this.isEmpty() && !this.isRunning) {
-         var item = this.queue[0];
-         var number = item.list.shift();
-         if (number == null) {
-            this.number = -1;
-            this.command = item.commandTemplate;
-         } else {
-            this.number = number;
-            this.command = item.commandTemplate.replace(/\%/g, number);
-         }
-         if(item.callback) {
-            this.callback = item.callback;
-         }
-         this.isRunning = true;
-         BRIDGE.run("function(){"+this.command+"}");
-      }
-   },
-   getCurrentItem : function(){
-      return this.isEmpty() ? null : this.queue[0];
-   },
 };
 }
 
@@ -876,23 +939,24 @@ var Cookies = {
    },
 };
 
-
 /**
  *    Changes the current location in the iframe to a different location
  */
-function changeLocation(newURL, title) {
+function changeLocation(newURL, title, navIndex) {
    if (UTIL.idExists("jbmnplsWebpage")) {
+      DEBUGGER.refresh();
       $("#jbmnplsWebpage").attr("src", newURL);
       if (title.empty()) {
          title = "Jobmine Plus";
       }
       document.title = title;
-      setNavSelection(newURL);
+      setNavSelection(navIndex);
    }
 }
 function redirect(newURL) {
    if (!newURL.empty()) {
       window.location.href = newURL;
+      DEBUGGER.refresh();
    }
 }
 
@@ -905,33 +969,25 @@ function setTitle(name){
       return;
    }
    if (PAGEINFO.IN_IFRAME) {
-      /*window.parent.document.title = name;*/
+      BRIDGE.run(function(){
+         window.parent.document.title = name;
+      }, null, {"name": name});
    } else {
       document.title = name;
    }
    }catch(e){alert(e)}
 }
-function setNavSelection(linkObj) {
-   if(UTIL.idExists("jbmnplNav") && linkObj != null) {
+function setNavSelection(index) {
+   if(UTIL.idExists("jbmnplsNav") && index != null) {
       unSelectNav();
-      var itemNum = -1;
-      switch(linkObj) {
-         case LINKS.PROFILE:        itemNum = 0;   break;
-         case LINKS.DOCUMENTS:      itemNum = 1;   break;
-         case LINKS.SEARCH :        itemNum = 2;   break;
-         case LINKS.LIST :          itemNum = 3;   break;
-         case LINKS.APPLICATIONS:   itemNum = 4;   break;
-         case LINKS.INTERVIEWS:     itemNum = 5;   break;
-         case LINKS.RANKINGS:       itemNum = 6;   break;
-      }
-      if (itemNum != -1) {
-         $("#jbmnplNav a").eq(itemNum).addClass("selected");
+      if (UTIL.isNumeric(index) && index >= 0) {
+         $("#jbmnplsNav a").eq(index).addClass("selected");
       }
    }
 }
 function unSelectNav() {
-   if(UTIL.idExists("jbmnplNav")) {
-      $("#jbmnplNav a").removeClass("selected");
+   if(UTIL.idExists("jbmnplsNav")) {
+      $("#jbmnplsNav a").removeClass("selected");
    }
 }
 
@@ -939,10 +995,18 @@ function unSelectNav() {
  *    Applies the header to the page
  */
 function addHeader() {
+   var counter = 0;
    var fname = "Matthew";
    var lname = "Ng";
    var studNum = "20351252";
-   var header = "<header id='jbmnplsHeader'><div id='jbmnplsTopGroup'><div id='jbmnplsBanner' class='banner'></div><nav id='jbmnplNav'><ul><li><a href='"+LINKS.PROFILE+"'>Profile</a></li><li><a href='"+LINKS.DOCUMENTS+"'>Documents</a></li><li><a href='"+LINKS.SEARCH+"'>Job Search</a></li><li><a href='"+LINKS.LIST+"'>Job Short List</a></li><li><a href='"+LINKS.APPLICATIONS+"'>Applications</a></li><li><a href='"+LINKS.INTERVIEWS+"'>Interviews</a></li><li><a href='"+LINKS.RANKINGS+"'>Rankings</a></li></ul></nav><div id='uwBanner' class='banner'></div></div><div id='jbmnplsBottomGroup'><div id='jbmnplsStatus'>Hi <span id='jbmnplsUserName'>"+fname+" "+lname+"!</span><span id='jbmnplsUserID'> ("+studNum+")</span></div><div id='jbmplsControlPanel'><a href='#'>Settings</a> | <a href='#'>About</a> | <a href='"+LINKS.LOGOUT+"'>Logout</a></div></div></header>";
+   var header = "<header id='jbmnplsHeader'><div id='jbmnplsTopGroup'><div id='jbmnplsBanner' class='banner'></div><nav id='jbmnplsNav'><ul>";
+   for(var item in NAVIGATION) {
+      if(PAGES.isValid(item) && LINKS.hasOwnProperty(item)) {
+         header += "<li><a item='"+counter+"' type='"+item+"' href='"+LINKS.HOME+"' realHref='"+LINKS[item]+"'>"+NAVIGATION[item]+"</a></li>";
+         counter++;
+      }
+   }
+   header += "</ul></nav><div id='uwBanner' class='banner'></div></div><div id='jbmnplsBottomGroup'><div id='jbmnplsStatus'>Hi <span id='jbmnplsUserName'>"+fname+" "+lname+"!</span><span id='jbmnplsUserID'> ("+studNum+")</span></div><div id='jbmplsControlPanel'><a href='#'>Settings</a> | <a href='#'>About</a> | <a href='"+LINKS.LOGOUT+"'>Logout</a></div></div></header>";
    $("body").prepend(header);
 }
 
@@ -1023,6 +1087,76 @@ function isPopupShown(strictIsBlack){
 }
 
 /**
+ *    Message
+ */
+function showMessage(msg, timeoutSeconds) {
+   Assert(timeoutSeconds == null || timeoutSeconds != null && timeoutSeconds >= 3, "The timer for message was set less than 3 sec, please set it higher");
+   var message = $("#jbmnplsMessage");
+   if (!message.exists()) {
+      $(document.body).append("<div "+(PAGEINFO.IN_IFRAME?"style='top:0;'":"")+" id='jbmnplsMessageHolder'><div id='jbmnplsMessage'><div id='jbmnplsMessageText'></div><a style='display:none;' id='jbnplsUpdate' href='"+LINKS.UPDATE_LINK+"'>You are using an old version of Jobmine Plus, click to update.</a><div id='jbmnplsMessageClose' class='close'></div></div></div>");
+      message = $("#jbmnplsMessage");
+      
+      if (CONSTANTS.DEBUG_ON) {
+         $("#jbmnplsNav ul").append("<li><span id='jbmnplsShowMessageBtn' class='fakeLink'>Show Message</span></li>");
+         $("#jbmnplsShowMessageBtn").click(function(){showMessage("showing message!!");})
+      }
+   }
+   //Update and reset timer
+   if (message.hasClass("show")) {
+      clearInterval(OBJECTS.MESSAGE_TIMER);
+   } else {
+   //Show it now
+      message.addClass("show");
+      message.css("top", "-50px").animate({top: 0}, 400);
+   }
+   message.attr("time", timeoutSeconds == null ? CONSTANTS.MESSAGE_TIME_OUT : timeoutSeconds);
+   //Set the message
+   if (msg != null) {
+      $("#jbmnplsMessageText").html(msg);
+   }
+   
+   //Add the event
+   $("#jbmnplsMessageClose").bind("click", closeMessage);
+   
+   //Set the timer
+   OBJECTS.MESSAGE_TIMER = setInterval(function(){
+      var obj = $("#jbmnplsMessage");
+      var remaining = parseInt(obj.attr("time"));
+      if (remaining <= 5) {      //Countdown
+         $("#jbmnplsMessageClose").text("Dismissing in "+remaining+"s");
+      }
+      if (remaining <= 0) {      //Finished
+         closeMessage();
+      } else {
+         obj.attr("time", remaining-1);
+      }
+   }, 1000);
+}
+BRIDGE.registerFunction("showMessage", showMessage);
+function closeMessage() {
+   var message = $("#jbmnplsMessage");
+   Assert(message.exists(), "Must create the message before closing it!!");
+   if (message.hasClass("show")) {
+      //Destroy timer if still exists
+      if (OBJECTS.MESSAGE_TIMER != null) {
+         clearInterval(OBJECTS.MESSAGE_TIMER);
+         OBJECTS.MESSAGE_TIMER = null;
+      }
+      //Fade out the close
+      $("#jbmnplsMessageClose").unbind("click").fadeOut(300, function(){
+         $("#jbmnplsMessageClose").css("display", "block").empty();
+      });
+      
+      //Animate up
+      message.animate({top: -50}, 600);
+      
+      //Clean up
+      message.removeClass("show");
+      message.removeAttr("time");
+   }
+}
+
+/**
  *    Handles customizing tables on the page
  */
 function handleCustomize(tableNum, columnNum) {
@@ -1044,12 +1178,13 @@ function handleCustomize(tableNum, columnNum) {
             table.hideColumns(hidden);
             break;
          case "save": 
-            PREF.save("HIDDEN_HEADERS", tableNum, table.getHeadersHidden());
+            PREF.save("HIDDEN_HEADERS", tableNum, table.getColumnsHidden());
+            showMessage("The table's headers customization has been saved.", 5);
             break;
       }
    }
    if (isPopupShown(true) && columnNum != null && UTIL.isNumeric(columnNum)) {
-      if(table.isHeaderShown(columnNum)) {
+      if(table.isColumnShown(columnNum)) {
          table.hideColumns([columnNum]);
       } else {
          table.showColumns([columnNum]);
@@ -1059,7 +1194,7 @@ function handleCustomize(tableNum, columnNum) {
       var maxHeight = blockHeight;
       var html = "<div class='customizeEntry instructions'><span class='row'>Click/check to hide columns</span></div>";
       for(var i=0; i<table.headers.length; i++) {
-         var hidden = !table.isHeaderShown(i);
+         var hidden = !table.isColumnShown(i);
          var name = table.headers[i];
          name = name == "" ? "Column #"+(i+1) : name;
          if (!(name.charAt(0) == "{" && name.charAt(name.length-1))) {
@@ -1078,187 +1213,19 @@ function handleCustomize(tableNum, columnNum) {
 BRIDGE.registerFunction("handleCustomize", handleCustomize);
 
 /**
- *    Renumbers the checkboxes, usually after content is missing or table is sorted
- *       Pass in a jQuery tablesorter table, will check if checkboxes exists
- */
-function reNumberCheckbox(jTable) {
-   if(jTable == null || !(jTable instanceof jQuery)) {
-      return;
-   }
-   var name = jTable.attr("name");
-   //There are checkboxes, this will happen
-   jTable.find("input.checkbox").each(function(i){
-      this.id = "checkbox_"+name+"_"+i;
-   });
-}
-
-/**
  *    Remove the timer
  */
 
 function removeTimer() {
+   BRIDGE.addFunction("setupTimeout");
+   //BRIDGE.addFunction("displayTimeoutMsg");
+   //BRIDGE.addFunction("displayTimeoutWarningMsg");
    BRIDGE.run(function(){
       if (typeof clearupTimeout === "function") {
          clearupTimeout();
       }
    });
-   BRIDGE.addFunction("setupTimeout");
-   BRIDGE.addFunction("refreshOnExpired");
 }
-
-/**
- *    Capture Ajax events
- */
-function initAjaxCapture() {
-   BRIDGE.registerFunction("ajaxComplete", ajaxComplete);
-   BRIDGE.addJS(function(){
-      net.ContentLoader.prototype.onReadyState = function() {
-         //Some functions
-         var obj = this;
-         function allowResubmit(){
-            obj.form.ICResubmit.value = "0";
-            nResubmit = 0;
-            obj.SetInProcess(false); 
-         }
-         Array.prototype.last = function(){
-            if (this.length == 0) {return null;}
-            return this[this.length-1];
-         }
-         var req = this.req;
-         var name = this.name;
-         //Loaded
-         if (req.readyState == 4 && req.status == 200) {
-            //Call our function when xmlhttprequest is finished
-            var url = null;
-            if(name.indexOf("hexcel") != -1) {  
-               try{
-                  var text = req.responseText;
-                  var start = text.indexOf(";window.open('"+commonURL+"?cmd=viewattach&userfile=ps.xls") + 14;
-                  url = text.substring(start, text.indexOf("',", start));
-                  allowResubmit();
-                  text = null;
-               }catch(e){alert("Excel stuff is broken: "+e);}
-            } else if(name.indexOf("UW_CO_APPLY_HL") != -1 && document.title == "Student Interviews"){
-                  url = req.responseText.match(/document.location='([^(';)]+)/).last();
-                  allowResubmit();
-            } else {
-               this.onload.call(this);
-            }
-            ajaxComplete(name, url);
-         }
-      }
-   }, {commonURL: CONSTANTS.PAGESIMILAR});
-}
-
-function ajaxComplete(name, url) {  
-   //Nothing is running, dont do anything
-   var item = JOBQUEUE.getCurrentItem();
-   var jobFinished = false;
-   var whitePopupShown = isPopupShown(false);
-
-   //Handle Excel exporting
-   if(name.contains("$hexcel$") && url != null) {
-      $("#slave").attr("src", url+"&jbmnpls=ignore").one("load", function(){
-         alert("Download Ready");
-         //5 sec timeout so that the iframe goes back to nothing
-         setTimeout(function(){
-            UTIL.getID("slave").src = LINKS.BLANK;
-         },5000);
-      });
-      return;
-   }
-   switch(PAGEINFO.TYPE) {
-      case PAGES.INTERVIEWS:
-         //FIX THIS
-         if (name.contains("UW_CO_APPLY_HL")) {
-            showPopup(true, "<div class='instructions block'>Please select an interview time</div>", "Interview Schedule", 500, null, null, url);
-            //iframeRunFunction(UTIL.getID("jbmnplsPopupFrame"))
-         }
-         break;
-      case PAGES.SEARCH:
-         //Clicked search button
-         if(name == "UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN") {
-            //Recrawl and update data
-            var table = TABLES[0];        //Results table
-            table.update();
-         }
-         break;
-      //Deleting shortlists
-      case PAGES.APPLICATIONS:
-      case PAGES.LIST:
-      try{
-         if (name.contains("$delete$")) {
-            if (whitePopupShown) {
-               setTitle("Saving...");
-               showPopup(false, "Deleting all the short listed jobs.<br/>Saving...<br/><span style='color:red;'>DO NOT REFRESH!</span>");
-            }
-            if(!whitePopupShown || (whitePopupShown && item.isEmpty())) {
-               BRIDGE.run(function(){
-                  setSaveText_win0('Saving...');
-                  submitAction_win0(document.win0, '#ICSave');
-               });
-            } else {
-               //Run the next job
-               var length = item.copyList.length;
-               var progress = (length-item.list.length+1)+"/"+length;
-               setTitle("Deleting: "+progress);
-               showPopup(false, "Deleting all the short listed jobs.<br/>Progress: "+progress+"<br/><span style='color:blue;'>You can cancel by refreshing.</span>");
-               jobFinished = true;
-            }
-         } else if (name == "#ICSave") {
-            //Popup up for deleting multiple checkboxes
-            if (whitePopupShown) {
-               //Finished saving and deleting checkboxes    
-               var tableObj = TABLES[TABLES.length-1];      //Last table
-               tableObj.deleteRowRange(item.copyList);
-               if (PAGEINFO.TYPE == PAGES.APPLICATIONS) {
-                  TABLES[0].deleteRowRange(item.copyList);     //Active Table
-                  setTitle("Applications");
-               } else {
-                  setTitle("Job Short List");
-               }
-               hidePopup();
-               alert("saved from deleting multiple rows");
-               jobFinished = true;
-            } else {
-               if (item != null && !TABLES.empty()) {
-                  //Delete the row and reorganize
-                  var deletedRowNumber = JOBQUEUE.number;
-                  var tableObj = TABLES[TABLES.length-1];      //Last table
-                  //Clean up
-                  var deleteObjs = tableObj.jInstance.find("tbody div.delete");
-                  deleteObjs.removeAttr("disabled");
-                  //Special operations for applications to mirror table rows
-                  if (PAGEINFO.TYPE == PAGES.APPLICATIONS) {
-                     //Delete the job listed in the all applications table when it is deleted
-                     alert("#row_"+tableObj.name+"_"+deletedRowNumber)
-                     var id = $("#row_"+tableObj.cname+"_"+deletedRowNumber).children(":first").plainText();
-                     var activeTable = TABLES[0];     //Active table
-                     var rowToDelete = $("#"+activeTable.tableID+" tbody td:contains('"+id+"')").parent().attr("row");
-                     activeTable.deleteRow(rowToDelete);
-                  }
-                  tableObj.deleteRow(deletedRowNumber);
-                  alert("saved");
-                  jobFinished = true;
-               }
-            }
-         } 
-         }catch(e){alert(e)}
-         break;
-   }
-   if (jobFinished) {
-      if (item.isEmpty()) {   
-         JOBQUEUE.queue.shift();
-         //Call back when the group of things are finished
-         if(JOBQUEUE.callback) {
-            JOBQUEUE.callback.call(this);
-         }
-      }
-      JOBQUEUE.isRunning = false;
-      JOBQUEUE.runNextJob();
-   }
-}
-
 
 function initRowDeletion() {
    // Delete button for tables
@@ -1385,15 +1352,378 @@ function iframeRunFunction(iframe) {
 }
 
 }
+
+/*================================*\
+|*         __JOBS_QUEUE__         *|
+\*================================*/
+{/*Expand to see the job queue*/
+function Job(commandOutline, listOfIndexes, onComplete) {
+   if(commandOutline == null || commandOutline == "" || !commandOutline.contains("%") 
+    ||listOfIndexes == null || !UTIL.isArray(listOfIndexes) || listOfIndexes.empty()) {
+      Throw("Job queue init is not valid");
+   }
+   this.commandTemplate = commandOutline;
+   this.callback = UTIL.isFunction(onComplete) ? onComplete : null;
+   //Private
+   this.list = listOfIndexes
+   this.copyList = listOfIndexes.clone();
+}
+Job.prototype = {
+   isValid : function(){
+      return this.commandTemplate != null && this.commandTemplate != "" && !this.isEmpty();
+   },
+   isEmpty : function(){
+      if (this.list == null) {
+         this.list = [];
+      }
+      return this.list.empty();
+   },
+   length : function(){
+      return this.list.length;
+   },
+};
+
+var JOBQUEUE = {
+   queue    : [],
+   isRunning: false,
+   command  : null,
+   callback : null,
+   number   : -1,
+   isEmpty  : function(){
+      return this.queue.empty();
+   },
+   addJob  : function(item){
+      if(item == null || !(item instanceof Job) || !item.isValid()) {
+         return;
+      }
+      this.queue.push(item);
+      this.runNextJob();
+   },
+   runNextJob : function(){
+      if (!this.isEmpty() && !this.isRunning) {
+         var item = this.queue[0];
+         var number = item.list.shift();
+         if (number == null) {
+            this.number = -1;
+            this.command = item.commandTemplate;
+         } else {
+            this.number = number;
+            this.command = item.commandTemplate.replace(/\%/g, number);
+         }
+         if(item.callback) {
+            this.callback = item.callback;
+         }
+         this.isRunning = true;
+         BRIDGE.run("function(){"+this.command+"}");
+      }
+   },
+   getCurrentItem : function(){
+      return this.isEmpty() ? null : this.queue[0];
+   },
+};
+}
+
+/*================================*\
+|*       __AJAX_FUNCTIONS__       *|
+\*================================*/
+{/*Expand to see ajax functions*/
+
+function initAjaxCapture() {
+   BRIDGE.registerFunction("ajaxComplete", ajaxComplete);
+   BRIDGE.addJS(function(){
+      net.ContentLoader.prototype.onReadyState = function() {
+         //Some functions
+         var obj = this;
+         function allowResubmit(){
+            obj.form.ICResubmit.value = "0";
+            nResubmit = 0;
+            obj.SetInProcess(false); 
+         }
+         Array.prototype.last = function(){
+            if (this.length == 0) {return null;}
+            return this[this.length-1];
+         }
+         var req = this.req;
+         var name = this.name;
+         //Loaded
+         if (req.readyState == 4 && req.status == 200) {
+            //Call our function when xmlhttprequest is finished
+            var url = null;
+            if(name.indexOf("hexcel") != -1) {  
+               try{
+                  var text = req.responseText;
+                  var start = text.indexOf(";window.open('"+commonURL+"?cmd=viewattach&userfile=ps.xls") + 14;
+                  url = text.substring(start, text.indexOf("',", start));
+                  allowResubmit();
+                  text = null;
+               }catch(e){alert("Excel stuff is broken: "+e);}
+            /*} else if(name.indexOf("UW_CO_APPLY_HL") != -1 && document.title == "Student Interviews"){    //Not releasing for first release
+                  url = req.responseText.match(/document.location='([^(';)]+)/).last();
+                  allowResubmit();*/
+            //} else if (document.title == "Job Search Component" && name.indexOf("UW_CO_SLIST_HL$") == 0) {
+               //Skip the onload call
+            //   allowResubmit();
+            } else {
+               this.onload.call(this);
+            }
+            ajaxComplete(name, url);
+         }
+      }
+      //Override to remove usless popup
+      net.ContentLoader.prototype.finalCall = function() {
+         var shouldShowPopup = this.name.indexOf("UW_CO_SLIST_HL$") != 0 && this.name != "UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN";
+         net.arrSrcScript=new Array();net.nScriptfiles=0;net.nScriptfileIndex=0;if(net.bScript){var n=net.arrScript.length;for(var xx=0;xx<n;xx++){if(net.arrScript[xx])this.addScript(id+"_"+xx,net.arrScript[xx]);}net.arrScript=new Array();net.bScript=false;}if(net.OnloadScriptList&&net.OnloadScriptList.length>0){for(var i=0;i<net.OnloadScriptList.length;i++){var script=net.OnloadScriptList[i].firstChild.data;if(!shouldShowPopup){script=script.replace(/self\.scroll[^;]+;/mi,"");script=script.replace(/setFocus_win0[^;]+;/mi,"");}eval(script);}}net.OnloadScriptList="";if(net.msgList&&net.msgList.length>0){this.SetInProcess(false);this.SetWaitingObject(null,"",null,false,false);if(shouldShowPopup){popupObj_win0.showMsg();}}if(shouldShowPopup){popupObj_win0.deferPrompt();}this.SetInProcess(false);if(ptGridObj_win0){ptGridObj_win0.restoreScrollPos();}if(this.bPrompt){promptFieldName=this.name;}if(ptRC.isEnabled()&&(!this.bPrompt)&&(promptFieldName.length>0)){window.top.ptrc.refreshRCOnChangeIfNeeded(promptFieldName);promptFieldName="";}if(ptRC.isEnabled()&&!this.bPrompt){window.top.ptrc.onAddChangeEvent();}ptCommonObj.generateABNSearchResults();if(this.GetWaitingICAction()!=""){var objWaiting=this.GetWaitingObject();this.SetWaitingObject(null,"",null,false,false);aAction0_win0(objWaiting.v,objWaiting.w,objWaiting.x,objWaiting.y,objWaiting.z);}
+      }
+      
+   }, {commonURL: CONSTANTS.PAGESIMILAR});
+}
+
+function ajaxComplete(name, url) {  
+   //Nothing is running, dont do anything
+   var item = JOBQUEUE.getCurrentItem();
+   var jobFinished = false;
+   var isSaving = name == "#ICSave";
+   var whitePopupShown = isPopupShown(false);
+   
+   //Handle Excel exporting
+   if(name.contains("$hexcel$") && url != null) {
+      $("#slave").attr("src", url+"&jbmnpls=ignore").one("load", function(){
+         showMessage("Download is ready.");
+         //5 sec timeout so that the iframe goes back to nothing
+         setTimeout(function(){
+            UTIL.getID("slave").src = LINKS.BLANK;
+         },5000);
+      });
+      return;
+   }
+   switch(PAGEINFO.TYPE) {
+     /* case PAGES.INTERVIEWS:      //Not to release in First release
+         //FIX THIS
+         if (name.contains("UW_CO_APPLY_HL")) {
+            showPopup(true, "<div class='instructions block'>Please select an interview time</div>", "Interview Schedule", 500, null, null, url);
+            //iframeRunFunction(UTIL.getID("jbmnplsPopupFrame"))
+         }
+         break;*/
+      case PAGES.SEARCH:
+         //Clicked search button
+         var table = TABLES[0];        //Results table
+         if(   name == "UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN"      //Search button
+            || name.startsWith("UW_CO_JOBRES_VW$hviewall$")    //View all/view 25
+            || name.startsWith("UW_CO_JOBRES_VW$hdown$")       //Next button
+            || name.startsWith("UW_CO_JOBRES_VW$hend$")        //Last button
+            || name.startsWith("UW_CO_JOBRES_VW$hup$")         //Previous button
+            || name.startsWith("UW_CO_JOBRES_VW$htop$")        //First button
+         ) {
+            table.update();
+         } else if(name.startsWith("UW_CO_SLIST_HL$")) {
+            showMessage("Added job to shortlist.",3);
+         }
+         break;
+      case PAGES.RANKINGS:
+         if (isSaving) {
+            showMessage("Rankings are saved.");
+         }
+         break;
+      //Deleting shortlists
+      case PAGES.APPLICATIONS:
+      case PAGES.LIST:
+      try{
+         if (name.contains("$delete$")) {
+            if (whitePopupShown) {
+               setTitle("Saving...");
+               showPopup(false, "Deleting all the short listed jobs.<br/>Saving...<br/><span style='color:red;'>DO NOT REFRESH!</span>");
+            }
+            if(!whitePopupShown || (whitePopupShown && item.isEmpty())) {
+               BRIDGE.run(function(){
+                  setSaveText_win0('Saving...');
+                  submitAction_win0(document.win0, '#ICSave');
+               });
+            } else {
+               //Run the next job
+               var length = item.copyList.length;
+               var progress = (length-item.list.length+1)+"/"+length;
+               setTitle("Deleting: "+progress);
+               showPopup(false, "Deleting all the short listed jobs.<br/>Progress: "+progress+"<br/><span style='color:blue;'>You can cancel by refreshing.</span>");
+               jobFinished = true;
+            }
+         } else if (isSaving) {
+            //Popup up for deleting multiple checkboxes
+            if (whitePopupShown) {
+               //Finished saving and deleting checkboxes    
+               var tableObj = TABLES[TABLES.length-1];      //Last table
+               tableObj.deleteRowRange(item.copyList);
+               if (PAGEINFO.TYPE == PAGES.APPLICATIONS) {
+                  TABLES[0].deleteRowRange(item.copyList);     //Active Table
+                  setTitle("Applications");
+               } else {
+                  setTitle("Job Short List");
+               }
+               hidePopup();
+               jobFinished = true;
+            } else {
+               if (item != null && !TABLES.empty()) {
+                  //Delete the row and reorganize
+                  var deletedRowNumber = JOBQUEUE.number;
+                  var tableObj = TABLES[TABLES.length-1];      //Last table
+                  //Clean up
+                  var deleteObjs = tableObj.jInstance.find("tbody div.delete");
+                  deleteObjs.removeAttr("disabled");
+                  //Special operations for applications to mirror table rows
+                  if (PAGEINFO.TYPE == PAGES.APPLICATIONS) {
+                     //Delete the job listed in the all applications table when it is deleted
+                     alert("#row_"+tableObj.name+"_"+deletedRowNumber)
+                     var id = $("#row_"+tableObj.cname+"_"+deletedRowNumber).children(":first").plainText();
+                     var activeTable = TABLES[0];     //Active table
+                     var rowToDelete = $("#"+activeTable.tableID+" tbody td:contains('"+id+"')").parent().attr("row");
+                     activeTable.deleteRow(rowToDelete);
+                  }
+                  tableObj.deleteRow(deletedRowNumber);
+                  jobFinished = true;
+               }
+            }
+            showMessage("Sucessfully deleted the jobs on your shortlist.");
+         } 
+         }catch(e){alert(e)}
+         break;
+   }
+   if (jobFinished) {
+      if (item.isEmpty()) {   
+         JOBQUEUE.queue.shift();
+         //Call back when the group of things are finished
+         if(JOBQUEUE.callback) {
+            JOBQUEUE.callback.call(this);
+         }
+      }
+      JOBQUEUE.isRunning = false;
+      JOBQUEUE.runNextJob();
+   }
+}
+
+}
+
+/*================================*\
+|*       __SEARCH_MANAGER__       *|
+\*================================*/
+/**
+ *    Implementation
+ *       SearchManager.updateLastVisit();       //Checks to see if 30 days have passed, if it has, then it deletes all ids; runs everytime you go to search
+ *       SearchManager.hasRead(jobId);          //Returns boolean true if user has read the job id; if the id exists in storage
+ *       SearchManager.setRead(jobId);          //Sets the id as read in storage
+ *       SearchManager.setNew(jobId);           //Removes the id in storage so the job has not been read
+ *       SearchManager.clearAll();              //Removes all the ids from storage so nothing is read
+ */
+{/*Expand to see storage: job search*/
+var SearchManager = {
+   prefix : "SEARCH_ID_VISITED_",
+   updateLastVisit : function(){
+      var now = new Date().getTime();
+      var before = PREF.load("LAST_ACCESSED_SEARCH");
+      PREF.save("LAST_ACCESSED_SEARCH", now);
+      var daysPast = (now - before) / 24 / 60 / 60 / 1000;     //Convert to days
+      Assert(daysPast>=0, "Somehow time went backwards? Search manager is broken");
+      if (daysPast > CONSTANTS.SEARCH_DAYS_CLEAR) {
+         this.clearAll();
+      }
+   },
+   validateKey : function(jobID) {
+      Assert(jobID!=null&&jobID!="", MESSAGE.JOBID_INVALID);
+      return this.prefix + jobID;
+   },
+   hasRead : function(jobID){
+      var key = this.validateKey(jobID);
+      try{
+      return OBJECTS.STORAGE.getItem(key) != undefined;
+      }catch(e){Throw("Something wrong with reading item in localStorage: "+e)}
+   },
+   setRead : function(jobID){
+      var key = this.validateKey(jobID);
+      try{
+      OBJECTS.STORAGE.setItem(key, 1);
+      }catch(e){Throw("Something wrong with setting item in localStorage: "+e)}
+   },
+   setNew : function(jobID){
+      var key = this.validateKey(jobID);
+      try{
+      OBJECTS.STORAGE.removeItem(key);
+      }catch(e){Throw("Something wrong with removing item in localStorage: "+e)}
+   },
+   clearAll : function(){
+      var d = OBJECTS.STORAGE.length;     //Firefox glitch to update localstorage
+      for(var item in OBJECTS.STORAGE) {  
+         if (item.startsWith(this.prefix)) { 
+            try{
+            OBJECTS.STORAGE.removeItem(item);
+            }catch(e){Throw("Something wrong with removing item in localStorage: "+e)}
+         }
+      }
+   },
+};
+}
+
 /*================================*\
 |*            __TABLE__           *|
 \*================================*/
+/**
+ *    Basic Arguments
+ *       "defaultName"            arguments are optional, it can look for the table's name on the page; if no name is provided at all, then no table is made
+ *       "_srcID"                is the Jobmine table you are grabbing informaation from
+ *       "objectToAppendTo"      is the object that jQuery will attach the tablet to [eg. $("body").append(tableHTML);]; can be dom object or jQuery object
+ *       "headerList"            an array of strings where each string is a header name (all name with "{____}" surrounded by curly braces will be empty but you reference a header through this)
+ *       "dataList"              2D array [row][col] with Strings as the value; this the body of the table
+ *       "index"                 is a positive integer that describes the location where an operation occurs; must be between 0 and the number of columns (subtract one)
+ *       "filterFunction"        some functions require column manipulation, this allows the data in the column to be manipulated when building/updating
+ *       "dontUpdate"            don't update the table, might use this if you are doing a batch operation
+ *       "columnInput"           references a column by either index or column header name
+ *       "onclick_OR_location"   provide a function that occurs when onclick happens or a url for it to go somewhere
+ *
+ *    makeTable & TABLES implementation
+ *       Call < TABLES[index] > to get the JbmnplsTable object on the page
+ *       Calling "makeTable(defaultName, tableID, objectToAppendTo)" would create the table and index the object in the "TABLES" array
+ *    
+ *    JbmnplsTable Filters [table.applyFilter("Job Title", TABLEFILTERS.jobDescription);  //Looks for header "Job Title" and applies the filter]
+ *       TABLEFILTERS.normal;                   //Filter does nothing, this is default
+ *       TABLEFILTERS.deleteRow;                //Filter shows the new delete object and provides the functionality; replaces only on Job short list and applications
+ *       TABLEFILTERS.jobDescription;           //Replaces the job link with a faster and direct link to the description 
+ *       TABLEFILTERS.googleSearch;             //Takes the employer name and makes it a link so that you can Google search them
+ *       TABLEFILTERS.googleMap;                //Takes the location and makes it a link so that you can look up where they are located
+ *       TABLEFILTERS.interviewerSearch;        //Takes the interviewer's name and makes it a link so that you can look them up on Linkedin
+ *
+ *    Implementation [Intended of use] 
+ *       var table = JbmnplsTable(defaultName, _srcID, objectToAppendTo);     //Constructor
+ *       table.parseTable(_srcID)               //Parses the table and gets the headers and columns+rows (can run multiple times)
+ *       table.insertData(headerList,dataList)  //Applies the headerList to the table's headers and dataList to the body of the table (use table.updateCells() to visually update the table)
+ *       table.updateCells()                    //Updates the headers and body of the table based on the data manipulation done to the class object
+ *       table.update()                         //A combination of table.parseTable().updateCells(); only run after table has been build and appended
+ *       table.updateTable()                    //When cell data changes externally, please run this
+ *       table.empty()                          //Returns true if there are no rows
+ *       table.setHeaderAt(index, newName)      //At the index, it will set the header with this name (becareful of other function that rely on the header to do things)
+ *       table.insertColumn(headerName, index_OR_filterFunction, dataArray_OR_filterFunction)      //Insert a new column; if no index is specified, appends to end of table; look at implementation below for more info
+ *       table.merge(intoIndex, fromIndex, headerName, filterFunction)      //merges two columns; fromIndex column is deleted; headername is optional (use null), look at implementation below for more info
+ *       table.deleteColumn(index)              //Deletes the column at that index
+ *       table.deleteColumnRange(startIndex_deleteArr, endIndex)   //Deletes all columns in a given range; more (arguments) info in implementation below
+ *       table.deleteRow(index, dontUpdate)     //Deletes a row with given index
+ *       table.deleteRowRange(list)             //Deletes several rows given an array list of indexes
+ *       table.hideColumns(list)                //Hides the column[s] on provided array indexes
+ *       table.showAllColumns()                 //Show all columns
+ *       table.showColumns()                    //Shows the column[s] on provided array indexes
+ *       table.isColumnShown(index)             //Checks to see if the column is shown
+ *       table.getColumnsHidden()               //Returns an array of indexes that corresponds to columns that are hidden
+ *       table.trim()                           //Removes all columns where they have no information (expensive)
+ *       table.applyFilter(columnInput, filterFunction) //Provided a column, apply a filter when it builds/updates
+ *       table.removeFilter(columnInput)        //Provided a column, removes a filter
+ *       table.addCheckboxes(columnNumber)      //Adds checkboxes to the table that is all managed by the class; columnNumber is optional, will set to 1st column if null
+ *       table.addControlButton(name, onclick_OR_location)   //Adds a control button on the table
+ *       table.removeControlButton(name)        //Removes a control button by name
+ *       table.build()                          //Builds the html of the table (better to run table.appendTo(obj) after create table or parse table)
+ *       table.appendTo(objectToAppendTo)       //Appends the object html to an object (can only run once)
+ *       table.makeDraggrable(shouldAllow)      //Allows/do not allow the table to be draggable (drags on the header of the table)
+ */   
+{/*===== Expand to see the table functions/class =====*/
 
 /**
  *    Object that holds all the table objects
  */
 var TABLES = [];
-{/*===== Expand to see the table functions/class =====*/
 
 /**
  *    Make a Jobmine Plus table and puts it in an array
@@ -1437,7 +1767,9 @@ var TABLEFILTERS = {
       } else {
          columnNumber = reverseLookup["Job Identifier"];
       }
-      var link = LINKS.JOB_DESCR + rowData[columnNumber];
+      var id = rowData[columnNumber];
+      if (id.empty()){return cell;}
+      var link = LINKS.JOB_DESCR + id;
       var end = cell.lastIndexOf("<");
       var jobDescription = cell.substring(cell.lastIndexOf("\">", end) + 2, end);
       return "<a target='_blank' class='PSHYPERLINK' href='"+link+"'>"+jobDescription+"</a>";
@@ -1456,6 +1788,7 @@ var TABLEFILTERS = {
       }
       return "<a href='http://maps.google.ca/maps?q="+(search.replace(/\s/g,"+"))+"' title='Google maps that company!' target='_blank' class='PSHYPERLINK'>"+cell+"</a>";
    },
+   //Interviews
    interviewerSearch : function(cell, row, rowData, reverseLookup){ 
       var search = cell;
       if(reverseLookup.hasOwnProperty("Employer Name")){
@@ -1464,6 +1797,7 @@ var TABLEFILTERS = {
       }
       return "<a href='http://www.linkedin.com/search/fpsearch?type=people&keywords="+search.replace(/\s/g,"+")+"' title='Linkedin this person' target='_blank' class='PSHYPERLINK'>"+cell+"</a>";
    },
+   //Applications
    //Next two are bad solutions, temporary
    fixApply : function(cell, row, rowData, reverseLookup){ 
       //If link
@@ -1520,6 +1854,7 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    //Controls
    this.controls = {};
    this.pageControls = null;
+   this.maxPages = -1;
    this.excel = "";
    
    //Object Queues
@@ -1589,7 +1924,7 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    this.updateCheckboxes = function() {
       if(!obj.empty() && obj.hasBuilt && obj.hasCheckboxes) {
          var checkboxes = $("#"+obj.tableID+" input.checkbox");
-         var name = obj.name;
+         var name = obj.cname;
          checkboxes.each(function(rowNum){
             this.id = "checkbox_"+name+"_"+rowNum;
          });
@@ -1638,7 +1973,7 @@ JbmnplsTable.prototype.clickHandler = function(evt) {
          var lastRow = lastTr.index();
          var thisRow = tr.index();
          for(var i = Math.min(lastRow, thisRow); i <= Math.max(lastRow, thisRow);i++) {
-            checkbox = $("#checkbox_"+this.name+"_"+i).attr("checked", !checked);
+            checkbox = $("#checkbox_"+this.cname+"_"+i).attr("checked", !checked);
             var row = checkbox.parent().parent();
             if(!checked) {
                row.addClass("selected");
@@ -1699,7 +2034,7 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
       Log(e);
       this.excel = "#";
    }
-                                                             
+
    // Get headers
    var tableRows = table.find("table.PSLEVEL1GRID tr");
    var listOfHeaderObjs = tableRows.eq(0).find("th.PSLEVEL1GRIDCOLUMNHDR");
@@ -1734,8 +2069,13 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
             var img = obj.find("img");
             if (img.exists()) {
                value = img.outerHTML();
-            } else {
-               value = obj.plainText();
+            } else { 
+               var select = obj.find("select");
+               if (select.exists()) {
+                  value = select.outerHTML();
+               } else {
+                  value = obj.plainText();
+               }
             }
          }
          if (value != "") {      //If one column at least has info, we record the row
@@ -1747,6 +2087,51 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
          this.data.push(bodyData);
       }
    }
+   
+   //Parse the page controls
+   var rightPanel = table.find("table:eq(0) table.PSRIGHTCORNER td").children();
+   var pageStrBuffer = "";
+   if (rightPanel.length >= 5 && rightPanel.last().plainText() == "Last") {  //Has the first,last, and page number controls; 5 button page controls
+      var last = rightPanel.last();
+      var first = rightPanel.eq(-5);
+      //Make sure we can go to different pages; one of them cannot be a span
+      if (first.tag() != "SPAN" || last.tag() != "SPAN") {
+         var href;
+         var progress = rightPanel.eq(-3).plainText().split(" of ");
+         var controls = {
+                           "First"  : first, 
+                           "&lt;--"   : rightPanel.eq(-4), 
+                           "page"   : progress, 
+                           "--&gt;"   : rightPanel.eq(-2), 
+                           "Last"   : last,
+                        };
+         for(var name in controls) {
+            var item = controls[name];
+            if (name == "page") {  //Progress pages
+               Assert(item[0].contains("-"), "Parsing page controls is broken");
+               var endRangeNum = parseInt(item[0].split("-")[1]);
+               var totalPages;
+               var currentPage;
+               if (endRangeNum == item[1]) {    //Last page
+                  currentPage = totalPages = this.maxPages;
+               } else {
+                  var difference = this.rows;
+                  var totalPages = this.maxPages = Math.ceil(parseInt(item[1]) / difference);
+                  var currentPage = Math.ceil(endRangeNum / difference);
+               }
+               pageStrBuffer += " " + currentPage + "/" + totalPages;
+            } else if (item.tag() == "A") {
+               href = item.attr("href");
+               href = href.substr(href.indexOf("submitA"));
+               pageStrBuffer += ' <span class="fakeLink'+(name.contains("--")?' bold':'')+'" onclick="'+href+'"">'+name+'</span>';
+            } else {
+               pageStrBuffer += " <span class='disabled fakeLink'>" + name + "</span>";
+            }
+         }
+         this.pageControls = pageStrBuffer;
+      }
+   }/* else {}    Only displays page numbers, so useless*/
+   
    //Cleanup
    columns = null
    table = null;
@@ -1755,35 +2140,6 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
    bodyData = null;
    this.parsed = true;
    return this;
-   
-    /* //Parse the page controls
-  PLEASE WORK ON THIS SOON!!!
-   var rightPanel = table.find("table:eq(0) table.PSRIGHTCORNER td").children();
-   var pageStatus, leftArrow, rightArrow, first, last;
-   switch(rightPanel.length) {
-      case 9:
-         pageStatus   = rightPanel.eq(6).plainText().split(" of ");
-         //If table is out of, ignore it
-         if (pageStatus[1]*1 > 1) {
-            //The number can be "1-A of B", we need to see if the A & B are the same number
-            var currentRange = pageStatus[0].split("-");
-            if(currentRange[currentRange.length-1] != pageStatus[1]) {     
-               first             = rightPanel.eq(4)[0].tagName == "A" ? "<a href='"+rightPanel.eq(4).attr("href")+"'>First</a>" : "";
-               leftButton        = rightPanel.eq(5)[0].tagName == "A" ? "<a href='"+rightPanel.eq(5).attr("href")+"'> < </a>" : "";
-               rightButton       = rightPanel.eq(7)[0].tagName == "A" ? "<a href='"+rightPanel.eq(7).attr("href")+"'> > </a>" : "";
-               last              = rightPanel.eq(8)[0].tagName == "A" ? "<a href='"+rightPanel.eq(8).attr("href")+"'>Last</a>" : "";
-               this.pageControls = first+leftButton+"</a>"+pageStatus.join(" of ")+rightButton+last;
-            }
-         }
-         break;
-      case 5:
-         //Do absolutely nothing
-         break;
-      default:
-         alert("Add me to the switch statement! => "+rightPanel.length);
-         break;
-   }*/
-   
 };
 
 /**
@@ -1843,27 +2199,27 @@ JbmnplsTable.prototype.setHeaderAt = function(index, newName) {
 
 /**
  *    Inserts a column
- *       Option 1: headerName = [String:header text]; index_OR_Array_Filter = DATA or index to insert column; data_Array_OR_Filter = DATA
- *       Option 2: headerName = [String:header text]; index_OR_Array_Filter = DATA     
+ *       Option 1: headerName = [String:header text]; index_OR_filterFunction = DATA or index to insert column; dataArray_OR_filterFunction = DATA
+ *       Option 2: headerName = [String:header text]; index_OR_filterFunction = DATA     
  *       - DATA = [Array:list of values in that column|Function:a function that returns a value, passes the rowArray then the rowNumber as the arguments]
  *       - Option 2 appends the column to the end
  */
-JbmnplsTable.prototype.insertColumn = function(headerName, index_OR_Array_Filter, data_Array_OR_Filter) {
+JbmnplsTable.prototype.insertColumn = function(headerName, index_OR_filterFunction, dataArray_OR_filterFunction) {
    //Last one is if we have the header name already
-   if (this.empty() || index_OR_Array_Filter == null || headerName == null || headerName == "" || this.filters.hasOwnProperty(headerName)) {   
+   if (this.empty() || index_OR_filterFunction == null || headerName == null || headerName == "" || this.filters.hasOwnProperty(headerName)) {   
       return false;
    }
   
    //Parse the inputs
    var index, data;
    //If inputted an array or function, then append the data
-   if (UTIL.isNumeric(index_OR_Array_Filter)) {
-      Assert(UTIL.inRange(index_OR_Array_Filter, this.columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
-      index = index_OR_Array_Filter;
-      data = data_Array_OR_Filter;
+   if (UTIL.isNumeric(index_OR_filterFunction)) {
+      Assert(UTIL.inRange(index_OR_filterFunction, this.columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
+      index = index_OR_filterFunction;
+      data = dataArray_OR_filterFunction;
    } else {
       index = this.columns;
-      data = index_OR_Array_Filter;
+      data = index_OR_filterFunction;
    }
    if (data == null) {
       return false;
@@ -1888,7 +2244,10 @@ JbmnplsTable.prototype.internalInsertColumn = function(headerName, index, data) 
    } else {
       return false;
    }
-   
+   var reverseLookup = {};
+   for(var i=0; i<this.columns; i++) {
+      reverseLookup[this.headers[i]] = i;
+   }
    this.headers.splice(index, 0, headerName);
    this.filters[headerName] = TABLEFILTERS.normal;
    for(var r = 0; r < this.rows; r++) {
@@ -1898,7 +2257,7 @@ JbmnplsTable.prototype.internalInsertColumn = function(headerName, index, data) 
             cellData = data[r];
          }
       } else {
-         cellData = data.call(this, r, this.data[r]);
+         cellData = data.call(this, r, this.data[r], reverseLookup);
       }
       this.data[r].splice(index, 0, cellData);
    }
@@ -2019,7 +2378,7 @@ JbmnplsTable.prototype.showColumns = function(list) {
 /**
  *    Sees if a header is shown and not hiding
  */
-JbmnplsTable.prototype.isHeaderShown = function(index) {
+JbmnplsTable.prototype.isColumnShown = function(index) {
    if (this.empty() || !this.hasBuilt) {
       return this;
    }
@@ -2030,13 +2389,13 @@ JbmnplsTable.prototype.isHeaderShown = function(index) {
 /**
  *    Sees if a header is shown and not hiding
  */
-JbmnplsTable.prototype.getHeadersHidden = function() {
+JbmnplsTable.prototype.getColumnsHidden = function() {
    if (this.empty() || !this.hasBuilt) {
       return this;
    } 
    var val = [];
    for(var i=0; i<this.columns; i++) {
-      if(!this.isHeaderShown(i)) {
+      if(!this.isColumnShown(i)) {
          val.push(i);
       }
    }
@@ -2230,7 +2589,7 @@ JbmnplsTable.prototype.addCheckboxes = function(columnNumber) {
       if(columnNumber == null) {columnNumber = 0;}
       this.hasCheckboxes = true;
       this.insertColumn("{CHECKBOXES}", columnNumber, function(row, rowData){
-         return "<span class='hide'>0</span><input id='checkbox_"+this.name+"_"+row+"' type='checkbox' class='checkbox'/>";
+         return "<span class='hide'>0</span><input id='checkbox_"+this.cname+"_"+row+"' type='checkbox' class='checkbox'/>";
      });
   }
   return this;
@@ -2268,38 +2627,47 @@ JbmnplsTable.prototype.removeControlButton = function(name) {
 /**
  *    Builds the table into html and returns it
  */
+JbmnplsTable.prototype.buildControls = function() {
+   var returnStr = '';
+   if (PAGEINFO.TYPE != PAGES.HOME) {
+      returnStr +=  '<span onclick="handleCustomize('+(this.tableNum)+')" class="options fakeLink">Customize</span>';
+   }
+   if (!this.excel.empty()) {
+      returnStr +=  ' | <a class="options" onclick="showMessage(\'Please wait, retrieving download...\');" href="'+this.excel+'">Export</a>';
+   }
+   for(var name in this.controls) {
+      //Function
+      var value = this.controls[name];
+      if(UTIL.isFunction(value)) {     
+         returnStr += " | <span class='options fakeLink' onclick='controlButton_"+name.replace(/\W/gm,"_")+"();'>"+name+"</span>";
+      } else {
+      //A link
+         returnStr += " | <a class='options' target='_blank' href='"+value+"'>"+name+"</a>";
+      }
+   }
+   if (this.pageControls != null) {
+     returnStr += " |" + this.pageControls;
+   }
+   //Removes the "| " because "customize" doesnt apply to any homepage tables
+   if (PAGEINFO.TYPE == PAGES.HOME) {returnStr = returnStr.substr(2);}
+   return returnStr;
+}
+
+/**
+ *    Builds the table into html and returns it
+ */
 JbmnplsTable.prototype.build = function() {
    if (this.empty()) {
       return null;
    }
-   //Index this table relative to number of pages on screen
    this.tableNum = $("div.jbmnplsTable").length;
    
    var html =  "<div id='"+this.id+"' class='jbmnplsTable'><div class='jbmnplsTableHeader noselect'><div class='jbmnplsTableName'>" + this.name + (this.rows==0?"":" (<span id='"+this.rowCounterID+"'>"+this.rows+"</span> Rows)");
    html +=     '</div><div class="jbmnplsTableControls">';
    
    //Build the controls
-   var controlsHTML = "";
-   if (PAGEINFO.TYPE != PAGES.HOME) {
-      controlsHTML +=  '<span onclick="handleCustomize('+(this.tableNum)+')" class="options fakeLink">Customize</span>';
-   }
-   if (!this.excel.empty()) {
-      controlsHTML +=  ' | <a class="options" href="'+this.excel+'">Export</a>';
-   }
-   for(var name in this.controls) {
-      //Function
-      var value = this.controls[name];
-      if(UTIL.isFunction(value)) {     
-         controlsHTML += " | <span class='options fakeLink' onclick='controlButton_"+name.replace(/\W/gm,"_")+"();'>"+name+"</span>";
-      } else {
-      //A link
-         controlsHTML += " | <a class='options' target='_blank' href='"+value+"'>"+name+"</a>";
-      }
-   }
-   //Removes the "| " because "customize" doesnt apply to any homepage tables
-   if (PAGEINFO.TYPE == PAGES.HOME) {controlsHTML = controlsHTML.substr(2);}
+   var controlsHTML = this.buildControls();
    html += controlsHTML;
-   
    html +=     "</div></div><table name='"+this.name+"' class='tablesorter' id='"+this.tableID+"' cellspacing=0 cellpadding=0 width='100%' height='auto'>";
    //Parse Header
    html +=     "<thead><tr row='header' class='noselect'>";
@@ -2389,11 +2757,11 @@ JbmnplsTable.prototype.updateCells = function() {
          originalRows.eq(i).remove();
       } else {
          if(i >= originalRows.length) {   //Start Adding a new row
-            originalRows.parent().append("<tr id='row_"+this.cname+"_"+i+"' row='"+i+"'></tr>");
+            var tbody = originalRows.exists() ? originalRows.parent() : table.find("tbody");
+            tbody.append("<tr id='row_"+this.cname+"_"+i+"' row='"+i+"'></tr>");
          } else {
             originalRows.eq(i).attr("id", "row_"+this.cname+"_"+i).attr("row", i).children().remove();
          }
-         
          var row = $("#row_"+this.cname+"_"+i);
          for(var j=0; j<columns; j++) {
             var headerName = this.headers[j];
@@ -2404,10 +2772,14 @@ JbmnplsTable.prototype.updateCells = function() {
       }
    }
    
+   //Update controls
+   $("#"+this.id).find("div.jbmnplsTableControls").html(this.buildControls());
+   
    //Finally Update the table
    $("#"+this.rowCounterID).text(this.rows);
    this.applyTableSorter();
    this.updateTable();
+   this.jInstance.find("th").attr("class", "header");
    return this;
 }
 
@@ -2514,12 +2886,12 @@ JbmnplsTable.prototype.makeDraggrable = function(shouldAllow) {
 /*================================*\
 |*         __CLEAN_UP__           *|
 \*================================*/
+
 //Removes the timer
 removeTimer();
 
-if (PAGEINFO.IN_IFRAME) {
-   $("iframe").remove();
-}
+//DESTROY IFRAMES
+$("iframe").remove();
 
 //Disallow highlighting last row if requested
 if (!PREF.load("HIGHLIGHT_LAST_ROW")) {
@@ -2529,61 +2901,78 @@ if (!PREF.load("HIGHLIGHT_LAST_ROW")) {
 //Elimate their highlight methods
 BRIDGE.addFunction("HighLightTR");
 
-//Keypresses
-$(window).keydown(function(evt){
-   //Shift key is pressed
-   if(evt.shiftKey) {
-      $("body").addClass("SHIFT");
-   }
-});
-$("body").keyup(function(evt){
-   //Shift key is pressed
-   if(evt.which == 16) {
-      $("body").removeClass("SHIFT");
-   }
-});
-
 /*================================*\
 |*     __INDIVIDUAL_PAGES__       *|
 \*================================*/
 
 //See if we are at home page
 switch (PAGEINFO.TYPE) {
-   case PAGES.HOME:
+   case PAGES.HOME:{       /*Expand to see what happens when you reach home page*/
       if (!PAGEINFO.IN_IFRAME) {
-         var currentPage = LINKS.APPLICATIONS;
+         window.location.hash = CONSTANTS.EXTRA_URL_TEXT;
+         
          //Cancel the load for the item
-         BRIDGE.addFunction("loadAllPgltData");
+         $(document.body).removeAttr("onload");
          
          //Delete the useless stuff on home page
          $("body > table").remove();
          
+         //Resolve page to go to
+         var currentPage = PREF.load("LAST_PAGE",  null);
+         if(currentPage == null || !PAGES.isValid(currentPage) || !NAVIGATION.hasOwnProperty(currentPage)) {
+            currentPage = PREF.load("DEFAULT_PAGE");
+         }         
+         var link = LINKS[currentPage];
+         
          //Add the header and select the nav item
          addHeader();
-         setNavSelection(currentPage);
+         setTitle(NAVIGATION[currentPage]);
+         setNavSelection($("#jbmnplsNav a[type='"+currentPage+"']").attr("item"));
          
          //Appends the iframe that holds the content
-         $("body").append("<div id='jbmnplsFrameWrapper'><iframe src='"+currentPage+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div>");
+         $("body").append("<div id='jbmnplsFrameWrapper'><iframe src='"+link+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div><div id='pthnavcontainer' class='hide'></div>")
         
-         //Set the header's nav to go to certain locations 
-         $("#jbmnplNav a").click(function(e){
+         //Fix up stuff 
+         BRIDGE.addJS(function(){
+            pthNav.abn.init = function(){};
+            ptEvent.add2 = ptEvent.add;
+            ptEvent.add = function(a,b,c){if(a!=null){ptEvent.add2(a,b,c);}}
+         });
+        
+         //Hacked the navigation because we have an iframe
+         $("#jbmnplsNav a").click(function(e){
             e.preventDefault();
-            var newLocation = e.target.getAttribute("href");
-            var newTitle = e.target.innerHTML;
-            changeLocation(newLocation, newTitle);
+            var obj = e.target;
+            var newLocation = obj.getAttribute("realHref");
+            var index = obj.getAttribute("item");
+            var newTitle = obj.innerHTML;
+            changeLocation(newLocation, newTitle, index);
+         }).mousedown(function(e){
+            //Ignore right click
+            if (e.which == 1 || e.which == 2) {
+               var type = e.target.getAttribute("type");
+               PREF.save("LAST_PAGE", type);
+            }
          });
          
          //If debug is on, we can add the debugger window
          if( CONSTANTS.DEBUG_ON) {
-            attachDebugger();
+            DEBUGGER.init();
             initDraggable();
          }
+         function hideIframe(){
+            $("#jbmnplsFrameWrapper").hide();
+         }
+         BRIDGE.registerFunction("hideIframe",hideIframe);
+         $("#jbmnplsWebpage").load(function(){
+            $("#jbmnplsFrameWrapper").show();
+         });
       } else {
          //Cannot have itself in its own iframe
          return;
       }
-      break;
-   case PAGES.LOGIN:
+      }break;
+   case PAGES.LOGIN:{      /*Expand to see what happens when you reach login page*/
       function setAutoComplete(flag){
          if(flag) {
             $("#userid").attr("autocomplete", "on").attr("value", defaultUser.toLowerCase());
@@ -2620,29 +3009,101 @@ switch (PAGEINFO.TYPE) {
          }
          setAutoComplete(this.checked);
       });
-      break;
+      PREF.remove("LAST_PAGE");
+      }break;
    default:
       //Redirect to home page if necessary the top is not already at home
       if (!PAGEINFO.IN_IFRAME) { 
          redirect(LINKS.HOME);
          return;
       } else {
+         var form = $("form:eq(0)");
          //Apply the header for the page if it exists
          if (PAGEINFO.TYPE) {
             $("body").prepend("<div class='pageTitle noselect'>"+PAGEINFO.TYPE.replace(/_/g, " ")+"</div>");
          }
-         var form = $("form:eq(0)");
-         
          initAjaxCapture();
          initRowDeletion();
          initDraggable();
          
          //Append an iframe for whatever reasons needed for it
          $("body").append("<iframe id='slave' style='display:none;visibility:hidden;' width='0'height='0' src='about:blank'></iframe>");
-
+         
+         //Record last page visited
+         if (PAGEINFO.TYPE != null) {
+            PREF.save("LAST_PAGE", PAGEINFO.TYPE);
+            $(window).unload(function(){
+               BRIDGE.addJS(function(){
+                  window.parent.hideIframe();
+               });   
+               PREF.save("LAST_PAGE", PAGEINFO.TYPE);
+            });
+         }
+         
          //Parse Individual pages here
          switch(PAGEINFO.TYPE){
-            case PAGES.INTERVIEWS:
+            case PAGES.SEARCH:{           /*Expand to see what happens when you reach the search page*/
+               function markRead(rowNum, id) {
+                  var row = $("#row_Results_"+rowNum);
+                  Assert(row.exists(), "Read status is broken, row "+rowNum+" does not exist.");
+                  var rowData = row.children();
+                  rowData.eq(0).text("Read");
+                  SearchManager.setRead(id);
+                  table0.updateTable();
+               }
+               function onShortList(rowNum, shortListIndex) {
+                  var row = $("#row_Results_"+rowNum);
+                  Assert(row.exists(), "Read status is broken, row "+rowNum+" does not exist.");
+                  var rowData = row.children();
+                  rowData.eq(0).text("Shortlisted");
+                  rowData.eq(shortListIndex).text("On Short List");
+                  table0.updateTable();
+               }
+               BRIDGE.registerFunction("markRead", markRead);
+               BRIDGE.registerFunction("onShortList", onShortList);
+               SearchManager.updateLastVisit();
+               var table0 = makeTable("Results", "UW_CO_JOBRES_VW$scroll$0");
+               table0.applyFilter("Employer Name", TABLEFILTERS.googleSearch)
+                     .applyFilter("Location", TABLEFILTERS.googleMap)
+                     .insertColumn("Hiring Chances", 8, function(row, rowData, reverseLookup){
+                        var openings = rowData[reverseLookup["Openings"]];
+                        var applications = rowData[reverseLookup["# Apps"]];
+                        if (openings.empty()&&applications.empty()){return "";}
+                        openings = openings.empty() ? 0 : parseInt(openings);
+                        applications = applications.empty() ? 1 : parseInt(applications) + 1;
+                        var value = Math.round(openings/applications*100)+"%";
+                        return "<span title='Hiring Changes is just Openings/(Applications+1), meaning after you apply this is the percentage. NOT ACCURATE because it does not calculate your skill level'>"+value+"</span>";
+                     })
+                     .insertColumn("Read Status", 0, function(row, rowData, reverseLookup){
+                        var id = rowData[reverseLookup["Job Identifier"]];
+                        if(id.empty()) {return "New";}
+                        if (rowData[reverseLookup["Apply"]] == "Already Applied") {
+                           return "Applied";
+                        } else if (rowData[reverseLookup["Short List"]] == "On Short List") {
+                           return "Shortlisted";
+                        } else if (SearchManager.hasRead(parseInt(id,10))) {
+                           return "Read";
+                        }
+                        return "New";
+                     })
+                     .applyFilter("Job Title", function(cell, row, rowData, reverseLookup){
+                        var data = TABLEFILTERS.jobDescription(cell, row, rowData, reverseLookup);
+                        if (rowData[reverseLookup["Read Status"]] == "New"){
+                           var id = rowData[reverseLookup["Job Identifier"]];
+                           data = data.replace("<a ", "<a onclick='markRead("+row+","+id+");' ");
+                        }
+                        return data;
+                     })
+                     .applyFilter("Short List", function(cell, row, rowData, reverseLookup){
+                        var action = cell.match(/hAction[^;]+;/);
+                        if (action==null) {return cell}
+                        action = action[0];
+                        return '<span onclick="'+action+'onShortList('+row+','+reverseLookup['Short List']+');" class="fakeLink">Add to Short List</span>';
+                     })
+                     .appendTo(form);
+                     BRIDGE.run(function(){hAction_win0(document.win0,'UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN', 0, 0, 'Search', false, true);});
+               }break;
+            case PAGES.INTERVIEWS:{       /*Expand to see what happens when you reach the interviews page*/
                var interviewTable = makeTable(null, "UW_CO_STUD_INTV$scroll$0");
                var groupTable = makeTable(null, "UW_CO_GRP_STU_V$scroll$0");
                var socialTable = makeTable(null, "UW_CO_NSCHD_JOB$scroll$0");
@@ -2657,8 +3118,8 @@ switch (PAGEINFO.TYPE) {
                groupTable.applyFilter("Employer Name", TABLEFILTERS.googleSearch).appendTo(form);
                socialTable.applyFilter("Employer Name", TABLEFILTERS.googleSearch).appendTo(form);
                cancelTable.applyFilter("Employer", TABLEFILTERS.googleSearch).appendTo(form);
-               break;
-            case PAGES.RANKINGS:
+               }break;
+            case PAGES.RANKINGS:{         /*Expand to see what happens when you reach the rankings page*/
                var table0 = makeTable("Rankings", "UW_CO_STU_RNKV2$scroll$0");
                form.children("div").remove();
                table0.addControlButton("Save", function(){
@@ -2671,8 +3132,8 @@ switch (PAGEINFO.TYPE) {
                      .applyFilter("Employer", TABLEFILTERS.googleSearch)
                      .applyFilter("Work location", TABLEFILTERS.googleMap)
                      .addControlButton("Rankings Info", "http://www.cecs.uwaterloo.ca/manual/first_cycle/4_11.php").appendTo(form);
-               break;
-            case PAGES.DOCUMENTS:
+               }break;
+            case PAGES.DOCUMENTS:{        /*Expand to see what happens when you reach the documents page*/
                var marks = $("#win0divSHOW_MARKS a.PSHYPERLINK").attr("href");
                var history = $("#win0divVIEW_WORK_HISTORY a.PSHYPERLINK").attr("href");
                var newResume = $("#UW_CO_DOC_ADD").attr("href");
@@ -2688,19 +3149,13 @@ switch (PAGEINFO.TYPE) {
                         return (row == 0 ? cell + "<span class='details noselect'>(Default Resume)</span>" : cell);
                      })
                      .appendTo(form);
-               break;
-            case PAGES.SEARCH:
-               var table0 = makeTable("Results", "UW_CO_JOBRES_VW$scroll$0");
-               table0.applyFilter("Employer Name", TABLEFILTERS.googleSearch)
-                     .applyFilter("Location", TABLEFILTERS.googleMap)
-                     .appendTo(form);
-               break;
-            case PAGES.PROFILE:
+               }break;
+            case PAGES.PROFILE:{          /*Expand to see what happens when you reach the profile page*/ 
                var table0 = makeTable("Profile", "UW_CO_STDTERMVW$scroll$0");
                table0.appendTo(form);
                form.children("div:not('.jbmnplsTable')").remove();
-               break;
-            case PAGES.LIST: {
+               }break;
+            case PAGES.LIST: {            /*Expand to see what happens when you reach the job shortlist page*/
                //Handles multi delete
                function handleCheckedDelete(){
                   //Get all the rows to delete
@@ -2739,7 +3194,7 @@ switch (PAGEINFO.TYPE) {
                     .addCheckboxes()
                     .appendTo(form);
                }break;
-            case PAGES.APPLICATIONS:
+            case PAGES.APPLICATIONS:{     /*Expand to see what happens when you reach the applications page*/
                //For merging application
                var applicationsMerge = function(a,b,r){
                   if (a == "Edit Application") {
@@ -2756,21 +3211,18 @@ switch (PAGEINFO.TYPE) {
                var activeApp = makeTable(null, "UW_CO_STU_APPSV$scroll$0");
                activeApp.applyFilter("Job Title", TABLEFILTERS.jobDescription)
                         .applyFilter("View Details", TABLEFILTERS.fixEditApplication)
+                        .applyFilter("Employer", TABLEFILTERS.googleSearch)
                         .appendTo(form);
                var allApp = makeTable(null, "UW_CO_APPS_VW2$scrolli$0");
                allApp.merge(7,10,"View/Edit Applications", applicationsMerge)
                      .applyFilter(10, TABLEFILTERS.deleteRow)
                      .applyFilter("Job Title", TABLEFILTERS.jobDescription)
-                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
+                     .applyFilter("Employer", TABLEFILTERS.googleSearch)
                      .setHeaderAt(10, "Delete").appendTo(form);
                
                //Clean up all webpage :P
                form.children("div:not('.jbmnplsTable')").css("display", "none");
-               break;
-            case PAGES.INTERVIEWS:
-               break;
-            case PAGES.RANKINGS:
-               break;
+               }break;
          }
       }
       applyHighlight(); 
@@ -2799,6 +3251,9 @@ var CSSOBJ = {
    /**
     *    Random Styles
     */
+   ".bold" : {
+      "font-weight" : "bold",
+   },
    "div.pageTitle" : {
       "font-family"     : "Verdana, Arial",
       "font-size"       : "30px",
@@ -2816,11 +3271,16 @@ var CSSOBJ = {
       "outline" : "none",
    },
    ".hide" : {
-      display : "none",
+      display    : "none !important",
+      visibility : "hidden !important",
    },
    "span.fakeLink" : {
       cursor : "pointer",
    },
+   "a.disabled, span.fakeLink.disabled" : {
+      cursor : "default",
+   },
+   
    /**
     *    Cannot select any text with this
     */
@@ -2903,7 +3363,7 @@ var CSSOBJ = {
    "#jbmnplsHeader div.banner": {
       "background-repeat": "no-repeat",
    },
-   "#jbmnplNav": {
+   "#jbmnplsNav": {
       "float": "left",
       "padding-top": "2px",
    },
@@ -2916,16 +3376,16 @@ var CSSOBJ = {
       "margin-left": "25px",
       "list-style-type": "none",
    },
-   "#jbmnplNav ul li a, #jbmnplNav ul li .fakeLink": {
+   "#jbmnplsNav ul li a, #jbmnplsNav ul li .fakeLink": {
       "color": "white",
       "font-size": "14px",
       "display": "block",
       "height": "29px",
    },
-   "#jbmnplNav ul li a.selected" : {
+   "#jbmnplsNav ul li a.selected" : {
       background : "50% 100% no-repeat url('"+IMAGES.HEADER_POINTER+"')",
    },
-   "#jbmnplNav ul li a:hover, #jbmnplNav ul li .fakeLink:hover": {
+   "#jbmnplsNav ul li a:hover, #jbmnplsNav ul li .fakeLink:hover": {
       "text-shadow": "0 0 0 transparent, #ffffbe 0 0 0.5em, #ffffbe 0 0 0.5em",
    },
    "#jbmnplsBottomGroup": {
@@ -3020,7 +3480,6 @@ var CSSOBJ = {
    },
    "div.jbmnplsTable table tr td span.fakeLink" : {
       color: "#336699",
-      cursor:"pointer",
    },
    "div.jbmnplsTable table tr td span.details" : {
       color    : "#999",
@@ -3068,9 +3527,12 @@ var CSSOBJ = {
       "float" : "right",
       "padding-top" : "4px",
    },
-   "div.jbmnplsTable div.jbmnplsTableControls *" : {
-      "color" : "#cccccc",
+   "div.jbmnplsTable div.jbmnplsTableControls,div.jbmnplsTable div.jbmnplsTableControls *" : {
+      "color" : "#CCC",
       "outline" : "none",
+   },
+   "div.jbmnplsTable div.jbmnplsTableControls *.disabled,div.jbmnplsTable div.jbmnplsTableControls a.disabled:hover, div.jbmnplsTable div.jbmnplsTableControls span.fakeLink.disabled:hover" : {
+      "color" : "#A0A0A0",
    },
    "div.jbmnplsTable div.jbmnplsTableControls a:hover, div.jbmnplsTable div.jbmnplsTableControls span.fakeLink:hover" : {
       "color" : "white",
@@ -3229,10 +3691,17 @@ var CSSOBJ = {
       padding           :  "10px 0 0",
    },
    "#jbmnplsPopup[name='customize'].black #jbmnplsPopupBody div.customizeEntry span.row span.hiddenMsg" : {
-      "padding-right"   :  "20px",
-      display           :  "none",
+      "padding-right"         :  "20px",
    },
-   "#jbmnplsPopup[name='customize'].black #jbmnplsPopupBody div.customizeEntry[selected='true'] span.row span.hiddenMsg" : {
+    "div.jbmnplsTable table.tablesorter td span.hiddenMsg, #jbmnplsPopup[name='customize'].black #jbmnplsPopupBody div.customizeEntry span.row span.hiddenMsg" : {
+      display                 :  "none",
+      "-moz-user-select"      :  "none",
+      "-webkit-user-select"   :  "none",
+      "-o-user-select"        :  "none",
+      "user-select"           :  "none",
+      "cursor"                :  "default",
+   },
+   "div.jbmnplsTable table.tablesorter td span.hiddenMsg.show, #jbmnplsPopup[name='customize'].black #jbmnplsPopupBody div.customizeEntry[selected='true'] span.row span.hiddenMsg" : {
       display           :  "inline",
       color             :  "#777",
       "float"           :  "right",
@@ -3240,6 +3709,54 @@ var CSSOBJ = {
    "#jbmnplsPopup[name='customize'].black #jbmnplsPopupBody div.customizeEntry input.checkbox" : {
       "margin"          :  "10px 20px 0",
       "float"           :  "left",
+   },
+   /**
+    *    Jobmine Plus Message
+    */
+   "#jbmnplsMessageHolder" : {
+      "overflow"        :  "hidden",
+      "height"          :  "50px",
+      "position"        :  "fixed",
+      "width"           :  "100%",
+      "left"            :  "0",
+      "z-index"         :  "1000",
+   },
+   "#jbmnplsMessage" : {
+      "height"          :  "35px",
+      "max-height"      :  "35px",
+      "top"             :  "-50px",
+      "position"        :  "relative",
+      "width"           :  "100%",
+      "box-shadow"      :  "0 3px 10px #333",
+      "background"      :  "#fafafa",
+      "text-align"      :  "center",
+   },
+   "#jbmnplsMessage *" : {
+      "font-family"     :  "Verdana, Arial",
+      "font-size"       :  "12px",
+      "color"           :  "#222",
+      "padding"          :  "7px",
+   },
+   "#jbnplsUpdate:hover"       : {
+      "color"           :  "#555",
+   },
+   "body.showUpdate #jbnplsUpdate" : {
+      display           :  "block !important",
+   },
+   "body.showUpdate #jbmnplsMessageText" : {
+      display           :  "none !important",
+   },
+   "#jbmnplsMessage div.close" : {
+      "background"      :  "no-repeat 100% 50% url('"+IMAGES.MESSAGE_CLOSE+"')",
+      "position"        :  "absolute",
+      "top"             :  "8px",
+      "right"           :  "25px",
+      "width"           :  "100px",
+      "height"          :  "16px",
+      "cursor"          :  "pointer",
+      "padding"         :  "0",
+      "padding-right"   :  "20px",
+      "font-size"       :  "10px",
    },
 };
 appendCSS(CSSOBJ);
