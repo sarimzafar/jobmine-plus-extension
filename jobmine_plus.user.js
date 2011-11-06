@@ -96,7 +96,7 @@ var OBJECTS = {
 };
 
 var LARGESTRINGS = {
-   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' title='I am draggable!' class='title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><iframe id='jbmnplsPopupFrame' frameborder='no' width='100%' height='100%' class='frame'></iframe><div id='jbmnplsPopupFooter' class='footer'><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
+   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' class='title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><iframe id='jbmnplsPopupFrame' frameborder='no' width='100%' height='100%' class='frame'></iframe><div id='jbmnplsPopupFooter' class='footer'><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
 };
 
 var IMAGES = {
@@ -108,6 +108,7 @@ var IMAGES = {
    TABLE_ASCEND   : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAECAYAAAC6Jt6KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAChJREFUeNpi/P//PwMSAHEYGfAAJjTFyDReDeiK/uPTgEsSqzhAgAEA5doJ/2fPKB8AAAAASUVORK5CYII=",
    TABLE_DESCEND  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAECAYAAAC6Jt6KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAChJREFUeNpi/A8EDLgBI7oAEzZBXIphGrBJ4jIErgFZESMeJzIABBgACYsEC30vZjwAAAAASUVORK5CYII=",
    DELETE_LOADING : "data:image/gif;base64,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",
+   LARGE_LOADING  : "data:image/gif;base64,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",
    MESSAGE_CLOSE  : "data:image/gif;base64,R0lGODlhDQAMANUAAObm5qampn19fX5+fq2trfT09N/f34SEhPf39/n5+XV1dYmJiXNzc2xsbHd3d2JiYlRUVKOjo3x8fIGBgX9/f9vb24uLi9nZ2YyMjIODg9bW1qmpqZGRkc/Pz3FxcY+Pj/X19ZCQkG5ubqqqqqenp4qKiuXl5eLi4unp6aysrN7e3nR0dGtra/Pz8/j4+Pr6+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAANAAwAAAZiwNfJ9CoaExWU8LAgGl0ERwhViLBKTldqJdggXi0SywLQrgaqb7EVYGE6K4nKaAx7Hoc5vZi4rCAfAHsvWgoTJA0lgk8pDBQGBW1YRS4jXHpsVwRCGWh0YSIcSicGgyAaSkEAOw==",
    EMPLOYER_NAME  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOYAAAANCAMAAACKN+LIAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAADBQTFRFycnJiYmJra2t9vb2kpKS7e3tgICA5OTkpKSktra20tLSm5ubwMDA29vbd3d3////5P2LPQAAAn5JREFUeNrElul2ozAMhb0bsJDe/23nyhsmzbTNnEzrPxBrsT5rIUa+vU6WV9bJ8VP5waf82DJc1xcsdffNmLuVn8Skb6Tsf2AG+g1M3hIHL5paIyZxMiJlC+yqUHdPdlx/dmnLCXPIUCh4UmIb1ROrJ8WMgXnrRDDx0CoqgVVmr454b34IJ4SoD4taLgGuCMZ4Jxs0JIGt+upReBXlfpOlBE55UcGLg1qBLAc948Is0VsaeQMpXJRw3rLp4DhPaY3OZnFWrb1P4A27YnpvXcW0RSKcUkIrJg9/3gdXHenyfIgp/ZXEb6dB8FQVsxTcyx70CAP6elyGwYhiA8/ejGuc+nuq7IrqYzrEJ6gnM3tTb8e5BrSrCbwX+lC02B3SUXkRMai1auvBLQWKqeHoq/IUzQB+Gjur318Nc7Z5VGNN7WAqOqbaU3r1FJpRHIyL7TWl6sbKTUUdIroDNwyuK5sLZuFWu88xh3RUMy+Y1DENK2ZtTzXbSsTuWZUvTCSOE62NXFwLdLg6ByZKwui5F6YkMsj7DXNV6RFRPfM55r5f5k+yuS9z5LisV0xU25JNXL1Wtmf/YcxR29Nae5LNgYlyiFrpSzYxqYuTG+ZNpUd0hIcR1DCzPrX70CkXZt9tBwzp6M0cHjAJ3UBrbyL0egx6U4ybmGfJtWV1WYiW3lwxrReXvIZw2gUz8/zwdsybSo9Ie1OIHntTXJ20FmMqXph1dx7QpXNCugdMW+fnMml1IKu+xwxONDFjaXO1vofbpL1htmGOEMKKKWF+eEfRriojIp204TTv/0Y9+3fjyj+7o7+Z2hc+vD+DOWfiGzG/+vvxC5hzJr4R86UC+SPAAPcUmZQN0BP2AAAAAElFTkSuQmCC",
    JOB_TITLE      : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG0AAAANCAMAAACU0hA+AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAC1QTFRFiYmJ9vb27e3tpKSkgICA5OTkkpKStra2ycnJm5ubra2twMDA29vbd3d3////XBn6XAAAATBJREFUeNq8kul2xCAIhcEtbvD+j1tEjUlq2+mZnvpnIst8XrjAL59Km2DK67M8chlmoxkRID3f/2WP7lO8pZV0a1y08rOAv6eRdRSQm9DI0ZGL0m8D6aQ0WimTXke2JyRQiKBKdQICPyByTIHZaBgTUcJFSwahzMcIUEpSqLcnZvbkz2zfTZbvysWhVHu2cNEmtFNbCoghn3uTltaq6cM21XHNZk1SojM7abbdXa/24xVPGsorOcLSdqEl6gPd02Z20tSWUtqqDdUtTUdLe9pxPPZ+13ZcXf7Uhl9ow7tLOs2337YZtHXRRrTTZvbT3oQahxfbvdFGo+6N46e9cVZPSjiZi6ezWmvsa2Qn7fSkhEOXxhi6J0ejeNISuQL83sn5N9Xv0qD8H22N7rXzIcAAJahEsPp7aB4AAAAASUVORK5CYII=",
@@ -168,6 +169,16 @@ String.prototype.getTextBetween=function(front, end){
 String.prototype.replaceCharCodes=function(){
    if (this==null){return null;}
    return this.replace(/&amp;/g, "&").replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&quot;/g, "\"");
+};
+Number.prototype.toDigits=function(numOfDigits){
+   var numberOfMovements = numOfDigits-this.toString().length;
+   if (numberOfMovements < 0) {
+      return this.toString().substr(Math.abs(numberOfMovements)-1);
+   } else {
+      var prefix = "";
+      for(var i=0;i<numberOfMovements;i++) {prefix += "0";}
+      return prefix + this;
+   }
 };
 Array.prototype.empty = function(){
    return this.length == 0;
@@ -247,6 +258,9 @@ var PAGES = {
    HOME        : "HOME",
    DOCUMENTS   : "DOCUMENTS",
    PROFILE     : "PROFILE",
+   PERSONAL    : "PERSONAL_INFO",
+   ACADEMIC    : "ACADEMIC_INFO",
+   SKILLS      : "SKILLS_INVENTORY",
    SEARCH      : "SEARCH",
    LIST        : "SHORT_LIST",
    APPLICATIONS: "APPLICATIONS",
@@ -274,11 +288,24 @@ if(PAGEINFO.URL.contains(LINKS.EMPLYR_TOP) || PAGEINFO.URL.contains(LINKS.EMPLYR
 } else {
    switch(PAGEINFO.TITLE) {
       case "Resumes":               PAGEINFO.TYPE = PAGES.DOCUMENTS;    break;
-      case "Student Data":          PAGEINFO.TYPE = PAGES.PROFILE;      break;
       case "Job Search Component":  PAGEINFO.TYPE = PAGES.SEARCH;       break;
       case "Job Short List":        PAGEINFO.TYPE = PAGES.LIST;         break;
       case "Student App Summary":   PAGEINFO.TYPE = PAGES.APPLICATIONS; break;
       case "Student Interviews":    PAGEINFO.TYPE = PAGES.INTERVIEWS;   break;
+      case "Student Data":          //Handle each profile page differently
+         try{
+         var selectedText = UTIL.getID("selected").getElementsByTagName("span")[0].firstChild.nodeValue;
+         switch(selectedText.trim().toLowerCase()) {
+            case "skills inventory":      PAGEINFO.TYPE = PAGES.SKILLS;    break;
+            case "acad info.":            PAGEINFO.TYPE = PAGES.ACADEMIC;  break;
+            case "student personal info": PAGEINFO.TYPE = PAGES.PERSONAL;  break;
+            case "term cards":            PAGEINFO.TYPE = PAGES.PROFILE;   break;
+            default:
+               throw new Error("Unhandled new nav item: "+selectedText.toLowerCase().trim());
+               break;
+         }
+         }catch(e){alert("There is a problem with the Profile page, cannot parse selected tab\n"+e);}
+         break;
    }
 }
 if (PAGEINFO.TYPE != null) {
@@ -1037,12 +1064,39 @@ function addHeader() {
    var header = "<header id='jbmnplsHeader'><div id='jbmnplsTopGroup'><div id='jbmnplsBanner' class='banner'></div><nav id='jbmnplsNav'><ul>";
    for(var item in NAVIGATION) {
       if(PAGES.isValid(item) && LINKS.hasOwnProperty(item)) {
-         header += "<li><a item='"+counter+"' type='"+item+"' href='"+LINKS.HOME+"' realHref='"+LINKS[item]+"'>"+NAVIGATION[item]+"</a></li>";
+         header += "<li><a item='"+counter+"' type='"+item+"' href='"+LINKS.HOME+"#"+item+"' realHref='"+LINKS[item]+"'>"+NAVIGATION[item]+"</a></li>";
          counter++;
       }
    }
    header += "</ul></nav><div id='uwBanner' class='banner'></div></div><div id='jbmnplsBottomGroup'><div id='jbmnplsStatus'>Hi <span id='jbmnplsUserName'>"+fname+" "+lname+"!</span><span id='jbmnplsUserID'> ("+studNum+")</span></div><div id='jbmplsControlPanel'><a href='#'>Settings</a> | <a href='#'>About</a> | <a href='"+LINKS.LOGOUT+"'>Logout</a></div></div></header>";
    $("body").prepend(header);
+}
+
+/**
+ *    Applies the header to the page
+ */
+function addProfileNav() {
+   if (UTIL.idExists("PSTAB")) {
+      var navHTML = "<nav class='noselect' id='jbmnplsProfileNav'><ul>";
+      var navigation = [
+         "Profile",
+         "Personal Info",
+         "Academic Info",
+         "Skills Inventory",
+      ];
+      $("#PSTAB td a").each(function(i){
+         var obj = $(this);
+         var link = obj.attr("href");
+         if (obj.attr("href") == null) {
+            navHTML += "<li style='z-index:"+i+";' class='selected navItem'><span>"+navigation[i]+"</span></li>";
+         } else {
+            var onclick = link.substr(link.indexOf(":")+1).trim();
+            navHTML += '<li style="z-index:'+i+'" class="navItem"><span class="fakeLink" onclick="'+onclick+'">'+navigation[i]+'</span></li>';
+         }
+      });
+      navHTML += "</ul></nav>";
+      $("body form:eq(0)").append(navHTML);
+   }
 }
 
 /**
@@ -1074,17 +1128,19 @@ function showPopup(isBlack, bodyText, title, width, maxHeight, onCloseFunction, 
    if (isBlack) {
       popup.attr("name", title.toLowerCase().underscorize());
       content.removeClass("disabled");
+      node.attr("title", "I am draggable");
+      if(maxHeight!=null) {
+         body.css("height", maxHeight - 42*2 + "px"); //42px for header and footer
+      } else {
+         body.css("height", "auto");
+      }
    } else {
+      node.removeAttr("title");
       content.addClass("disabled");
    }
    popup[0].className = isBlack ? "black" : "white";
    if(width!=null) {
       content.css("left", -width/2 + "px").css("width", width + "px");
-   }
-   if(maxHeight!=null) {
-      body.css("height", maxHeight - 42*2 + "px"); //42px for header and footer
-   } else {
-      body.css("height", "auto");
    }
    //Position the height of the popup
    var contentHeight = content.outerHeight();
@@ -1404,6 +1460,18 @@ function iframeRunFunction(iframe) {
    }catch(e){alert("Unable to call function inside iframe: "+e);}
 }
 
+function parseMonth(prefix) {
+   if(prefix != null) {
+      var months = ["january","februrary","march","april","may","june","july","august","september","october","november","december"];
+      for(var i=0;i<months.length;i++) {
+         if(months[i].startsWith(prefix.toLowerCase())) {
+            return i;
+         }
+      }
+   }
+   return -1;
+}
+
 }
 
 /*================================*\
@@ -1543,7 +1611,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
    var jobFinished = false;
    var isSaving = name == "#ICSave";
    var whitePopupShown = isPopupShown(false);
-   
+
    //Handle Excel exporting
    if(name.contains("$hexcel$") && url != null) {
       $("#slave").attr("src", url+"&jbmnpls=ignore").one("load", function(){
@@ -1574,6 +1642,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
             || name.startsWith("UW_CO_JOBRES_VW$htop$")        //First button
          ) {
             table.update();
+            hidePopup();
          } else if(name == "TYPE_COOP") {
             var type = $("#jbmnplsJobType");
             if(popupOccurs) { 
@@ -1608,7 +1677,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
          if (name.contains("$delete$")) {
             if (whitePopupShown) {
                setTitle("Saving...");
-               showPopup(false, "Deleting all the short listed jobs.<br/>Saving...<br/><span style='color:red;'>DO NOT REFRESH!</span>");
+               showPopup(false, "Deleting all the short listed jobs.<br/>Saving...<br/><span style='color:red;'>DO NOT REFRESH!</span><br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>");
             }
             if(!whitePopupShown || (whitePopupShown && item.isEmpty())) {
                BRIDGE.run(function(){
@@ -1620,7 +1689,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
                var length = item.copyList.length;
                var progress = (length-item.list.length+1)+"/"+length;
                setTitle("Deleting: "+progress);
-               showPopup(false, "Deleting all the short listed jobs.<br/>Progress: "+progress+"<br/><span style='color:blue;'>You can cancel by refreshing.</span>");
+               showPopup(false, "Deleting all the short listed jobs.<br/>Progress: "+progress+"<br/><span style='color:blue;'>You can cancel by refreshing.</span><br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>");
                jobFinished = true;
             }
          } else if (isSaving) {
@@ -1914,6 +1983,8 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
       if (error) {
          alert("The fields with the red borders must be filled out or selected with a value!");
       } else {
+         //Validation is done, everything is good
+         showPopup(false, "Please wait while Jobmine receives the search results.<br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>", "Search is in Progress",550);
          //Close it if wanted
          if(!UTIL.getID("jbmnplsDontCloseSearch").checked) {
             this.parentNode.parentNode.parentNode.className = "closed";
@@ -2004,6 +2075,62 @@ function makeTable(defaultName, tableID, objectToAppendTo) {
    var table = new JbmnplsTable(defaultName, tableID, objectToAppendTo);
    TABLES.push(table);
    return table;
+}
+
+/**
+ *    Table columns: used to when you are applying a new filter for a new column
+ */
+var TABLECOLUMNS = {
+   googleCalendar : function(row, rowData, reverseLookup){
+      var company = rowData[reverseLookup["Employer Name"]];
+      var title = encodeURIComponent("Interview with "+company);
+      var type = rowData[reverseLookup["Type"]];
+      var location = rowData[reverseLookup["Room"]];location=location==""?"":encodeURIComponent("Tatham Center Room "+location.substr(2));
+      var jobTitle = rowData[reverseLookup["Job Title"]].getTextBetween(">","</a>");
+      var interviewer = rowData[reverseLookup["Interviewer"]];
+      var instructions = rowData[reverseLookup["Instructions"]];instructions==""?"":"\nExtra Information:\n"+instructions;
+      var details = encodeURIComponent(type + " interview with " + company + "\nInterviewer: " + interviewer + "\nTitle: "+ jobTitle + instructions);
+      
+      //Dates
+      var date = rowData[reverseLookup["Date"]].split(" ");
+      var year = date[2];
+      var month = (parseMonth(date[1])+1).toDigits(2);
+      var day = parseInt(date[0],10).toDigits(2);
+      var start = rowData[reverseLookup["Start Time"]].split(" ");
+      var startTime = start[0].split(":");
+      var sHour = parseInt(startTime[0],10) + new Date().getTimezoneOffset()/60 + (start[1].toUpperCase() == "AM" ? 0 : 12);
+      var sMin = parseInt(startTime[1],10);
+      var finishedDate = new Date(year, month, day, sHour, sMin + parseInt(rowData[reverseLookup["Length"]],10), 0, 0);
+      var eHour = finishedDate.getHours();
+      var eMin  = finishedDate.getMinutes();
+      var dateStr = year + month + day + "T" + sHour.toDigits(2) + sMin.toDigits(2) + "00Z/" + year + month + day + "T" + eHour.toDigits(2) + eMin.toDigits(2) + "00Z";
+      return '<a href="http://www.google.com/calendar/event?action=TEMPLATE&text='+title+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" alt="0" border="0"></a>';
+   },
+   googleCalendarGroup : function(row, rowData, reverseLookup){
+      var company = rowData[reverseLookup["Employer Name"]];
+      var title = encodeURIComponent("Interview with "+company);
+      var location = rowData[reverseLookup["Room"]];location=location==""?"":encodeURIComponent("Tatham Center Room "+location.substr(2));
+      var jobTitle = rowData[reverseLookup["Job Title"]].getTextBetween(">","</a>");
+      var instructions = rowData[reverseLookup["Instructions"]];instructions==""?"":"\nExtra Information:\n"+instructions;
+      var details = encodeURIComponent("Group interview with " + company + "\nTitle: "+ jobTitle + instructions);
+      
+      //Dates
+      var date = rowData[reverseLookup["Date"]].split(" ");
+      var year = date[2];
+      var month = (parseMonth(date[1])+1).toDigits(2);
+      var day = parseInt(date[0],10).toDigits(2);
+      
+      var start = rowData[reverseLookup["Start Time"]].split(" ");
+      var startTime = start[0].split(":");
+      var sHour = parseInt(startTime[0],10) + new Date().getTimezoneOffset()/60 + (start[1].toUpperCase() == "AM" ? 0 : 12);
+      var sMin = parseInt(startTime[1],10);
+      var end = rowData[reverseLookup["End Time"]].split(" ");
+      var endTime = end[0].split(":");
+      var eHour = parseInt(endTime[0],10) + new Date().getTimezoneOffset()/60 + (end[1].toUpperCase() == "AM" ? 0 : 12);
+      var eMin = parseInt(endTime[1],10);
+      var dateStr = year + month + day + "T" + sHour.toDigits(2) + sMin.toDigits(2) + "00Z/" + year + month + day + "T" + eHour.toDigits(2) + eMin.toDigits(2) + "00Z";
+      return '<a href="http://www.google.com/calendar/event?action=TEMPLATE&text='+title+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" alt="0" border="0"></a>';
+   },
 }
 
 /**
@@ -3181,35 +3308,40 @@ BRIDGE.addFunction("HighLightTR");
 switch (PAGEINFO.TYPE) {
    case PAGES.HOME:{       /*Expand to see what happens when you reach home page*/
       if (!PAGEINFO.IN_IFRAME) {
-         window.location.hash = CONSTANTS.EXTRA_URL_TEXT;
-         
          //Cancel the load for the item
          $(document.body).removeAttr("onload");
-         
          //Delete the useless stuff on home page
          $("body > table").remove();
-         
-         //Resolve page to go to
-         var currentPage = PREF.load("LAST_PAGE",  null);
-         if(currentPage == null || !PAGES.isValid(currentPage) || !NAVIGATION.hasOwnProperty(currentPage)) {
-            currentPage = PREF.load("DEFAULT_PAGE");
-         }         
-         var link = LINKS[currentPage];
-         
-         //Add the header and select the nav item
-         addHeader();
-         setTitle(NAVIGATION[currentPage]);
-         setNavSelection($("#jbmnplsNav a[type='"+currentPage+"']").attr("item"));
-         
-         //Appends the iframe that holds the content
-         $("body").append("<div id='jbmnplsFrameWrapper'><iframe src='"+link+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div><div id='pthnavcontainer' class='hide'></div>")
-        
          //Fix up stuff 
          BRIDGE.addJS(function(){
             pthNav.abn.init = function(){};
             ptEvent.add2 = ptEvent.add;
             ptEvent.add = function(a,b,c){if(a!=null){ptEvent.add2(a,b,c);}}
          });
+         
+         /**
+          *    Handle what page to go to
+          */
+         var gotoLocation = window.location.hash == "" ? "" : window.location.hash.substr(1);   //Get rid of # in hash
+         window.location.hash = CONSTANTS.EXTRA_URL_TEXT;
+         
+         var currentPage = gotoLocation;
+         if (CONSTANTS.EXTRA_URL_TEXT == currentPage) {    //Refreshed the entire page
+            currentPage = PREF.load("LAST_PAGE");
+         } else if(currentPage == null || !PAGES.isValid(currentPage) || !NAVIGATION.hasOwnProperty(currentPage)) {
+            currentPage = PREF.load("DEFAULT_PAGE");
+         }         
+         var link = LINKS[currentPage];
+         
+         /**
+          *    Set some stuff in the nav to match the new location
+          */
+         addHeader();
+         setTitle(NAVIGATION[currentPage]);
+         setNavSelection($("#jbmnplsNav a[type='"+currentPage+"']").attr("item"));
+         
+         //Appends the iframe that holds the content
+         $("body").append("<div id='jbmnplsFrameWrapper'><iframe src='"+link+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div><div id='pthnavcontainer' class='hide'></div>")
         
          //Hacked the navigation because we have an iframe
          $("#jbmnplsNav a").click(function(e){
@@ -3219,12 +3351,6 @@ switch (PAGEINFO.TYPE) {
             var index = obj.getAttribute("item");
             var newTitle = obj.innerHTML;
             changeLocation(newLocation, newTitle, index);
-         }).mousedown(function(e){
-            //Ignore right click
-            if (e.which == 1 || e.which == 2) {
-               var type = e.target.getAttribute("type");
-               PREF.save("LAST_PAGE", type);
-            }
          });
          
          //If debug is on, we can add the debugger window
@@ -3232,13 +3358,6 @@ switch (PAGEINFO.TYPE) {
             DEBUGGER.init();
             initDraggable();
          }
-         function hideIframe(){
-            $("#jbmnplsFrameWrapper").hide();
-         }
-         BRIDGE.registerFunction("hideIframe",hideIframe);
-         $("#jbmnplsWebpage").load(function(){
-            $("#jbmnplsFrameWrapper").show();
-         });
       } else {
          //Cannot have itself in its own iframe
          return;
@@ -3305,9 +3424,6 @@ switch (PAGEINFO.TYPE) {
          if (PAGEINFO.TYPE != null) {
             PREF.save("LAST_PAGE", PAGEINFO.TYPE);
             $(window).unload(function(){
-               BRIDGE.addJS(function(){
-                  window.parent.hideIframe();
-               });   
                PREF.save("LAST_PAGE", PAGEINFO.TYPE);
             });
          }
@@ -3390,32 +3506,14 @@ switch (PAGEINFO.TYPE) {
                var socialTable = makeTable(null, "UW_CO_NSCHD_JOB$scroll$0");
                var cancelTable = makeTable(null, "UW_CO_SINT_CANC$scroll$0");
                form.children("div").remove();      //Remove useless stuff
+               interviewTable.insertColumn("Google Calendar", TABLECOLUMNS.googleCalendar);
+               groupTable.insertColumn("Google Calendar", TABLECOLUMNS.googleCalendarGroup);
                
                //Apply Filters, and append the tables
                for(var i=0; i<TABLES.length;i++) {
                    TABLES[i].applyFilter("Job Title", TABLEFILTERS.jobDescription)
                }
                interviewTable.applyFilter("Interviewer", TABLEFILTERS.interviewerSearch).applyFilter("Employer Name", TABLEFILTERS.googleSearch)
-               //.insertColumn("Google Calendar", function(row, rowData, reverseLookup){
-               //   var company = "Hwllo"//rowData[reverseLookup["Employer Name"]];
-               //   var type = rowData[reverseLookup["Type"]];
-               //   var year = "2011";
-               //   var month = "05";
-               //   var day = "10";
-               //   var sHour = "05";
-               //   var sMin = "40"; 
-               //   var eHour = "40";
-               //   var eMin  = "0";
-               //   var dateStr = year + month + day + "T" + sHour + sMin + "00Z/" + year + month + day + "T" + eHour + eMin + "00Z";
-               //   var location = rowData[reverseLookup["Room"]];location=location==""?"":"Tatham Center Room "+location.substr(2);
-               //   var jobTitle = "sdsdsd"//rowData[reverseLookup["Job Title"]];
-               //   var interviewer = "Matthew Ng";//rowData[reverseLookup["Interviewer"]];
-               //   var instructions = rowData[reverseLookup["Instructions"]];instructions==""?"":"\nExtra Information:\n"+instructions;
-               //   var details = (type + " interview with " + company + " (" + interviewer + ")\nTitle: "+ jobTitle + "\n"+instructions).replace(/ /g,"%20").replace(/\n/g,"%0A").replace(/:/g,"%3A").replace(/,/g,"%2C").replace(/,/g,"%2C");
-               //   return "";
-                  //return '<a href="http://www.google.com/calendar/event?action=TEMPLATE&text=Coop Interview with '+encodeURIComponent(company)+'&dates='+dateStr+'&details='+details+'&location='+encodeURIComponent(location)+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" border=0></a>';
-               //})
-               
                .appendTo(form);
                groupTable.applyFilter("Employer Name", TABLEFILTERS.googleSearch).appendTo(form);
                socialTable.applyFilter("Employer Name", TABLEFILTERS.googleSearch).appendTo(form);
@@ -3452,11 +3550,6 @@ switch (PAGEINFO.TYPE) {
                      })
                      .appendTo(form);
                }break;
-            case PAGES.PROFILE:{          /*Expand to see what happens when you reach the profile page*/ 
-               var table0 = makeTable("Profile", "UW_CO_STDTERMVW$scroll$0");
-               table0.appendTo(form);
-               form.children("div:not('.jbmnplsTable')").remove();
-               }break;
             case PAGES.LIST: {            /*Expand to see what happens when you reach the job shortlist page*/
                //Handles multi delete
                function handleCheckedDelete(){
@@ -3473,7 +3566,7 @@ switch (PAGEINFO.TYPE) {
                   var command = table.jInstance.find("tbody div.delete:eq(0)").attr("action");
                   var progress = "1/"+listToDelete.length;
                   setTitle("Deleting: "+progress);
-                  showPopup(false, "Deleting all the short listed jobs.<br/>Progress: "+progress+"<br/><span style='color:blue;'>You can cancel by refreshing.</span>", "Please Be Patient", 500, 300);
+                  showPopup(false, "Deleting all the short listed jobs.<br/>Progress: "+progress+"<br/><span style='color:blue;'>You can cancel by refreshing.</span><br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>", "Please Be Patient", 500, 300);
                   var deletion = new Job("submitAction_win0(document.win0, '" + command + "')", listToDelete);
                   JOBQUEUE.addJob(deletion);
                }
@@ -3525,6 +3618,20 @@ switch (PAGEINFO.TYPE) {
                //Clean up all webpage :P
                form.children("div:not('.jbmnplsTable')").css("display", "none");
                }break;
+            //Part of the profile page
+            case PAGES.PROFILE:{          /*Expand to see what happens when you reach the profile page*/ 
+               var table0 = makeTable("Profile", "UW_CO_STDTERMVW$scroll$0");
+               addProfileNav();
+               form.children("div").remove();
+               table0.appendTo(form);
+               }break;
+            case PAGES.PERSONAL:case PAGES.ACADEMIC:case PAGES.SKILLS:{/*Expand to see what happens when you reach the personal profile page*/
+               addProfileNav();
+               form.children("div:not('#PAGECONTAINER')").remove();
+               $("#win0divPSTOOLBAR").remove();
+               $("#PAGECONTAINER>table").css("margin", "0 auto");
+               $("#ACE_width").removeAttr("width").find("tbody>tr:eq(0)>td").eq(-1).attr("width",0);
+               }break;
          }
       }
       applyHighlight(); 
@@ -3555,6 +3662,7 @@ var CSSOBJ = {
       padding  : '0',
       margin   : '0',
       height   : "100%",
+      "position"  :  "relative",
    },
    /**
     *    Random Styles
@@ -3720,6 +3828,65 @@ var CSSOBJ = {
    },
    "#jbmplsControlPanel a:hover" : {
       "color" : "#6f6f6f",
+   },
+   /**
+    *    Profile Nav
+    */
+   "#jbmnplsProfileNav" : {
+      position          :  "absolute",
+      top               :  "0",
+      "overflow-x"      :  "hidden",
+      "overflow-y"      :  "visible",
+      "width"           :  "100%",
+      "left"            :  0,
+   },
+   "#jbmnplsProfileNav ul" : {
+      margin            :  0,
+      padding           :  0,
+      left              :  "50%",
+      "float"           :  "left",
+      "position"        :  "relative",
+   },
+   "#jbmnplsProfileNav li.navItem" : {
+      "position"        :  "relative",
+      "float"           :  "left",
+      "list-style-type" :  "none",
+      "right"           :  "50%",
+      "background"      :  "#7F7F7F",
+      width             :  "150px",
+      "margin-bottom"   :  "10px",
+      "margin-left"     :  "-15px",
+      "box-shadow"      :  "0 0 9px black",
+      "text-align"      :  "center",
+      "border"          :  "2px solid #CCC",
+      "border-top"      :  "none",
+      "border-bottom-right-radius"          :  "15px",
+      "border-bottom-left-radius"          :  "15px",
+   },
+   "#jbmnplsProfileNav li.navItem span" : {
+      "font-size"       :  "14px",
+      "padding-top"     :  "5px",
+      "padding-bottom"  :  "8px",
+      "color"           :  "white",
+      "width"           :  "100%",
+      "height"          :  "100%",
+      "display"         :  "block",
+      "-moz-transition-property" : "padding",
+      "-moz-transition-duration" : "0.2s",
+   },
+   "#jbmnplsProfileNav li.navItem.selected" : {
+      "z-index"         :  "4 !important",
+      "background"      :  "#999 !important",
+   },
+   "#jbmnplsProfileNav li.navItem.selected span" : {
+      "padding-top"     :  "10px",
+   },
+   "#jbmnplsProfileNav li.navItem:hover" : {
+      "z-index"         :  "4 !important",
+      "background"      :  "#AAA",
+   },
+   "#jbmnplsProfileNav li.navItem span:hover" : {
+      "padding-top"     :  "10px",
    },
    /**
     *    Jobmine Plus Tables
