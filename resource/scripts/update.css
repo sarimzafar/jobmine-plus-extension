@@ -2,5 +2,5 @@
  *    Used for updating Jobmine Plus via css
  */
 body:not(.v_2_0_1) #jbnplsUpdate{
-   display : block !important;
+   display : block !important; 
 }
