@@ -8,7 +8,6 @@
 // @include        https://jobmine.ccol.uwaterloo.ca/psc/ES*
 // @exclude        *WEBLIB_UW_DOCS.UW_CO_DOC_TEXT*
 // @exclude        *UW_CO_STUDENTS.UW_CO_EVALUATION*
-// @exclude        *UW_CO_STUDENTS.UW_CO_JOBDTLS*
 // @exclude        *&jbmnpls=ignore
 // ==/UserScript==
 
@@ -23,13 +22,14 @@
    __PREFERENCES__
    __JOBS_QUEUE__
    __FUNCTIONS__
+   __HIGHLIGHTING__
    __AJAX_FUNCTIONS__
    __SEARCH_MANAGER__
    __JOB_SEARCH_CRITERIA__
    __TABLE__
    __CLEAN_UP__
-   __INDIVIDUAL_PAGES__
    __CSS__
+   __INDIVIDUAL_PAGES__
 
 
 
@@ -69,6 +69,7 @@ var LINKS = {
    EMPLYR_TOP  : "jobmine.ccol.uwaterloo.ca/psp/ES",
    EMPLYR_FRAME: "jobmine.ccol.uwaterloo.ca/psc/ES",
    UPDATE_LINK : "http://userscripts.org/scripts/source/80771.user.js",
+   UPDATE_CSS  : "https://jobmine-plus.googlecode.com/svn/trunk/resource/scripts/update.css",
 };
 
 var NAVIGATION = {   //The order below will be on the left side
@@ -86,17 +87,23 @@ var COLOURS = {
    HOVER                : "skyblue",
    LINK_HIGHLIGHT_HOVER : "green",
    ROW_SELECT           : "#c7e4f7",      //Lighter blue than skyblue
+   GREAT                 : "#a3f57f",
+   BLANK                : "white",
+   BAD                  : "#f4baba",
+   AVERAGE              : "#fffe93",
+   WORST                : "#AAAAAA",
+   GOOD                 : "#a1f6cd",
 };
 
 var OBJECTS = {
-   STORAGE        : null, //Set later
-   HIGHLIGHT      : null,
+   STORAGE        :  null, //Set later
+   HIGHLIGHT      :  null,
    ONPOPUPCLOSE   :  null,
    MESSAGE_TIMER  :  null,
 };
 
 var LARGESTRINGS = {
-   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' class='title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><iframe id='jbmnplsPopupFrame' frameborder='no' width='100%' height='100%' class='frame'></iframe><div id='jbmnplsPopupFooter' class='footer'><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
+   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' class='title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><div id='jbmnplsPopupFrameWrapper'><iframe id='jbmnplsPopupFrame' allowtransparency='true' frameborder='no' width='100%' height='100%' class='frame'></iframe></div><div id='jbmnplsPopupFooter' class='footer'><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
 };
 
 var IMAGES = {
@@ -112,9 +119,9 @@ var IMAGES = {
    MESSAGE_CLOSE  : "data:image/gif;base64,R0lGODlhDQAMANUAAObm5qampn19fX5+fq2trfT09N/f34SEhPf39/n5+XV1dYmJiXNzc2xsbHd3d2JiYlRUVKOjo3x8fIGBgX9/f9vb24uLi9nZ2YyMjIODg9bW1qmpqZGRkc/Pz3FxcY+Pj/X19ZCQkG5ubqqqqqenp4qKiuXl5eLi4unp6aysrN7e3nR0dGtra/Pz8/j4+Pr6+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAANAAwAAAZiwNfJ9CoaExWU8LAgGl0ERwhViLBKTldqJdggXi0SywLQrgaqb7EVYGE6K4nKaAx7Hoc5vZi4rCAfAHsvWgoTJA0lgk8pDBQGBW1YRS4jXHpsVwRCGWh0YSIcSicGgyAaSkEAOw==",
    EMPLOYER_NAME  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOYAAAANCAMAAACKN+LIAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAADBQTFRFycnJiYmJra2t9vb2kpKS7e3tgICA5OTkpKSktra20tLSm5ubwMDA29vbd3d3////5P2LPQAAAn5JREFUeNrElul2ozAMhb0bsJDe/23nyhsmzbTNnEzrPxBrsT5rIUa+vU6WV9bJ8VP5waf82DJc1xcsdffNmLuVn8Skb6Tsf2AG+g1M3hIHL5paIyZxMiJlC+yqUHdPdlx/dmnLCXPIUCh4UmIb1ROrJ8WMgXnrRDDx0CoqgVVmr454b34IJ4SoD4taLgGuCMZ4Jxs0JIGt+upReBXlfpOlBE55UcGLg1qBLAc948Is0VsaeQMpXJRw3rLp4DhPaY3OZnFWrb1P4A27YnpvXcW0RSKcUkIrJg9/3gdXHenyfIgp/ZXEb6dB8FQVsxTcyx70CAP6elyGwYhiA8/ejGuc+nuq7IrqYzrEJ6gnM3tTb8e5BrSrCbwX+lC02B3SUXkRMai1auvBLQWKqeHoq/IUzQB+Gjur318Nc7Z5VGNN7WAqOqbaU3r1FJpRHIyL7TWl6sbKTUUdIroDNwyuK5sLZuFWu88xh3RUMy+Y1DENK2ZtTzXbSsTuWZUvTCSOE62NXFwLdLg6ByZKwui5F6YkMsj7DXNV6RFRPfM55r5f5k+yuS9z5LisV0xU25JNXL1Wtmf/YcxR29Nae5LNgYlyiFrpSzYxqYuTG+ZNpUd0hIcR1DCzPrX70CkXZt9tBwzp6M0cHjAJ3UBrbyL0egx6U4ybmGfJtWV1WYiW3lwxrReXvIZw2gUz8/zwdsybSo9Ie1OIHntTXJ20FmMqXph1dx7QpXNCugdMW+fnMml1IKu+xwxONDFjaXO1vofbpL1htmGOEMKKKWF+eEfRriojIp204TTv/0Y9+3fjyj+7o7+Z2hc+vD+DOWfiGzG/+vvxC5hzJr4R86UC+SPAAPcUmZQN0BP2AAAAAElFTkSuQmCC",
    JOB_TITLE      : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG0AAAANCAMAAACU0hA+AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAC1QTFRFiYmJ9vb27e3tpKSkgICA5OTkkpKStra2ycnJm5ubra2twMDA29vbd3d3////XBn6XAAAATBJREFUeNq8kul2xCAIhcEtbvD+j1tEjUlq2+mZnvpnIst8XrjAL59Km2DK67M8chlmoxkRID3f/2WP7lO8pZV0a1y08rOAv6eRdRSQm9DI0ZGL0m8D6aQ0WimTXke2JyRQiKBKdQICPyByTIHZaBgTUcJFSwahzMcIUEpSqLcnZvbkz2zfTZbvysWhVHu2cNEmtFNbCoghn3uTltaq6cM21XHNZk1SojM7abbdXa/24xVPGsorOcLSdqEl6gPd02Z20tSWUtqqDdUtTUdLe9pxPPZ+13ZcXf7Uhl9ow7tLOs2337YZtHXRRrTTZvbT3oQahxfbvdFGo+6N46e9cVZPSjiZi6ezWmvsa2Qn7fSkhEOXxhi6J0ejeNISuQL83sn5N9Xv0qD8H22N7rXzIcAAJahEsPp7aB4AAAAASUVORK5CYII=",
+   TWITTER        : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA31JREFUeNrsV11Ik2EUPnM6TPxjOGRSeJFTVAghLTe1G0EEKQd1IXRTLPRKCexKBW/sJpDypuUPUhd6o3aheZEMLRZDwhgaY4Kh4paI6VRc2BrTnvO2yaTETb9JxHfg+d69P9/7Pe855z3nTHFwcED/sihkgjJBmaBMUCb4HxGsqqqKdGkRcBeoAJyAFeifmJiImmD8KQ6lBXTAJ+D7MeTsYf3rwD3ACNyK9mNxUa5/DawC7wEv8BLQsGaC2lEDb/hHbW0tdXV1UXNzM2VkZPDQTVjgWsxMjM1Zc6tqtZqysrJoYWGBfD5faPoV8AgwA3f0ej21traSSqUiu91Og4ODNDs7e6hRHOZjLAheRvNFq9VSR0cHud1uobWZmZlwopSWlibm8/LyRJ/339raoqGhIRoZGeEhN3CF3QPv/5TSxMv8WFtbo7GxMSotLaWWlhZqb28ng8FAcXG/tyovLz8kJzSgUBBr3WQyiXcgF4EngA+H7pWMIE4bQNPNGlleXqbNzU1KSEig4uJiamtro8bGRsrMzAyR+PM2xseT0WgkpVLJ3Qfc5xYkVVLe4imggc2YmJh45OM1NTWUm5srSB4nOTk5VF1dTdvb2wIOh4OH+eJ8kOoWi42sViuZzWba3d09MqnT6Sg1NfXYl3muqamJSkpKaG9vLzTslSzMwMxf0fTs7+8L30pJSYk6iHq9XgoEAiFTsyglIQhfCbnDM344nU5xWTY2NiIm5/F4qLOzU9xo9uOgOM5MEOS60fi5hRY5dU25XC7q6+uj9fX1iAmyz9lsNhEJ/H4/BdPfjzMRBCm+DfXBMFKPPudVC3c4/lksFuHwJwmvHR0dDXUfAhdAziRFLq4QCbaoSATcpaWlcg53PJaUlCQ+zD55krBZ5+bmQt3nIOeXqlj4xo+dnR2qq6sTDr6ysiLIFRYWUn5+PgVj2l+F4+bw8DANDAxQMGu9iJRcxKkOZrWh0WdnZ4dnhBOFfY01Nz4+HtJyL8jVx6pY4ArmBhcAZWVlVFlZKVJacnLyYcjgvTi+MbHp6WmanJwU2g5KD8g1xLpg7Udzn3+np6dTQUGByB4ajUbkYg7ci4uLND8/Hx5G3gFNIPf5vCrqS8BT4PYJy/m2PwbehgX6c6moXVzzAZx0DcDVIGm2swfgwo/rvVNpTP5XJxOUCcoEZYIyQWnllwADADxxoZVLM9g7AAAAAElFTkSuQmCC",
+   TWITTER_GLOW   : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAByBJREFUeNqkmWlMFFccwP8ze3EK3XIVoaDIoYhAK4qRNikgjdIGUOvRRGti+80rjTFtMI0JH0w/kDbWVONBwgeMVmOiSFSCFCUqralGKkg9YEFQ7pWyuMAe0/deZ7aPx3u7bPqSf2Zmmdn57f9+f/SK0ghzXUVFh33eU1//reTleQX8XHp/H/AGgJbk41m/waU5alDinEtzBWOWIjhyYWUvQDyRGdFxRM8R7W+yQLTvn2UhWQBGX8sMnAjEgMSoHlkxzgGYC8maWOKAShxQifPFksD8msnclCiCI1DXxNx6L3ASpWVJYFoWWhK4DQ3nUkWhrt3qs271eQ8krUEWiNWWBqRnfE7oT5QGXRSMk4J0MZBuBn5WmhFpjg0Cgxd/YrWovdjJEQ1YUo9AweHPFL0gncjUkYbjOb6BuYcFpLU1jcShwkxTUBqYwriYB1DiaJH1ORrMpB7pqPVo8uLF3xc1NLR9NDg4lh4aGtgTF2d+WFHx2RX1vikVjucKCguq+aDkJRAMlKZMV68+jG9v7120cePKzoSECDcFSkx+5cqDhUeOXPuejZKIiNDfzpzZVa4CTqpHDXaa0qiDMr9bL0jSPEjjhg0/Hh8ftxfim65fbwWkmRsHDnx6Ji0tFr/Q0N09HHbyZCOpZyUlJZCfnw89PT1QXV0Nw8PDK8+da8nevDm3laM5OspnpC7doUNfgEB7MxJwbe39uObmjgqz2QxJSUkwNjYGVqttIdJoyd27z+YvXRr/8vDhS9uHhv5OWLVqFezbtw9iYmJgfHwcuru7YWBgAB48sBSZTIY/09PjRihTujniMTUPkE4nmn+ZWlu759+/b/k8PDwcysvLITMzExwOBwwODsLQ0Fgc+gEFVutEdFhYGOzduxeio6OJejDk8uXLQVEUePz4MbS3972/YkXSTVmWnQEBBgcnR9KphgDyai1dlkhQLFgQ6Th79u5XExMTyHMlKCsrg9WrV0NaWhrY7Xbo6+sjEIWFhVBcXPyfv6B7AwMDISsrC54/fw4WS08g8uFw5ArfNTQ8iikry7nFRDqdExXZS6MwI8UEBZn08fFv12EIi8UCIyMjYDAYiHYOHjwIu3fvJlrLzc3l93V6PZSWloJOp4OurqECfP3q1etPRkZsgUxVmhHdPA2yCVmL0oCOjpfhXV2DeampqZCXlwdGo/HfZCnLkJKSAhkZGZCYmAgmk4kLGRwcDDabDaKioiAkJAS5xhA4na57yOS9TIXxmN1bu0X/IgKdn5/egf/Y3NwMx44dIwFAr+TkZJg3b56wEcR/27NnD+Tk5BC3wAvlSTtPc/62W0RychZak5NjmtxuN/Gt0NBQfxtyokGXy0VMTcqMy63zdr/so4P2HCcmprDJ5U2bcuvxBzgia2trcX6bM9zo6ChUVlbC+fPniR/jtW5dVidTQfzfk2zb9vM3AwNjpYmJkfUnTnx55vTppqcvXrxIPnXqFMmJERERcwJsa2uDO3fueK5jY9+6Fh0dNsnkwxmweh/7BlQJRkwYDgeCxTJUtHXrT4mocvzV3/86eWpqChoaGtCLYgHnR28L33v58mVynpeXWrNr18eXzObgYSYwZmlS72PTo1RV/foePsF5zGq1ohTRlXL79pMU/FlQUBB5MfZJXwubtbW1lZzv3198FaUtG9N2sRoUmpj2A8VsDsFliZS2LVu2EAfH9RXDpaenw+LFi0mOE27hUN68cOEC1NTUkHMUZI0I7o3aFDh4qYXubnA3w+ZAuq0KwFJSUvmL3T69LCEhAXbu3ClMxuzq7+8nmqurqyNaTkl559bRozuO4mBWZQLJG6a7ocHdPEAd1eeZVMjA9et/qLbZJrNxcsYlrqCgAHDCxglXSxlYQzi/YbCWlhZobGwk2sYLwd1EcMcpMBpukoFzigDpPYeRak4JJIrmChQwpNDioFiyZAmpIJGRkaSa4MTd2dkJHR0dnjSCovTJ9u0fVK9Zk/EUXdpVqDfquZ3pCx2sT2qAIGi1WEjTjRuP3q2quvk1aqs+8GZe1KA+KSpadmnHjg//oCDslMZEmnPS/sgCSpxazLb5BPbevc7opqb2rN7e0TRk+ihkXR1qn2yoie3Ozk58tnZtZhfVIWsds9ZNT3N8jleLFRrQ2/SAbhqMnCkCvWGit5ouDuQ0dc1Gsou37VSYL6a3fS6mPivM/tbA2cTz7nMyOzme1thkPWuyoIHyINkpgUv9cU5mqwAcQFpYKCfTSXsqiTbl0nOSNAsJgg2OkzP+AGa+4ma04xRME9g5zaxmgTUzCODol8qiLliwIXJxrhVeDaZnhHovZQ7YskP9EHZoBIKBkcLpVNwCMIU3wBT5IPsiifpSmQoe2cck1c2cKwIRjoG9+SAwsxKgRmSSry5IMNLgXXudUfvqZlj/9AX2v+bR/k75lTl+5s+/Mfx+/h8BBgCH4JiybQW7/wAAAABJRU5ErkJggg==",
 };
-
-
 
 /*===============================*\
 |*    __PROTOTYPE_FUNCTIONS__    *|
@@ -253,19 +260,38 @@ var PAGEINFO = {
    BROWSER  : (function(){var ua = navigator.userAgent.toLowerCase();var b;if (ua.contains("firefox")) {b = BROWSER.FIREFOX;} else if(ua.contains("chrome")) {b = BROWSER.CRHOME;} else {b = BROWSER.OTHER;}return b;})(),
 };
 
+var REVERSE_PAGES = {
+   LOGIN             : "LOGIN",
+   HOME              : "HOME",
+   DOCUMENTS         : "DOCUMENTS",
+   PROFILE           : "PROFILE",
+   PERSONAL_INFO     : "PERSONAL",
+   ACADEMIC_INFO     : "ACADEMIC",
+   SKILLS_INVENTORY  : "SKILLS",
+   SEARCH            : "SEARCH",
+   SHORT_LIST        : "LIST",
+   APPLICATIONS      : "APPLICATIONS",
+   INTERVIEWS        : "INTERVIEWS",
+   RANKINGS          : "RANKINGS",
+   JOB_DETAILS       : "DETAILS",
+   EMPLOYEE_PROFILE  : "EMPLOYEE_PROF",
+};
+
 var PAGES = {
-   LOGIN       : "LOGIN",
-   HOME        : "HOME",
-   DOCUMENTS   : "DOCUMENTS",
-   PROFILE     : "PROFILE",
-   PERSONAL    : "PERSONAL_INFO",
-   ACADEMIC    : "ACADEMIC_INFO",
-   SKILLS      : "SKILLS_INVENTORY",
-   SEARCH      : "SEARCH",
-   LIST        : "SHORT_LIST",
-   APPLICATIONS: "APPLICATIONS",
-   INTERVIEWS  : "INTERVIEWS",
-   RANKINGS    : "RANKINGS",
+   LOGIN          : "LOGIN",
+   HOME           : "HOME",
+   DOCUMENTS      : "DOCUMENTS",
+   PROFILE        : "PROFILE",
+   PERSONAL       : "PERSONAL_INFO",
+   ACADEMIC       : "ACADEMIC_INFO",
+   SKILLS         : "SKILLS_INVENTORY",
+   SEARCH         : "SEARCH",
+   LIST           : "SHORT_LIST",
+   APPLICATIONS   : "APPLICATIONS",
+   INTERVIEWS     : "INTERVIEWS",
+   RANKINGS       : "RANKINGS",
+   DETAILS        : "JOB_DETAILS",
+   EMPLOYEE_PROF  : "EMPLOYEE_PROFILE",
    
    //Functions
    isValid     : function(page){
@@ -283,6 +309,12 @@ if(PAGEINFO.URL.contains(LINKS.EMPLYR_TOP) || PAGEINFO.URL.contains(LINKS.EMPLYR
    PAGEINFO.TYPE = PAGES.LOGIN;
 } else if (PAGEINFO.URL.contains("?tab=DEFAULT") && PAGEINFO.URL.contains(CONSTANTS.PAGESIMILARTOP)) {
    PAGEINFO.TYPE = PAGES.HOME;
+} else if (PAGEINFO.TITLE == "Job Details") {
+   if(UTIL.getID("selected").getElementsByTagName("span")[0].firstChild.nodeValue == "Job Details") {
+      PAGEINFO.TYPE = PAGES.DETAILS;
+   } else {
+      PAGEINFO.TYPE = PAGES.EMPLOYEE_PROF;
+   }
 } else if (PAGEINFO.TITLE.contains("Student Ranking")) {
    PAGEINFO.TYPE = PAGES.RANKINGS; 
 } else {
@@ -818,6 +850,8 @@ var PREF = {
       DEFAULT_PAGE         : PAGES.APPLICATIONS,
       LAST_ACCESSED_SEARCH : new Date().getTime(),
       NO_CLOSE_WHEN_SEARCH : false,
+      SHOW_OLD_JOB_DETAILS : false,
+      SHOW_WELCOME_MSG     : true,
       PAGE : {
          HIDDEN_HEADERS : [],
       },
@@ -1021,6 +1055,9 @@ function redirect(newURL) {
       DEBUGGER.refresh();
    }
 }
+function refresh(){
+   window.location = window.location;
+}
 
 /**
  *    Navigation Pointer/Selection
@@ -1057,10 +1094,11 @@ function unSelectNav() {
  *    Applies the header to the page
  */
 function addHeader() {
+   if (UTIL.idExists("jbmnplsHeader")) {return;}
    var counter = 0;
    var fname = "Matthew";
    var lname = "Ng";
-   var studNum = "20351252";
+   var studNum = "1234567";
    var header = "<header id='jbmnplsHeader'><div id='jbmnplsTopGroup'><div id='jbmnplsBanner' class='banner'></div><nav id='jbmnplsNav'><ul>";
    for(var item in NAVIGATION) {
       if(PAGES.isValid(item) && LINKS.hasOwnProperty(item)) {
@@ -1068,12 +1106,23 @@ function addHeader() {
          counter++;
       }
    }
-   header += "</ul></nav><div id='uwBanner' class='banner'></div></div><div id='jbmnplsBottomGroup'><div id='jbmnplsStatus'>Hi <span id='jbmnplsUserName'>"+fname+" "+lname+"!</span><span id='jbmnplsUserID'> ("+studNum+")</span></div><div id='jbmplsControlPanel'><a href='#'>Settings</a> | <a href='#'>About</a> | <a href='"+LINKS.LOGOUT+"'>Logout</a></div></div></header>";
+   BRIDGE.registerFunction("showAbout", function(){
+      showPopup(true, "<h1>Jobmine Plus Version "+CONSTANTS.VERSION+"</h1><br/>Hey there!<br/><br/>This is Matthew Ng the creator of Jobmine Plus. I am a System Designs Engineering Student at the University of Waterloo. I created this because Jobmine is not user friendly so this addon/extension should speed things up.<br/><br/>Feel free to email me if there are any problems, concerns or requests for future updates:<br/><a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a><br/><br/>Visit the extensions website for information and future updates:<br/><a href='http://userscripts.org/scripts/show/80771'>http://userscripts.org/scripts/show/80771</a><br/><br/>", "About Me", 400);
+   });
+   header += '</ul></nav><div id="uwBanner" class="banner"></div><a target="_blank" title="Follow Me!" href="https://twitter.com/jobmineplus" class="twitter-follow-button" data-button="grey" data-text-color="#FFFFFF" data-link-color="#00AEFF" data-show-count="false"></a><script src="//platform.twitter.com/widgets.js" type="text/javascript"></script></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul><!-- <li class="statusItem">Hi <span id="jbmnplsUserName">'+fname+' '+lname+'!</span><span id="jbmnplsUserID"> ('+studNum+')</span></li> --></ul></div><div id="jbmplsControlPanel"><!-- <a href="#">Settings</a> | --><span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
    $("body").prepend(header);
+   
 }
 
 /**
- *    Applies the header to the page
+ *    Applies the update message to the page
+ */
+function addUpdateMessage() {
+   $(document.body).append("<div style='display:none;' id='jbnplsUpdate'><a style='margin:0 auto;width:500px;' href='"+LINKS.UPDATE_LINK+"'>You are using an old version of Jobmine Plus, click to update.</a><div onclick='this.parentNode.style.visibility=\"hidden\";' class='close'></div></div>");
+}
+
+/**
+ *    Applies the Profile nav to the page
  */
 function addProfileNav() {
    if (UTIL.idExists("PSTAB")) {
@@ -1181,13 +1230,8 @@ function showMessage(msg, timeoutSeconds) {
    Assert(timeoutSeconds == null || timeoutSeconds != null && timeoutSeconds >= 3, "The timer for message was set less than 3 sec, please set it higher");
    var message = $("#jbmnplsMessage");
    if (!message.exists()) {
-      $(document.body).append("<div "+(PAGEINFO.IN_IFRAME?"style='top:0;'":"")+" id='jbmnplsMessageHolder'><div id='jbmnplsMessage'><div id='jbmnplsMessageText'></div><a style='display:none;' id='jbnplsUpdate' href='"+LINKS.UPDATE_LINK+"'>You are using an old version of Jobmine Plus, click to update.</a><div id='jbmnplsMessageClose' class='close'></div></div></div>");
+      $(document.body).append("<div "+(PAGEINFO.IN_IFRAME?"style='top:0;'":"")+" id='jbmnplsMessageHolder' class='message'><div id='jbmnplsMessage'><div id='jbmnplsMessageText'></div><div id='jbmnplsMessageClose' class='close'></div></div></div>");
       message = $("#jbmnplsMessage");
-      
-      if (CONSTANTS.DEBUG_ON) {
-         $("#jbmnplsNav ul").append("<li><span id='jbmnplsShowMessageBtn' class='fakeLink'>Show Message</span></li>");
-         $("#jbmnplsShowMessageBtn").click(function(){showMessage("showing message!!");})
-      }
    }
    //Update and reset timer
    if (message.hasClass("show")) {
@@ -1327,7 +1371,7 @@ function initRowDeletion() {
       {
          //Add the classes
          var tr = obj.parent().parent();
-         tr.parent().find("div.delete").attr("disabled", "true");
+         tr.parent().find("div.delete").attr("disabled", "disabled");
          obj.addClass("loading").removeAttr("disabled");
          var row = tr.attr("row");
          var command = obj.attr("action");  
@@ -1336,22 +1380,6 @@ function initRowDeletion() {
          JOBQUEUE.addJob(deletion);
       }
    });
-}
-
-/**
- *    Colouring/Highlight
- */
-function applyHighlight(){
-   switch(PAGEINFO.TYPE) { 
-      case PAGES.LIST: 
-         $("form:eq(0) div.jbmnplsTable td:contains('Already Applied')").parent().css("background","#a3f57f");
-         break;
-      case PAGES.APPLICATIONS:
-         $("form:eq(0) div.jbmnplsTable td:contains('Selected')").parent().css("background","#a3f57f");
-         $("form:eq(0) div.jbmnplsTable td:contains('Scheduled')").parent().css("background","#a3f57f");
-         $("form:eq(0) div.jbmnplsTable td:contains('Not Selected')").parent().css("background","white");
-         break;
-   }
 }
 
 /**
@@ -1472,6 +1500,98 @@ function parseMonth(prefix) {
    return -1;
 }
 
+}
+
+/*================================*\
+|*        __HIGHLIGHTING__        *|
+\*================================*/
+{/*Expand to see the highlighting code*/
+var HIGHLIGHT = {
+   getCriteria : function(){     //The lower it is, the more priority it has
+      switch(PAGEINFO.TYPE) { 
+         case PAGES.LIST: 
+            return {
+               'Already Applied'          :     COLOURS.GREAT,
+               'Not Authorized to Apply'  :     COLOURS.BAD,
+            };
+            break;
+         case PAGES.RANKINGS:
+            return {
+               'Offer'                    :     COLOURS.GREAT,
+               'Ranked'                   :     COLOURS.GOOD,
+               'Not Ranked'               :     COLOURS.WORST,
+            };
+            break;
+         case PAGES.INTERVIEWS:
+            return {
+               'Unfilled'                 :     COLOURS.BAD,
+               'Scheduled'                :     COLOURS.GREAT,
+            };
+            break;
+         case PAGES.SEARCH:
+            return {
+               'New'                      :     COLOURS.AVERAGE,
+               'Read'                     :     COLOURS.BLANK,
+               'On Short List'            :     COLOURS.GREAT,
+               'Already Applied'          :     COLOURS.GREAT,
+            };
+            break;
+         case PAGES.PROFILE:
+            return {
+               'Outstanding'              :     COLOURS.GREAT,
+               'Excellent'                :     COLOURS.GREAT,
+               'Good'                     :     COLOURS.GOOD,
+               'Very Good'                :     COLOURS.GOOD,
+               'Satisfactory'             :     COLOURS.AVERAGE,
+               'Marginal'                 :     COLOURS.AVERAGE,
+               'Unsatisfactory'           :     COLOURS.BAD,
+            };
+            break;
+         case PAGES.APPLICATIONS:
+            return {
+               'Selected'                 :     COLOURS.GREAT,
+               'Scheduled'                :     COLOURS.GREAT,
+               'Not Selected'             :     COLOURS.WORST,
+               "Unfilled"                 :     COLOURS.BAD,
+               "Ranked or Offered"        :     COLOURS.GREAT,
+               "Alternate"                :     COLOURS.GOOD,
+               "Ranking Complete"         :     COLOURS.BAD,
+               "Cancelled"                :     COLOURS.WORST,
+               "Employed"                 :     COLOURS.GREAT,
+            };
+            break;
+         default:
+            return null;
+            break;
+      }
+   },
+   apply : function(jObj){
+      if (jObj == null) {jObj=$("form:eq(0) table.tablesorter tr");}
+      if (!UTIL.isjQuery(jObj)) {
+         jObj = $(jObj);
+      }
+      var criteria = this.getCriteria();
+      if (criteria!=null){
+         for(var text in criteria) {
+            jObj.find("td:contains('"+text+"')").parent().css("background-color", criteria[text]);
+         }
+      }
+   },
+};
+//LOGIN          : "LOGIN",
+//   HOME           : "HOME",
+//   DOCUMENTS      : "DOCUMENTS",
+//   PROFILE        : "PROFILE",
+//   PERSONAL       : "PERSONAL_INFO",
+//   ACADEMIC       : "ACADEMIC_INFO",
+//   SKILLS         : "SKILLS_INVENTORY",
+//   SEARCH         : "SEARCH",
+//   LIST           : "SHORT_LIST",
+//   APPLICATIONS   : "APPLICATIONS",
+//   INTERVIEWS     : "INTERVIEWS",
+//   RANKINGS       : "RANKINGS",
+//   DETAILS        : "JOB_DETAILS",
+//   EMPLOYEE_PROF  : "EMPLOYEE_PROFILE",
 }
 
 /*================================*\
@@ -1641,7 +1761,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
             || name.startsWith("UW_CO_JOBRES_VW$hup$")         //Previous button
             || name.startsWith("UW_CO_JOBRES_VW$htop$")        //First button
          ) {
-            table.update();
+            table.update().setLoading(false);
             hidePopup();
          } else if(name == "TYPE_COOP") {
             var type = $("#jbmnplsJobType");
@@ -1717,7 +1837,6 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
                   //Special operations for applications to mirror table rows
                   if (PAGEINFO.TYPE == PAGES.APPLICATIONS) {
                      //Delete the job listed in the all applications table when it is deleted
-                     alert("#row_"+tableObj.name+"_"+deletedRowNumber)
                      var id = $("#row_"+tableObj.cname+"_"+deletedRowNumber).children(":first").plainText();
                      var activeTable = TABLES[0];     //Active table
                      var rowToDelete = $("#"+activeTable.tableID+" tbody td:contains('"+id+"')").parent().attr("row");
@@ -1727,7 +1846,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
                   jobFinished = true;
                }
             }
-            showMessage("Sucessfully deleted the jobs on your shortlist.");
+            showMessage("Sucessfully deleted the job(s) on your "+(PAGEINFO.TYPE==PAGES.APPLICATIONS?"applications list" : "shortlist")+".");
          } 
          }catch(e){alert(e)}
          break;
@@ -2060,6 +2179,7 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
  *       table.build()                          //Builds the html of the table (better to run table.appendTo(obj) after create table or parse table)
  *       table.appendTo(objectToAppendTo)       //Appends the object html to an object (can only run once)
  *       table.makeDraggrable(shouldAllow)      //Allows/do not allow the table to be draggable (drags on the header of the table)
+ *       table.setLoading(shouldShow)           //Shows the loading screen for the table
  */   
 {/*===== Expand to see the table functions/class =====*/
 
@@ -2196,6 +2316,12 @@ var TABLEFILTERS = {
       }
       return "<a href='http://www.linkedin.com/search/fpsearch?type=people&keywords="+search.replace(/\s/g,"+")+"' title='Linkedin this person' target='_blank' class='PSHYPERLINK'>"+cell+"</a>";
    },
+   jobInterviews : function(cell, row, rowData, reverseLookup){ 
+      if (!cell.empty()) {
+         OBJECTS.STORAGE.setItem("INTERVIEWS_ID_" + cell, "1");
+      }
+      return cell;
+   },
    //Applications
    //Next two are bad solutions, temporary
    fixApply : function(cell, row, rowData, reverseLookup){ 
@@ -2255,6 +2381,7 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    this.pageControls = null;
    this.maxPages = -1;
    this.excel = "";
+   this.view100 = "";
    
    //Object Queues
    this.filters = {};
@@ -2304,6 +2431,7 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    this.updateTable = function() {
       obj.updateCheckboxes();
       obj.updateSorting();
+      HIGHLIGHT.apply(this.jInstance);
       return obj;
    }
    
@@ -2522,12 +2650,19 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
             } else if (item.tag() == "A") {
                href = item.attr("href");
                href = href.substr(href.indexOf("submitA"));
-               pageStrBuffer += ' <span class="fakeLink'+(name.contains("--")?' bold':'')+'" onclick="'+href+'"">'+name+'</span>';
+               pageStrBuffer += ' <span class="fakeLink'+(name.contains("--")?' bold':'')+'" onclick="document.getElementById(\''+this.id+'\').className=\'jbmnplsTable loading\';'+href+'"">'+name+'</span>';
             } else {
                pageStrBuffer += " <span class='disabled fakeLink'>" + name + "</span>";
             }
          }
          this.pageControls = pageStrBuffer;
+         
+         //View 100/25
+         var view100 = rightPanel.eq(-8);
+         if (view100.tag() == "A") {
+            var link = view100.attr("href");
+            this.view100 = '<span class="fakeLink" onclick="document.getElementById(\''+this.id+'\').className=\'jbmnplsTable loading\';'+link.substr(link.indexOf(":")+1)+'">'+view100.plainText()+'</span>'
+         }
       }
    }/* else {}    Only displays page numbers, so useless*/
    
@@ -3044,6 +3179,9 @@ JbmnplsTable.prototype.buildControls = function() {
          returnStr += " | <a class='options' target='_blank' href='"+value+"'>"+name+"</a>";
       }
    }
+   if(!this.view100.empty()) {
+      returnStr += " | " + this.view100;
+   }
    if (this.pageControls != null) {
      returnStr += " |" + this.pageControls;
    }
@@ -3067,7 +3205,7 @@ JbmnplsTable.prototype.build = function() {
    //Build the controls
    var controlsHTML = this.buildControls();
    html += controlsHTML;
-   html +=     "</div></div><table name='"+this.name+"' class='tablesorter' id='"+this.tableID+"' cellspacing=0 cellpadding=0 width='100%' height='auto'>";
+   html +=     "</div></div><div class='jbmnplsTableBody'><div class='jbmnplsTableLoadOverlay'></div><table name='"+this.name+"' class='tablesorter' id='"+this.tableID+"' cellspacing=0 cellpadding=0 width='100%' height='auto'>";
    //Parse Header
    html +=     "<thead><tr row='header' class='noselect'>";
    var inverseHeaderLookup = {};
@@ -3096,7 +3234,7 @@ JbmnplsTable.prototype.build = function() {
       }
       html += "</tr>";
    }
-   html +=     "</tbody></table><div class='jbmnplsTableFooter noselect'><div class='jbmnplsTableControls'>" + controlsHTML;
+   html +=     "</tbody></table></div><div class='jbmnplsTableFooter noselect'><div class='jbmnplsTableControls'>" + controlsHTML;
    //Parse the controls for the bottom
    html +=     "</div></div>";
    this.html = html;
@@ -3201,6 +3339,7 @@ JbmnplsTable.prototype.appendTo = function(obj) {
    this.jInstance = $("#" + this.tableID);
    if (this.rows > 1) {
       this.applyTableSorter();
+      HIGHLIGHT.apply(this.jInstance);
    }
    
    //Load and turn off some headers
@@ -3278,13 +3417,27 @@ JbmnplsTable.prototype.makeDraggrable = function(shouldAllow) {
    return this;
 }
 
-
+/**
+ *    Shows/removes the loading screen
+ */
+JbmnplsTable.prototype.setLoading = function(shouldShow) {
+   if(shouldShow==null){shouldShow=true;}
+   if (shouldShow) {
+      $("#"+this.id).addClass("loading");
+   } else {
+      $("#"+this.id).removeClass("loading");
+   }
+   return this;
+}
 
 }
 
 /*================================*\
 |*         __CLEAN_UP__           *|
 \*================================*/
+
+//Append the version on the webpage
+$("body").addClass("v_"+CONSTANTS.VERSION.replace(/\./g,"_"));
 
 //Removes the timer
 removeTimer();
@@ -3299,344 +3452,6 @@ if (!PREF.load("HIGHLIGHT_LAST_ROW")) {
 
 //Elimate their highlight methods
 BRIDGE.addFunction("HighLightTR");
-
-/*================================*\
-|*     __INDIVIDUAL_PAGES__       *|
-\*================================*/
-
-//See if we are at home page
-switch (PAGEINFO.TYPE) {
-   case PAGES.HOME:{       /*Expand to see what happens when you reach home page*/
-      if (!PAGEINFO.IN_IFRAME) {
-         //Cancel the load for the item
-         $(document.body).removeAttr("onload");
-         //Delete the useless stuff on home page
-         $("body > table").remove();
-         //Fix up stuff 
-         BRIDGE.addJS(function(){
-            pthNav.abn.init = function(){};
-            ptEvent.add2 = ptEvent.add;
-            ptEvent.add = function(a,b,c){if(a!=null){ptEvent.add2(a,b,c);}}
-         });
-         
-         /**
-          *    Handle what page to go to
-          */
-         var gotoLocation = window.location.hash == "" ? "" : window.location.hash.substr(1);   //Get rid of # in hash
-         window.location.hash = CONSTANTS.EXTRA_URL_TEXT;
-         
-         var currentPage = gotoLocation;
-         if (CONSTANTS.EXTRA_URL_TEXT == currentPage) {    //Refreshed the entire page
-            currentPage = PREF.load("LAST_PAGE");
-         } else if(currentPage == null || !PAGES.isValid(currentPage) || !NAVIGATION.hasOwnProperty(currentPage)) {
-            currentPage = PREF.load("DEFAULT_PAGE");
-         }         
-         var link = LINKS[currentPage];
-         
-         /**
-          *    Set some stuff in the nav to match the new location
-          */
-         addHeader();
-         setTitle(NAVIGATION[currentPage]);
-         setNavSelection($("#jbmnplsNav a[type='"+currentPage+"']").attr("item"));
-         
-         //Appends the iframe that holds the content
-         $("body").append("<div id='jbmnplsFrameWrapper'><iframe src='"+link+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div><div id='pthnavcontainer' class='hide'></div>")
-        
-         //Hacked the navigation because we have an iframe
-         $("#jbmnplsNav a").click(function(e){
-            e.preventDefault();
-            var obj = e.target;
-            var newLocation = obj.getAttribute("realHref");
-            var index = obj.getAttribute("item");
-            var newTitle = obj.innerHTML;
-            changeLocation(newLocation, newTitle, index);
-         });
-         
-         //If debug is on, we can add the debugger window
-         if( CONSTANTS.DEBUG_ON) {
-            DEBUGGER.init();
-            initDraggable();
-         }
-      } else {
-         //Cannot have itself in its own iframe
-         return;
-      }
-      }break;
-   case PAGES.LOGIN:{      /*Expand to see what happens when you reach login page*/
-      function setAutoComplete(flag){
-         if(flag) {
-            $("#userid").attr("autocomplete", "on").attr("value", defaultUser.toLowerCase());
-            $("#pwd, #login").attr("autocomplete", "on");
-         } else {
-            $("#pwd, #login, #userid").attr("autocomplete", "off");
-         }
-      }
-      var checked = false;
-      var cookieName = "RememberLogin";
-      var rememberMe = Cookies.read(cookieName);
-      if (rememberMe != -1 && rememberMe == "1") {
-         //Determine the person
-         var defaultUser = Cookies.read("SignOnDefault");
-         if (defaultUser != -1) {   
-            setAutoComplete(true);
-            $("body").attr("onload", "");
-            BRIDGE.run(function(){document.getElementById("userid").focus();document.getElementById("pwd").focus();});
-            checked = true;
-         }
-      } 
-      //Put the extra field in
-      var insertLoc = $("#login table:eq(0)");
-      var message = "Save My Username<br/><span class='important'>(DO NOT CHECK ON PUBLIC PC)</span>";
-      if (PAGEINFO.BROWSER == BROWSER.FIREFOX) {
-         message = "Remember Me<br/><span class='important'>(DO NOT CHECK ON PUBLIC PC)</span>";
-      }
-      insertLoc.after("<div id='jbmnplsHolder' class='noselect'><input id='jbmplsChbx' class='checkbox' "+(checked?"checked='true'":"")+" type='checkbox'/><label class='message' for='jbmplsChbx'>"+message+"</label></div>");
-      $("#jbmplsChbx").change(function(){
-         if(this.checked) {
-            Cookies.set(cookieName, "1");
-         } else {
-            Cookies.remove(cookieName);
-         }
-         setAutoComplete(this.checked);
-      });
-      PREF.remove("LAST_PAGE");
-      }break;
-   default:
-      //Redirect to home page if necessary the top is not already at home
-      if (!PAGEINFO.IN_IFRAME) { 
-         redirect(LINKS.HOME);
-         return;
-      } else {
-         var form = $("form:eq(0)");
-         //Apply the header for the page if it exists
-         if (PAGEINFO.TYPE) {
-            $("body").prepend("<div class='pageTitle noselect'>"+PAGEINFO.TYPE.replace(/_/g, " ")+"</div>");
-         }
-         initAjaxCapture();
-         initRowDeletion();
-         initDraggable();
-         
-         //Append an iframe for whatever reasons needed for it
-         $("body").append("<iframe id='slave' style='display:none;visibility:hidden;' width='0'height='0' src='about:blank'></iframe>");
-         
-         //Record last page visited
-         if (PAGEINFO.TYPE != null) {
-            PREF.save("LAST_PAGE", PAGEINFO.TYPE);
-            $(window).unload(function(){
-               PREF.save("LAST_PAGE", PAGEINFO.TYPE);
-            });
-         }
-         
-         //Parse Individual pages here
-         switch(PAGEINFO.TYPE){
-            case PAGES.SEARCH:{           /*Expand to see what happens when you reach the search page*/
-               attachNewSearchFields();
-               function markRead(rowNum, id) {
-                  var row = $("#row_Results_"+rowNum);
-                  Assert(row.exists(), "Read status is broken, row "+rowNum+" does not exist.");
-                  var rowData = row.children();
-                  rowData.eq(0).text("Read");
-                  SearchManager.setRead(id);
-                  table0.updateTable();
-               }
-               function onShortList(rowNum, shortListIndex) {
-                  var row = $("#row_Results_"+rowNum);
-                  Assert(row.exists(), "Read status is broken, row "+rowNum+" does not exist.");
-                  var rowData = row.children();
-                  rowData.eq(0).text("Shortlisted");
-                  rowData.eq(shortListIndex).text("On Short List");
-                  table0.updateTable();
-               }
-               BRIDGE.registerFunction("markRead", markRead);
-               BRIDGE.registerFunction("onShortList", onShortList);
-               SearchManager.updateLastVisit();
-               var table0 = makeTable("Results", "UW_CO_JOBRES_VW$scroll$0");
-               table0.applyFilter("Employer Name", TABLEFILTERS.googleSearch)
-                     .applyFilter("Location", TABLEFILTERS.googleMap)
-                     .insertColumn("Hiring Chances", 8, function(row, rowData, reverseLookup){
-                        var openings = rowData[reverseLookup["Openings"]];
-                        var applications = rowData[reverseLookup["# Apps"]];
-                        if (openings.empty()&&applications.empty()){return "";}
-                        openings = openings.empty() ? 0 : parseInt(openings);
-                        applications = applications.empty() ? 1 : parseInt(applications) + 1;
-                        var value = Math.round(openings/applications*100)+"%";
-                        return "<span title='Hiring Changes is just Openings/(Applications+1), meaning after you apply this is the percentage. NOT ACCURATE because it does not calculate your skill level'>"+value+"</span>";
-                     })
-                     .insertColumn("Read Status", 0, function(row, rowData, reverseLookup){
-                        var id = rowData[reverseLookup["Job Identifier"]];
-                        if(id.empty()) {return "New";}
-                        if (rowData[reverseLookup["Apply"]] == "Already Applied") {
-                           return "Applied";
-                        } else if (rowData[reverseLookup["Short List"]] == "On Short List") {
-                           return "Shortlisted";
-                        } else if (SearchManager.hasRead(id)) {
-                           return "Read";
-                        }
-                        return "New";
-                     })
-                     .applyFilter("Job Title", function(cell, row, rowData, reverseLookup){
-                        var data = TABLEFILTERS.jobDescription(cell, row, rowData, reverseLookup);
-                        if (rowData[reverseLookup["Read Status"]] == "New"){
-                           var id = rowData[reverseLookup["Job Identifier"]];
-                           data = data.replace("<a ", "<a onclick='markRead("+row+",\""+id+"\");' ");
-                        }
-                        return data;
-                     })
-                     .applyFilter("Short List", function(cell, row, rowData, reverseLookup){
-                        var action = cell.match(/hAction[^;]+;/);
-                        if (action==null) {return cell}
-                        action = action[0];
-                        return '<span onclick="'+action+'onShortList('+row+','+reverseLookup['Short List']+');" class="fakeLink">Add to Short List</span>';
-                     }).addControlButton("Clear Read History", function(){
-                        if(!confirm("Would you like to delete all your read status history? All jobs under search will now be set to the 'new' status.")) {
-                           return;
-                        }
-                        SearchManager.clearAll();
-                        showMessage("Read status history was successfully deleted.");
-                        Log(table0.jInstance.find("tbody tr").children(":first-child:contains('Read')"))
-                        table0.jInstance.find("tbody tr").children(":first-child:contains('Read')").text("New");
-                     })
-                     .appendTo(form);
-                     //BRIDGE.run(function(){hAction_win0(document.win0,'UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN', 0, 0, 'Search', false, true);});
-               }break;
-            case PAGES.INTERVIEWS:{       /*Expand to see what happens when you reach the interviews page*/
-               var interviewTable = makeTable(null, "UW_CO_STUD_INTV$scroll$0");
-               var groupTable = makeTable(null, "UW_CO_GRP_STU_V$scroll$0");
-               var socialTable = makeTable(null, "UW_CO_NSCHD_JOB$scroll$0");
-               var cancelTable = makeTable(null, "UW_CO_SINT_CANC$scroll$0");
-               form.children("div").remove();      //Remove useless stuff
-               interviewTable.insertColumn("Google Calendar", TABLECOLUMNS.googleCalendar);
-               groupTable.insertColumn("Google Calendar", TABLECOLUMNS.googleCalendarGroup);
-               
-               //Apply Filters, and append the tables
-               for(var i=0; i<TABLES.length;i++) {
-                   TABLES[i].applyFilter("Job Title", TABLEFILTERS.jobDescription)
-               }
-               interviewTable.applyFilter("Interviewer", TABLEFILTERS.interviewerSearch).applyFilter("Employer Name", TABLEFILTERS.googleSearch)
-               .appendTo(form);
-               groupTable.applyFilter("Employer Name", TABLEFILTERS.googleSearch).appendTo(form);
-               socialTable.applyFilter("Employer Name", TABLEFILTERS.googleSearch).appendTo(form);
-               cancelTable.applyFilter("Employer", TABLEFILTERS.googleSearch).appendTo(form);
-               }break;
-            case PAGES.RANKINGS:{         /*Expand to see what happens when you reach the rankings page*/
-               var table0 = makeTable("Rankings", "UW_CO_STU_RNKV2$scroll$0");
-               form.children("div").remove();
-               table0.addControlButton("Save", function(){
-                        BRIDGE.run(function(){
-                           setSaveText_win0('Saving...');
-                           submitAction_win0(document.win0, '#ICSave');
-                        });     
-                     })
-                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
-                     .applyFilter("Employer", TABLEFILTERS.googleSearch)
-                     .applyFilter("Work location", TABLEFILTERS.googleMap)
-                     .addControlButton("Rankings Info", "http://www.cecs.uwaterloo.ca/manual/first_cycle/4_11.php").appendTo(form);
-               }break;
-            case PAGES.DOCUMENTS:{        /*Expand to see what happens when you reach the documents page*/
-               var marks = $("#win0divSHOW_MARKS a.PSHYPERLINK").attr("href");
-               var history = $("#win0divVIEW_WORK_HISTORY a.PSHYPERLINK").attr("href");
-               var newResume = $("#UW_CO_DOC_ADD").attr("href");
-               var table0 = makeTable("Resumes", "UW_CO_RESUMES$scrolli$0");
-               if (table0.rows < 3) {  //Max 3 resumes
-                  table0.addControlButton("New Resume", function(){
-                     BRIDGE.run(function(){aAction0_win0(document.win0,'UW_CO_DOC_ADD');});    
-                  });     
-               }
-               form.children("div").remove();      //Remove useless stuff
-               table0.addControlButton("View Marks", marks).addControlButton("View Work History", history)
-                     .applyFilter("Resume", function(cell, row, rowData, reverseLookup){
-                        return (row == 0 ? cell + "<span class='details noselect'>(Default Resume)</span>" : cell);
-                     })
-                     .appendTo(form);
-               }break;
-            case PAGES.LIST: {            /*Expand to see what happens when you reach the job shortlist page*/
-               //Handles multi delete
-               function handleCheckedDelete(){
-                  //Get all the rows to delete
-                  var listToDelete = [];
-                  $("#"+table.tableID+" input.checkbox:checked").each(function(r){
-                     listToDelete.push(this.parentNode.parentNode.getAttribute("row"));
-                  });
-                  if(listToDelete.empty()) {return;}
-                  if(!confirm("Would you like to delete these rows?\nThere are "+listToDelete.length+" rows to delete and it might take a while.\n\nYou can refresh anytime to cancel.")) {
-                     return;
-                  }
-                  listToDelete.sort(function(a,b){return b-a;});     
-                  var command = table.jInstance.find("tbody div.delete:eq(0)").attr("action");
-                  var progress = "1/"+listToDelete.length;
-                  setTitle("Deleting: "+progress);
-                  showPopup(false, "Deleting all the short listed jobs.<br/>Progress: "+progress+"<br/><span style='color:blue;'>You can cancel by refreshing.</span><br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>", "Please Be Patient", 500, 300);
-                  var deletion = new Job("submitAction_win0(document.win0, '" + command + "')", listToDelete);
-                  JOBQUEUE.addJob(deletion);
-               }
-               
-               form.find("div").css("display", "none");
-               var table = makeTable("Jobs", "UW_CO_STUJOBLST$scrolli$0");
-               table.applyFilter("", TABLEFILTERS.deleteRow)
-                    .applyFilter("Job Title", TABLEFILTERS.jobDescription)
-                    .applyFilter("Employer Name", TABLEFILTERS.googleSearch)
-                    .applyFilter("Location", TABLEFILTERS.googleMap)
-                    .applyFilter("Apply", TABLEFILTERS.fixApply)
-                    .setHeaderAt(7, "Delete")
-                    .addControlButton("Select All", function(){
-                        $("#"+table.tableID+" input.checkbox").attr("checked", true).parent().parent().addClass("selected");
-                     })
-                     .addControlButton("Select None", function(){
-                        $("#"+table.tableID+" input.checkbox").attr("checked", false).parent().parent().removeClass("selected");
-                     })
-                     .addControlButton("Delete Selected", handleCheckedDelete)
-                    .addCheckboxes()
-                    .appendTo(form);
-               }break;
-            case PAGES.APPLICATIONS:{     /*Expand to see what happens when you reach the applications page*/
-               //For merging application
-               var applicationsMerge = function(a,b,r){
-                  if (a == "Edit Application") {
-                     return b;
-                  } else {
-                     var searchFor = "javascript:"; var start = a.indexOf(searchFor) + searchFor.length; searchFor = "UW_CO_APPLY_HL2$";
-                     var point1 = a.indexOf(searchFor, start) + searchFor.length; var point2 = a.indexOf("'", point1) + 1;
-                     var end = a.indexOf('"', point2);  var part1 = a.substring(start, point1);  var part2 = a.substring(point2, end);
-                     var firstLink = '<span class="fakeLink" onclick="var row=this.parentNode.parentNode.getAttribute(\'row\');'+part1+'\'+row'+part2+'">Edit</span>';
-                     return firstLink + " | " + b.replaceLast(" Package", "");
-                  }
-               }
-               //Pull and make new tables
-               var activeApp = makeTable(null, "UW_CO_STU_APPSV$scroll$0");
-               activeApp.applyFilter("Job Title", TABLEFILTERS.jobDescription)
-                        .applyFilter("View Details", TABLEFILTERS.fixEditApplication)
-                        .applyFilter("Employer", TABLEFILTERS.googleSearch)
-                        .appendTo(form);
-               var allApp = makeTable(null, "UW_CO_APPS_VW2$scrolli$0");
-               allApp.merge(7,10,"View/Edit Applications", applicationsMerge)
-                     .applyFilter(10, TABLEFILTERS.deleteRow)
-                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
-                     .applyFilter("Employer", TABLEFILTERS.googleSearch)
-                     .setHeaderAt(10, "Delete").appendTo(form);
-               
-               //Clean up all webpage :P
-               form.children("div:not('.jbmnplsTable')").css("display", "none");
-               }break;
-            //Part of the profile page
-            case PAGES.PROFILE:{          /*Expand to see what happens when you reach the profile page*/ 
-               var table0 = makeTable("Profile", "UW_CO_STDTERMVW$scroll$0");
-               addProfileNav();
-               form.children("div").remove();
-               table0.appendTo(form);
-               }break;
-            case PAGES.PERSONAL:case PAGES.ACADEMIC:case PAGES.SKILLS:{/*Expand to see what happens when you reach the personal profile page*/
-               addProfileNav();
-               form.children("div:not('#PAGECONTAINER')").remove();
-               $("#win0divPSTOOLBAR").remove();
-               $("#PAGECONTAINER>table").css("margin", "0 auto");
-               $("#ACE_width").removeAttr("width").find("tbody>tr:eq(0)>td").eq(-1).attr("width",0);
-               }break;
-         }
-      }
-      applyHighlight(); 
-      break;
-}
 
 /*================================*\
 |*            __CSS__             *|
@@ -3654,6 +3469,10 @@ var CSSOBJ = {
     */
    "#popupMask" : {
       width    :  "100% !important",
+   },
+   "#WAIT_win0, #SAVED_win0" : {
+      display  :  "none !important",
+      visibility  :  "hidden !important",
    },
     /**
     *    No extra spaces
@@ -3739,6 +3558,8 @@ var CSSOBJ = {
       "-o-box-sizing" : "border-box",
       "box-sizing" : "border-box",
       "padding-top" : "60px",
+      "padding-right"  : '0 !important',
+      "margin-right"   : '0 !important',
       overflow : "hidden",
    },
    "#jbmnplsHeader": {
@@ -3805,6 +3626,18 @@ var CSSOBJ = {
    "#jbmnplsNav ul li a:hover, #jbmnplsNav ul li .fakeLink:hover": {
       "text-shadow": "0 0 0 transparent, #ffffbe 0 0 0.5em, #ffffbe 0 0 0.5em",
    },
+   "#jbmnplsTopGroup a.twitter-follow-button" : {
+      display        :  "block",
+      "float"        :  "right",
+      width          :  "40px",
+      position       :  "relative",
+      top            :  "-8px",
+      height         :  "40px",
+      background     :  "no-repeat url('"+IMAGES.TWITTER+"')",
+   },
+   "#jbmnplsTopGroup a.twitter-follow-button:hover" : {
+      background     :  "no-repeat url('"+IMAGES.TWITTER_GLOW+"')",
+   },
    "#jbmnplsBottomGroup": {
       "padding": "0px 20px",
       "background": "#e7e7e7",
@@ -3817,16 +3650,20 @@ var CSSOBJ = {
       "font-weight": "bold",
       "float": "left",
    },
+   "#jbmnplsStatus li.statusItem" : {
+      "margin-left"     :  "0",
+      "margin-right"     :  "30px",
+   },
    "#jbmnplsUserID": {
       "font-weight": "normal",
    },
    "#jbmplsControlPanel": {
       "float": "right",
    },
-   "#jbmplsControlPanel a": {
+   "#jbmplsControlPanel a, #jbmplsControlPanel span.fakeLink": {
       "font-size": "11px",
    },
-   "#jbmplsControlPanel a:hover" : {
+   "#jbmplsControlPanel a:hover, #jbmplsControlPanel span.fakeLink:hover" : {
       "color" : "#6f6f6f",
    },
    /**
@@ -3923,6 +3760,16 @@ var CSSOBJ = {
       "display" : "block",
       "float" : "left",
    },
+   "div.jbmnplsTableBody" : {
+      position :  "relative",
+   },
+   "div.jbmnplsTable.loading div.jbmnplsTableLoadOverlay" : {
+      position          :  "absolute",
+      height            :  "100%",
+      width             :  "100%",
+      top               :  "0",
+      background        :  "rgba(255,255,255,0.5) no-repeat center center url('"+IMAGES.LARGE_LOADING+"')",
+   },
    "div.jbmnplsTable table td *, div.jbmnplsTable table td" : {
       "color" : "#555555",
       "vertical-align" : "middle",
@@ -3995,7 +3842,7 @@ var CSSOBJ = {
       "background" : "-5px -5px url('"+IMAGES.DELETE_LOADING+"')",
       "cursor" : "default",
    },
-   "div.jbmnplsTable table td .delete.disabled, div.jbmnplsTable table td .delete[disabled='true']" : {
+   "div.jbmnplsTable table td .delete.disabled, div.jbmnplsTable table td .delete[disabled='disabled']" : {
       "background" : "0 0 url('"+IMAGES.DELETE_DISABLE+"')",
       "cursor" : "default",
    },
@@ -4043,12 +3890,12 @@ var CSSOBJ = {
       left        :  "0",
       height      : "100%",
       width       : "100%",
-      "z-index"   :  "100",
+      "z-index"   :  "1000",
    },
    "body.showPopup" : {
       overflow : "hidden",
    },
-   "body.showPopup.iframe" : {
+   "html body.showPopup" : {
       "margin-right"  :  DIMENSIONS.SCROLLBAR_WIDTH+"px",
    },
    "body.showPopup #jbmnplsPopup" : {
@@ -4056,6 +3903,9 @@ var CSSOBJ = {
    },
    "#jbmnplsPopup div.content #jbmnplsPopupFrame" : {
       display  :  "none",
+   },
+   "#jbmnplsPopup div.content.iframe #jbmnplsPopupFrameWrapper" : {
+      background  :  "no-repeat center center url('"+IMAGES.LARGE_LOADING+"')",
    },
    "#jbmnplsPopup div.content.iframe #jbmnplsPopupFrame" : {
       display  :  "block",
@@ -4101,13 +3951,13 @@ var CSSOBJ = {
    "#jbmnplsPopup.black div.wrapper div.content .footer .close" : {
       "display" : "none",
    },
-   "#jbmnplsPopup.black #jbmnplsPopupTitle" : {
+   "#jbmnplsPopup.black #jbmnplsPopupTitle.title" : {
       height            :  "30px",
       "border-bottom"   :  "2px solid black",
       "background"      :  "#333",
       "font-size"       :  "14px",
       "font-weight"     :  "bold",
-      "color"           :  "white",
+      "color"           :  "white !important",
       "padding-top"     :  "10px",
       "padding-left"    :  "10px",
    },
@@ -4143,6 +3993,16 @@ var CSSOBJ = {
       width             :  "100%",
       display           :  "block",
       padding           :  "10px 0 0",
+   },
+   
+   /**
+    *    Jobmine Plus Popup: Employer info under job details
+    */
+   "#jbmnplsPopup[name='employer_profile'].black span.save,#jbmnplsPopup[name='employer_profile'].black span.cancel" : {
+      "display"         :  "none",
+   },
+   "#jbmnplsPopup[name='employer_profile'].black #jbmnplsPopupFooter span.close" : {
+      "display"         :  "block",
    },
    
    /**
@@ -4189,8 +4049,60 @@ var CSSOBJ = {
       "margin"          :  "10px 20px 0",
       "float"           :  "left",
    },
+   
    /**
-    *    Jobmine Plus Message
+    *    Jobmine Plus About Me
+    */
+   "#jbmnplsPopup[name='about_me'].black #jbmnplsPopupBody" : {
+      "font-family"     :  "Verdana, Arial",
+      "font-size"       :  "12px",
+      "color"           :  "#222",
+      padding           :  "20px 10px",
+   },
+   "#jbmnplsPopup[name='about_me'].black #jbmnplsPopupBody h1" : {
+      "color"           :  "#555",
+      "font-size"       :  "16px",
+      "margin"          :  "0 0px 10px",
+   },
+   "#jbmnplsPopup[name='about_me'].black span.save,#jbmnplsPopup[name='about_me'].black span.cancel" : {
+      "display"         :  "none",
+   },
+   "#jbmnplsPopup[name='about_me'].black #jbmnplsPopupFooter span.close" : {
+      "display"         :  "block",
+   },
+   
+   /**
+    *    Jobmine Plus Welcome
+    */
+   "#jbmnplsPopup[name='welcome!'].black #jbmnplsPopupBody" : {
+      "font-family"     :  "Verdana, Arial",
+      "font-size"       :  "12px",
+      "color"           :  "#222",
+      padding           :  "20px 10px",
+   },
+   "#jbmnplsPopup[name='welcome!'].black #jbmnplsPopupBody h1" : {
+      "color"           :  "#555",
+      "font-size"       :  "16px",
+      "margin"          :  "0 0px 10px",
+   },
+   "#jbmnplsPopup[name='welcome!'].black #jbmnplsPopupBody h2" : {
+      "color"           :  "#555",
+      "font-size"       :  "14px",
+      "margin"          :  "10px 0px 10px",
+   },
+   "#jbmnplsPopup[name='welcome!'].black #jbmnplsPopupBody .detail" : {
+      "color"           :  "#444",
+      "font-size"       :  "10px",
+   },
+   "#jbmnplsPopup[name='welcome!'].black span.save,#jbmnplsPopup[name='welcome!'].black span.cancel" : {
+      "display"         :  "none",
+   },
+   "#jbmnplsPopup[name='welcome!'].black #jbmnplsPopupFooter span.close" : {
+      "display"         :  "block",
+   },
+   
+   /**
+    *    Jobmine Plus Message and Update Message
     */
    "#jbmnplsMessageHolder" : {
       "overflow"        :  "hidden",
@@ -4198,9 +4110,9 @@ var CSSOBJ = {
       "position"        :  "fixed",
       "width"           :  "100%",
       "left"            :  "0",
-      "z-index"         :  "1000",
+      "z-index"         :  "999",
    },
-   "#jbmnplsMessage" : {
+   "#jbmnplsMessage, #jbnplsUpdate" : {
       "height"          :  "35px",
       "max-height"      :  "35px",
       "top"             :  "-50px",
@@ -4210,22 +4122,20 @@ var CSSOBJ = {
       "background"      :  "#fafafa",
       "text-align"      :  "center",
    },
-   "#jbmnplsMessage *" : {
+   "#jbnplsUpdate" : {
+      "position"        :  "fixed",
+      top               :  0,
+      left              :  0,
+      "z-index"         :  "998",
+   },
+   "#jbmnplsMessage *, #jbnplsUpdate *" : {
       "font-family"     :  "Verdana, Arial",
       "font-size"       :  "12px",
       "color"           :  "#222",
-      "padding"          :  "7px",
+      "padding"         :  "7px",
+      "display"         :  "block",
    },
-   "#jbnplsUpdate:hover"       : {
-      "color"           :  "#555",
-   },
-   "body.showUpdate #jbnplsUpdate" : {
-      display           :  "block !important",
-   },
-   "body.showUpdate #jbmnplsMessageText" : {
-      display           :  "none !important",
-   },
-   "#jbmnplsMessage div.close" : {
+   "#jbmnplsMessage div.close, #jbnplsUpdate div.close" : {
       "background"      :  "no-repeat 100% 50% url('"+IMAGES.MESSAGE_CLOSE+"')",
       "position"        :  "absolute",
       "top"             :  "8px",
@@ -4239,6 +4149,577 @@ var CSSOBJ = {
    },
 };
 appendCSS(CSSOBJ);
+
+
+/*================================*\
+|*     __INDIVIDUAL_PAGES__       *|
+\*================================*/
+
+//See if we are at home page
+switch (PAGEINFO.TYPE) {
+   case PAGES.HOME:{       /*Expand to see what happens when you reach home page*/
+      if (!PAGEINFO.IN_IFRAME) {
+         //Fix up stuff 
+         BRIDGE.addJS(function(){
+            pthNav.abn.init = function(){};
+            ptEvent.add2 = ptEvent.add;
+            ptEvent.add = function(a,b,c){if(a!=null){ptEvent.add2(a,b,c);}}
+         });
+         //Cancel the load for the item
+         $(document.body).removeAttr("onload");
+         //Delete the useless stuff on home page
+         $("body > table").remove();
+         
+         /**
+          *    Handle what page to go to
+          */
+         var gotoLocation = window.location.hash == "" ? "" : window.location.hash.substr(1);   //Get rid of # in hash
+         window.location.hash = CONSTANTS.EXTRA_URL_TEXT;
+         
+         var currentPage = gotoLocation;
+         if (CONSTANTS.EXTRA_URL_TEXT == currentPage) {    //Refreshed the entire page
+            currentPage = PREF.load("LAST_PAGE");
+         } else if(currentPage == null || !PAGES.isValid(currentPage) || !NAVIGATION.hasOwnProperty(currentPage)) {
+            currentPage = PREF.load("DEFAULT_PAGE");
+         }         
+         var link = LINKS[currentPage];
+         
+         /**
+          *    Set some stuff in the nav to match the new location
+          */
+         addHeader();
+         setTitle(NAVIGATION[currentPage]);
+         setNavSelection($("#jbmnplsNav a[type='"+currentPage+"']").attr("item"));
+         
+         //Appends the iframe that holds the content
+         $("body").append("<div id='jbmnplsFrameWrapper'><iframe src='"+link+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div><div id='pthnavcontainer' class='hide'></div>")
+        
+         //Hacked the navigation because we have an iframe
+         $("#jbmnplsNav a").click(function(e){
+            var obj = e.target;
+            if (obj.getAttribute("target") == "_blank") {return;}
+            e.preventDefault();
+            var newLocation = obj.getAttribute("realHref");
+            var index = obj.getAttribute("item");
+            var newTitle = obj.innerHTML;
+            changeLocation(newLocation, newTitle, index);
+         });
+         
+         //If debug is on, we can add the debugger window
+         if( CONSTANTS.DEBUG_ON) {
+            DEBUGGER.init();
+            initDraggable();
+         }
+      } else {
+         //Cannot have itself in its own iframe
+         return;
+      }
+      }break;
+   case PAGES.LOGIN:{      /*Expand to see what happens when you reach login page*/
+      function setAutoComplete(flag){
+         if(flag) {
+            $("#userid").attr("autocomplete", "on").attr("value", defaultUser.toLowerCase());
+            $("#pwd, #login").attr("autocomplete", "on");
+         } else {
+            $("#pwd, #login, #userid").attr("autocomplete", "off");
+         }
+      }
+      var checked = false;
+      var cookieName = "RememberLogin";
+      var rememberMe = Cookies.read(cookieName);
+      if (rememberMe != -1 && rememberMe == "1") {
+         //Determine the person
+         var defaultUser = Cookies.read("SignOnDefault");
+         if (defaultUser != -1) {   
+            setAutoComplete(true);
+            $("body").attr("onload", "");
+            BRIDGE.run(function(){document.getElementById("userid").focus();document.getElementById("pwd").focus();});
+            checked = true;
+         }
+      } 
+      //Put the extra field in
+      var insertLoc = $("#login table:eq(0)");
+      var message = "Save My Username<br/><span class='important'>(DO NOT CHECK ON PUBLIC PC)</span>";
+      if (PAGEINFO.BROWSER == BROWSER.FIREFOX) {
+         message = "Remember Me<br/><span class='important'>(DO NOT CHECK ON PUBLIC PC)</span>";
+      }
+      insertLoc.after("<div id='jbmnplsHolder' class='noselect'><input id='jbmplsChbx' class='checkbox' "+(checked?"checked='true'":"")+" type='checkbox'/><label class='message' for='jbmplsChbx'>"+message+"</label></div>");
+      $("#jbmplsChbx").change(function(){
+         if(this.checked) {
+            Cookies.set(cookieName, "1");
+         } else {
+            Cookies.remove(cookieName);
+         }
+         setAutoComplete(this.checked);
+      });
+      PREF.remove("LAST_PAGE");
+      }break;
+   case PAGES.DETAILS: {   /*Expand to see what happens when you reach job details page*/
+      if (!PAGEINFO.IN_IFRAME) {    //Ported from Jobmine Plus version 1
+         initDraggable();
+         var form = $("body form:eq(0)");
+         if(PREF.load("SHOW_OLD_JOB_DETAILS") == false) {
+            //Data that needs to be extracted from the page, this object holds it all
+            var jobDescriptionData = {
+               employerName   : "",    position       : "",    location       : "",    openings       : "",    jobLevels      : "",    grades         : "",
+               comments       : "",    description    : "",    openDate       : "",    cecsCoord      : "",    disciplines    : "",    closeDate      : ""
+            };
+            $("#ACE_width span").each(function(index){
+               var text = $(this).plainText();
+               if(text != ""){
+                  switch(index){
+                     case 1:  jobDescriptionData.openDate      = text;        break;
+                     case 2:  jobDescriptionData.closeDate     = text;        break;
+                     case 5:  jobDescriptionData.employerName  = text;        break;
+                     case 6:  jobDescriptionData.position      = text;        break;
+                     case 7:  jobDescriptionData.grades        = text;        break;
+                     case 8:  jobDescriptionData.location      = text;        break;
+                     case 9:  jobDescriptionData.openings      = text;        break;
+                     case 10: jobDescriptionData.disciplines   = text+", ";   break;
+                     case 11: jobDescriptionData.disciplines  += text;        break;
+                     case 12: jobDescriptionData.jobLevels     = text;        break;
+                     case 13: jobDescriptionData.cecsCoord     = text;        break;
+                     case 14: jobDescriptionData.comments      = text;        break;
+                     case 16: jobDescriptionData.description   = $(this).html();        break;
+                  }
+               }
+            });
+            //Add url a-href to most of the links on page
+            jobDescriptionData.description = jobDescriptionData.description.replace(/((http:|https:|www.)[^\s]+)/gi, function(item){
+               item = item.replace(/&nbsp;/, "");        //usually this appears at the end of the link
+               //Removes random all punctuation at the end of the link
+               var endPunctuation = "";
+               item = item.replace(/([^\/\w])+$/, function(characters){
+                  endPunctuation = characters;
+                  return "";
+               });
+               item = item.toUpperCase().indexOf('HTTP') == 0 ? item : "http://"+item;         
+               return "<a href='"+item+"' target='_blank'>"+item+"</a>" + (endPunctuation ? endPunctuation : "");
+            });
+            var toolbar =  "<div id='toolbar' class='printHide'>Don't like this look for your job descriptions? <span id='showOldDetailsBtn' class='fakeLink' href='#'>Click here to change it back</span></div>";
+            var newBody =  "<table class='page' id='jobDetails' cellspacing='0' cellpadding='0'><tr><td valign='top' id='header'><span class='title'>Employer: <a class='printHide' target='_blank' title='Google search "+jobDescriptionData.employerName+"' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"'>"+(jobDescriptionData.employerName.length > 48 ? jobDescriptionData.employerName.substring(0,48)+"..." : jobDescriptionData.employerName)+"</a><a class='printshow' href='#'>"+jobDescriptionData.employerName+"</a></span><input class='button printHide' onclick='window.print();' type='button' value='Print Job Description'/><br/><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Job Title:</td><td valign='top'>"+jobDescriptionData.position+"</td></tr><tr><td valign='top' class='category'>Work Location:</td><td valign='top'><a target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"+"+encodeURIComponent(jobDescriptionData.location)+"' title='Search location' class='location'>"+jobDescriptionData.location+"</a></td></tr><tr><td valign='top' class='category'>Available Openings:</td><td valign='top'>"+jobDescriptionData.openings+"</td></tr></table></td><td valign='top' class='right'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Levels:</td><td valign='top'>"+jobDescriptionData.jobLevels+"</td></tr><tr><td valign='top' class='category'>Grades:</td><td valign='top'>"+jobDescriptionData.grades+"</td></tr></table><input style='margin-top:10px;' class='button printHide' onclick='invokeEmployerPopup();' type='button' value='View Employer Profile'/></td></tr></table><br/>"+(jobDescriptionData.comments==""?"":"<table id='comments' cellspacing='0' cellpadding='0'><tr><td class='category' valign='top'>Comments:</td><td class='important' valign='top'>"+jobDescriptionData.comments+"</td></tr></table>")+"<hr/></td></tr><tr><td valign='top' id='content'><div class='title'>Description</div><div class='body'>"+jobDescriptionData.description+"</div></td></tr><tr><td valign='top' id='footer'><hr/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Posting Open Date:</td><td valign='top'>"+jobDescriptionData.openDate+"</td></tr><tr><td valign='top' class='category'>CECS Field Co-ordinator:</td><td valign='top'>"+jobDescriptionData.cecsCoord+"</td></tr><tr><td colspan='2'><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Disciplines:</td><td valign='top'>"+jobDescriptionData.disciplines+"</td></tr></table></td></tr></table></td><td valign='top' class='right'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Last Day to Apply:</td><td valign='top'>"+jobDescriptionData.closeDate+"</td></tr></table></td></tr></table><hr class='printHide'/></td></tr></table>";
+            var detailsCss = {
+               "body.PSPAGE" : {
+                  "overflow-y"  :  "scroll",
+                  "padding"     :   "0 50px",
+               },
+               ".printshow" : {
+                  "display" : "none",
+               },
+               "iframe" : {
+                  "overflow-x" : "hidden",
+                  "overflow-y" : "scroll",
+               },
+               ".jobmineButton" : {
+                  "font-family" : " 'Arial','sans-serif'",
+                  "font-size" : " 9pt",
+                  "font-weight" : " normal",
+                  "font-Style" : " normal",
+                  "font-variant" : " normal",
+                  "color" : " rgb(0,0,0)",
+                  "background-color" : " rgb(255,255,153)",
+               },
+               "#jobDetails.page" : {
+                  "width" : "760px",
+                  "height" : "950px",
+                  "min-height" : "950px",
+                  "margin" : " 50px auto",
+                  "-moz-box-shadow" : " 0 0 1em black",
+                  "-webkit-box-shadow" : " 0 0 1em black",
+                  "background-color" : " #f6f6f6",
+                  "padding" : " 35px 20px",
+                  "font-family" : " Arial, Verdana, san-serif",
+                  "font-size" : "12px",
+               },
+               "input.button" : {
+                  "float" : "right",
+               },
+               ".important" : {
+                  "color" : "red",
+               },
+               ".jobDescriptionArea td, #comments td" : {
+                  "font-size" : "14px",
+               },
+               ".jobDescriptionArea .left" : {
+                  "width" : "100%",
+               },
+               ".jobDescriptionArea .right td" : {
+                  "white-space" : "nowrap",
+               },
+               ".jobDescriptionArea a.location" : {
+                  "color" : " #3333cc",
+                  "text-decoration" : " none",
+               },
+               ".jobDescriptionArea .category" : {
+                  "font-weight" : "bold",
+                  "padding-right" : "10px",
+                  "white-space" : "nowrap",
+                  "width" : "10px",
+               },
+               "#comments" : {
+                  "margin-top" : "10px",
+                  "display" : jobDescriptionData.comments == " " ? "none" : "block",
+               },
+               "#comments .category" : {
+                  "font-weight" : "bold",
+                  "padding-right" : "30px",
+               },
+               "hr" : {
+                  "color" : "#6c6cbd",
+                  "margin" : "10px 0",
+               },
+               "#content .body" : {
+                  "margin" : " 15px 0px",
+               },
+               ".title" : {
+                  "font-size" : "19px",
+                  "color" : " #4b4bb4 !important",
+                  "font-weight" : " bold",
+               },
+               "#jobDetails .title a:visited" : {
+                  "font-size" : "19px",
+                  "color" : " #4b4bb4 !important",
+               },
+               "#jobDetails .title a" : {
+                  "font-weight" : " normal",
+                  "margin-left" : "10px",
+               },
+               "#content" : {
+                  "height" : "100%",
+               },
+               "#footer" : {
+                  "max-height" : "110px",
+               },
+               /*Toolbar*/
+               "#toolbar" : {
+                  "background-color" : "rgba(0,0,0,0.6)",
+                  "color" : "white",
+                  "width" : "100%",
+                  "position" : "fixed",
+                  "text-align" : "center",
+                  "top" : "0",
+                  "left" : "0",
+                  "padding" : "5px 20px",
+                  "font-family" : "Arial",
+                  "font-size" : "12px",
+               },
+               "#toolbar span.fakeLink" : {
+                  "color" : " white",
+                  "text-decoration":"underline",
+               },
+               "#toolbar span.fakeLink:hover" : {
+                  "color" : " #CCC",
+               },
+            };
+            var printCSS = "<style>@media print{a{color: black !important;text-decoration: none;}hr{color:black;}.printHide{display:none !important;}#jobDetails .title{color: black !important;}body, #jobDetails.page{width: 100%;padding:0px;margin:0px;-moz-box-shadow: none;-webkit-box-shadow: none;background-color:white;}.printshow{display:inline !important;}}</style>";
+            //Clean up the page
+            form.children("div").remove();
+            form.append(newBody).append(toolbar);
+            appendCSS(detailsCss);
+            $("body").append(printCSS);
+            
+            $("#showOldDetailsBtn").click(function(){
+               PREF.save("SHOW_OLD_JOB_DETAILS", true);
+               refresh();
+            });
+            
+            BRIDGE.registerFunction("invokeEmployerPopup", function(){  
+               showPopup(true, null, "Employer Profile", 550, null, null, PAGEINFO.URL+"&jbmnpls=employeeInfo");
+               $("#jbmnplsPopupFrame").attr("state", "loading").css("visibility", "hidden").unbind().bind("load", function(){
+                  var obj = $(this);
+                  if (obj.attr("state") == "loading") {
+                     obj.removeAttr("state");
+                  } else {
+                     obj.css("visibility", "visible");
+                  }
+               });
+            });
+            
+         } else {    //Old webpage
+            var toolbar    = "<div id='toolbar' class='printHide'>Want to see the Jobmine Plus version of job descriptions? <span class='fakeLink' id='showNewDetailsBtn'>Click here to change it</span></div>";
+            var cssStyles  = "<style>body.PSPAGE{margin-top:30px;}@media print{.PSPAGE{margin-top:1px;}.printHide{display:none;}}/*Toolbar*/#toolbar{background-color: rgba(0,0,0,0.6);color: white;width:100%;position:fixed;text-align:center;top:0;left:0;padding: 5px 20px;font-family:Arial;font-size:12px;}#toolbar span.fakeLink{color: white;text-decoration:underline;}#toolbar span.fakeLink:hover{color: #CCC;}</style>";
+            form.append(toolbar).append(cssStyles);
+            
+            //Clicking the link would tell it to look at the old one
+            $("#showNewDetailsBtn").click(function(){
+               PREF.save("SHOW_OLD_JOB_DETAILS", false);
+               refresh();
+            });
+         }
+      } else if(PAGEINFO.URL.contains("&jbmnpls=employeeInfo")) {    //In iframe being loaded for finding employee info
+         BRIDGE.run(function(){submitAction_win0(document.win0,'#ICPanel1');});
+      }
+   }break;
+   case PAGES.EMPLOYEE_PROF:{
+      if(PAGEINFO.IN_IFRAME) {  
+         //Clean up
+         $("body form:eq(0)").children("div:not('#PAGECONTAINER')").remove();
+         $("#PAGECONTAINER").css({"position":"absolute","top":0,"left":0,});
+         var trs = $("#ACE_width tr");
+         trs.eq(-1).find("td:eq(0)").removeAttr("height");
+         trs.eq(1).remove();trs.eq(2).remove();
+      }
+   }break;
+   default:
+      //Redirect to home page if necessary the top is not already at home
+      if (!PAGEINFO.IN_IFRAME) { 
+         redirect(LINKS.HOME);
+         return;
+      } else {
+         var form = $("form:eq(0)");
+         //Apply the header for the page if it exists
+         if (PAGEINFO.TYPE) {
+            $("body").prepend("<div class='pageTitle noselect'>"+PAGEINFO.TYPE.replace(/_/g, " ")+"</div>");
+         }
+         initAjaxCapture();
+         initRowDeletion();
+         initDraggable();
+         
+         //Update stuff
+         addUpdateMessage();
+         $("head").append("<link href='"+LINKS.UPDATE_CSS+"' type='text/css' rel='stylesheet'/>");
+         
+         //Append an iframe for whatever reasons needed for it
+         $("body").append("<iframe id='slave' style='display:none;visibility:hidden;' width='0'height='0' src='about:blank'></iframe>");
+         
+         //Record last page visited
+         if (PAGEINFO.TYPE != null) {
+            PREF.save("LAST_PAGE", REVERSE_PAGES[PAGEINFO.TYPE]);
+            $(window).unload(function(){
+               PREF.save("LAST_PAGE", REVERSE_PAGES[PAGEINFO.TYPE]);
+            });
+         }
+         
+         //Welcome message - only shown once!
+         if(PREF.load("SHOW_WELCOME_MSG")) {
+            showPopup(true, "<h1>Welcome to Jobmine Plus!</h1><br/>Before you get started please know that I save all your preferences to localStorage. If you do not know what that means, that means that all your saved settings will only apply to <span class='bold'>this computer</span> and <span class='bold'>this browser</span>.<br/><br/><h2>Important</h2><span style='color:red;'>The 'customize' button on each table requires that you un-hide any columns in the original Jobmine or else some features will work on Jobmine Plus.</span><br/><span class='detail'>(If you do know know what I mean, <a href='mailto:jobmineplus@gmail.com'>I can explain via email</a>)</span><br/><br/>Therefore please disable Jobmine Plus and go back to Jobmine to un-hide all custom headers if you have done so.<br/><br/>That is it, so please enjoy using Jobmine Plus 2.0!<br/><br/><br/><br/>",
+               "Welcome!",     //Title
+               400,            //Width
+               null,          //No max height
+               function(){   //Callback
+                  PREF.save("SHOW_WELCOME_MSG", false);     //Clicking close will never let you see the message again
+               });
+         }
+         
+         //Parse Individual pages here
+         switch(PAGEINFO.TYPE){
+            case PAGES.SEARCH:{           /*Expand to see what happens when you reach the search page*/
+               attachNewSearchFields();
+               $("#PAGEBAR").remove();
+               function markRead(rowNum, id) {
+                  var row = $("#row_Results_"+rowNum);
+                  Assert(row.exists(), "Read status is broken, row "+rowNum+" does not exist.");
+                  var rowData = row.children();
+                  rowData.eq(0).text("Read");
+                  SearchManager.setRead(id);
+                  table0.updateTable();
+               }
+               function onShortList(rowNum, shortListIndex) {
+                  var row = $("#row_Results_"+rowNum);
+                  Assert(row.exists(), "Read status is broken, row "+rowNum+" does not exist.");
+                  var rowData = row.children();
+                  rowData.eq(0).text("Shortlisted");
+                  rowData.eq(shortListIndex).text("On Short List");
+                  table0.updateTable();
+               }
+               BRIDGE.registerFunction("markRead", markRead);
+               BRIDGE.registerFunction("onShortList", onShortList);
+               SearchManager.updateLastVisit();
+               var table0 = makeTable("Results", "UW_CO_JOBRES_VW$scroll$0");
+               table0.applyFilter("Employer Name", TABLEFILTERS.googleSearch)
+                     .applyFilter("Location", TABLEFILTERS.googleMap)
+                     .insertColumn("Hiring Chances", 8, function(row, rowData, reverseLookup){
+                        var openings = rowData[reverseLookup["Openings"]];
+                        var applications = rowData[reverseLookup["# Apps"]];
+                        if (openings.empty()&&applications.empty()){return "";}
+                        openings = openings.empty() ? 0 : parseInt(openings);
+                        applications = applications.empty() ? 1 : parseInt(applications) + 1;
+                        var percentage = Math.round(openings/applications*1000)/10;
+                        var value = (percentage>=100?99.9:percentage) +"%";
+                        return "<span title='Hiring Changes is just Openings/(Applications+1), meaning after you apply this is the percentage. NOT ACCURATE because it does not calculate your skill level'>"+value+"</span>";
+                     })
+                     .insertColumn("Read Status", 0, function(row, rowData, reverseLookup){
+                        var id = rowData[reverseLookup["Job Identifier"]];
+                        if(id.empty()) {return "New";}
+                        if (rowData[reverseLookup["Apply"]] == "Already Applied") {
+                           return "Applied";
+                        } else if (rowData[reverseLookup["Short List"]] == "On Short List") {
+                           return "Shortlisted";
+                        } else if (SearchManager.hasRead(id)) {
+                           return "Read";
+                        }
+                        return "New";
+                     })
+                     .applyFilter("Job Title", function(cell, row, rowData, reverseLookup){
+                        var data = TABLEFILTERS.jobDescription(cell, row, rowData, reverseLookup);
+                        if (rowData[reverseLookup["Read Status"]] == "New"){
+                           var id = rowData[reverseLookup["Job Identifier"]];
+                           data = data.replace("<a ", "<a onclick='markRead("+row+",\""+id+"\");' ");
+                        }
+                        return data;
+                     })
+                     .applyFilter("Short List", function(cell, row, rowData, reverseLookup){
+                        var action = cell.match(/hAction[^;]+;/);
+                        if (action==null) {return cell}
+                        action = action[0];
+                        return '<span onclick="'+action+'onShortList('+row+','+reverseLookup['Short List']+');" class="fakeLink">Add to Short List</span>';
+                     }).addControlButton("Clear Read History", function(){
+                        if(!confirm("Would you like to delete all your read status history? All jobs under search will now be set to the 'new' status.")) {
+                           return;
+                        }
+                        SearchManager.clearAll();
+                        showMessage("Read status history was successfully deleted.");
+                        Log(table0.jInstance.find("tbody tr").children(":first-child:contains('Read')"))
+                        table0.jInstance.find("tbody tr").children(":first-child:contains('Read')").text("New");
+                     })
+                     .appendTo(form);
+                     //BRIDGE.run(function(){hAction_win0(document.win0,'UW_CO_JOBSRCHDW_UW_CO_DW_SRCHBTN', 0, 0, 'Search', false, true);});
+               }break;
+            case PAGES.INTERVIEWS:{       /*Expand to see what happens when you reach the interviews page*/
+               var interviewTable = makeTable(null, "UW_CO_STUD_INTV$scroll$0");
+               var groupTable = makeTable(null, "UW_CO_GRP_STU_V$scroll$0");
+               var socialTable = makeTable(null, "UW_CO_NSCHD_JOB$scroll$0");
+               var cancelTable = makeTable(null, "UW_CO_SINT_CANC$scroll$0");
+               form.children("div").remove();      //Remove useless stuff
+               interviewTable.insertColumn("Google Calendar", TABLECOLUMNS.googleCalendar);
+               groupTable.insertColumn("Google Calendar", TABLECOLUMNS.googleCalendarGroup);
+               
+               //Apply Filters, and append the tables
+               for(var i=0; i<TABLES.length;i++) {
+                   TABLES[i].applyFilter("Job Title", TABLEFILTERS.jobDescription)
+               }
+               interviewTable.applyFilter("Job ID", TABLEFILTERS.jobInterviews).applyFilter("Interviewer", TABLEFILTERS.interviewerSearch).applyFilter("Employer Name", TABLEFILTERS.googleSearch)
+               .appendTo(form);
+               groupTable.applyFilter("Employer Name", TABLEFILTERS.googleSearch).applyFilter("Job ID", TABLEFILTERS.jobInterviews).appendTo(form);
+               socialTable.applyFilter("Employer Name", TABLEFILTERS.googleSearch).appendTo(form);
+               cancelTable.applyFilter("Employer", TABLEFILTERS.googleSearch).appendTo(form);
+               }break;
+            case PAGES.RANKINGS:{         /*Expand to see what happens when you reach the rankings page*/
+               var table0 = makeTable("Rankings", "UW_CO_STU_RNKV2$scroll$0");
+               form.children("div").remove();
+               table0.addControlButton("Save", function(){
+                        BRIDGE.run(function(){
+                           setSaveText_win0('Saving...');
+                           submitAction_win0(document.win0, '#ICSave');
+                        });     
+                     })
+                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
+                     .applyFilter("Employer", TABLEFILTERS.googleSearch)
+                     .applyFilter("Work location", TABLEFILTERS.googleMap)
+                     .addControlButton("Rankings Info", "http://www.cecs.uwaterloo.ca/manual/first_cycle/4_11.php").appendTo(form);
+               }break;
+            case PAGES.DOCUMENTS:{        /*Expand to see what happens when you reach the documents page*/
+               var marks = $("#win0divSHOW_MARKS a.PSHYPERLINK").attr("href");
+               var history = $("#win0divVIEW_WORK_HISTORY a.PSHYPERLINK").attr("href");
+               var newResume = $("#UW_CO_DOC_ADD").attr("href");
+               var table0 = makeTable("Resumes", "UW_CO_RESUMES$scrolli$0");
+               if (table0.rows < 3) {  //Max 3 resumes
+                  table0.addControlButton("New Resume", function(){
+                     BRIDGE.run(function(){aAction0_win0(document.win0,'UW_CO_DOC_ADD');});    
+                  });     
+               }
+               form.children("div").remove();      //Remove useless stuff
+               table0.addControlButton("View Marks", marks).addControlButton("View Work History", history)
+                     .applyFilter("Resume", function(cell, row, rowData, reverseLookup){
+                        return (row == 0 ? cell + "<span class='details noselect'>(Default Resume)</span>" : cell);
+                     })
+                     .appendTo(form);
+               }break;
+            case PAGES.LIST: {            /*Expand to see what happens when you reach the job shortlist page*/
+               //Handles multi delete
+               function handleCheckedDelete(){
+                  //Get all the rows to delete
+                  var listToDelete = [];
+                  $("#"+table.tableID+" input.checkbox:checked").each(function(r){
+                     listToDelete.push(this.parentNode.parentNode.getAttribute("row"));
+                  });
+                  if(listToDelete.empty()) {return;}
+                  if(!confirm("Would you like to delete these rows?\nThere are "+listToDelete.length+" rows to delete and it might take a while.\n\nYou can refresh anytime to cancel.")) {
+                     return;
+                  }
+                  listToDelete.sort(function(a,b){return b-a;});     
+                  var command = table.jInstance.find("tbody div.delete:eq(0)").attr("action");
+                  var progress = "1/"+listToDelete.length;
+                  setTitle("Deleting: "+progress);
+                  showPopup(false, "Deleting all the short listed jobs.<br/>Progress: "+progress+"<br/><span style='color:blue;'>You can cancel by refreshing.</span><br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>", "Please Be Patient", 500, 300);
+                  var deletion = new Job("submitAction_win0(document.win0, '" + command + "')", listToDelete);
+                  JOBQUEUE.addJob(deletion);
+               }
+               
+               form.find("div").css("display", "none");
+               var table = makeTable("Jobs", "UW_CO_STUJOBLST$scrolli$0");
+               table.applyFilter("", TABLEFILTERS.deleteRow)
+                    .applyFilter("Job Title", TABLEFILTERS.jobDescription)
+                    .applyFilter("Employer Name", TABLEFILTERS.googleSearch)
+                    .applyFilter("Location", TABLEFILTERS.googleMap)
+                    .applyFilter("Apply", TABLEFILTERS.fixApply)
+                    .setHeaderAt(7, "Delete")
+                    .addControlButton("Select All", function(){
+                        $("#"+table.tableID+" input.checkbox").attr("checked", true).parent().parent().addClass("selected");
+                     })
+                     .addControlButton("Select None", function(){
+                        $("#"+table.tableID+" input.checkbox").attr("checked", false).parent().parent().removeClass("selected");
+                     })
+                     .addControlButton("Delete Selected", handleCheckedDelete)
+                    .addCheckboxes()
+                    .appendTo(form);
+               }break;
+            case PAGES.APPLICATIONS:{     /*Expand to see what happens when you reach the applications page*/
+               //For merging application
+               var applicationsMerge = function(a,b,r){
+                  if (a == "Edit Application") {
+                     return b;
+                  } else {
+                     var searchFor = "javascript:"; var start = a.indexOf(searchFor) + searchFor.length; searchFor = "UW_CO_APPLY_HL2$";
+                     var point1 = a.indexOf(searchFor, start) + searchFor.length; var point2 = a.indexOf("'", point1) + 1;
+                     var end = a.indexOf('"', point2);  var part1 = a.substring(start, point1);  var part2 = a.substring(point2, end);
+                     var firstLink = '<span class="fakeLink" onclick="var row=this.parentNode.parentNode.getAttribute(\'row\');'+part1+'\'+row'+part2+'">Edit</span>';
+                     return firstLink + " | " + b.replaceLast(" Package", "");
+                  }
+               }
+               //Pull and make new tables
+               var activeApp = makeTable(null, "UW_CO_STU_APPSV$scroll$0");
+               activeApp.applyFilter("Job Title", TABLEFILTERS.jobDescription)
+                        .applyFilter("View Details", TABLEFILTERS.fixEditApplication)
+                        .applyFilter("Employer", TABLEFILTERS.googleSearch)
+                        .applyFilter("Job Status", function(cell, row, rowData, reverseLookup){
+                           if (reverseLookup.hasOwnProperty("Job ID")) {
+                              var id = rowData[reverseLookup["Job ID"]];
+                              if(cell=="Ranking Complete" && OBJECTS.STORAGE.getItem("INTERVIEWS_ID_"+id) != undefined) {
+                                 return "<span title='According to the Jobmine glitch, if you have Ranking Complete in Active Applications, this means you have been ranked OR you have been offered this job.'>Ranked or Offered</span>";
+                              }
+                           }
+                           return cell;
+                        })
+                        .appendTo(form);
+               var allApp = makeTable(null, "UW_CO_APPS_VW2$scrolli$0");
+               allApp.merge(7,10,"View/Edit Applications", applicationsMerge)
+                     .applyFilter(10, TABLEFILTERS.deleteRow)
+                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
+                     .applyFilter("Employer", TABLEFILTERS.googleSearch)
+                     .setHeaderAt(10, "Delete").appendTo(form);
+               
+               //Clean up all webpage :P
+               form.children("div:not('.jbmnplsTable')").css("display", "none");
+               }break;
+            case PAGES.PROFILE:{          /*Expand to see what happens when you reach the profile page*/ 
+               var table0 = makeTable("Profile", "UW_CO_STDTERMVW$scroll$0");
+               addProfileNav();
+               form.children("div").remove();
+               table0.appendTo(form);
+               }break;
+            case PAGES.PERSONAL:case PAGES.ACADEMIC:case PAGES.SKILLS:{/*Expand to see what happens when you reach the personal profile page*/
+               addProfileNav();
+               form.children("div:not('#PAGECONTAINER')").remove();
+               $("#win0divPSTOOLBAR").remove();
+               $("#PAGECONTAINER>table").css("margin", "0 auto");
+               $("#ACE_width").removeAttr("width").find("tbody>tr:eq(0)>td").eq(-1).attr("width",0);
+               }break;
+         }
+      }
+      break;
+}
+
 
 
 

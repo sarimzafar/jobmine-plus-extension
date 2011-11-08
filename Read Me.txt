@@ -1,6 +1,10 @@
 Issues:
+Chrome:
+   - css body problem with job description
+   - twitter (wierd position and firefox doesnt work)
 
 Optional Fixes:
+   - work on loading pages without that obvious change?
 
 Features:
 
