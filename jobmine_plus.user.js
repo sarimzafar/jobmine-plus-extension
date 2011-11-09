@@ -40,7 +40,7 @@
 \*===============================*/
 var CONSTANTS = {
    VERSION           : "2.0.0",
-   DEBUG_ON          : true,
+   DEBUG_ON          : false,
    PAGESIMILAR       : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP    : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
    EXTRA_URL_TEXT    : "__Jobmine_Plus_has_taken_over_Jobmine",
@@ -119,8 +119,6 @@ var IMAGES = {
    MESSAGE_CLOSE  : "data:image/gif;base64,R0lGODlhDQAMANUAAObm5qampn19fX5+fq2trfT09N/f34SEhPf39/n5+XV1dYmJiXNzc2xsbHd3d2JiYlRUVKOjo3x8fIGBgX9/f9vb24uLi9nZ2YyMjIODg9bW1qmpqZGRkc/Pz3FxcY+Pj/X19ZCQkG5ubqqqqqenp4qKiuXl5eLi4unp6aysrN7e3nR0dGtra/Pz8/j4+Pr6+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAANAAwAAAZiwNfJ9CoaExWU8LAgGl0ERwhViLBKTldqJdggXi0SywLQrgaqb7EVYGE6K4nKaAx7Hoc5vZi4rCAfAHsvWgoTJA0lgk8pDBQGBW1YRS4jXHpsVwRCGWh0YSIcSicGgyAaSkEAOw==",
    EMPLOYER_NAME  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOYAAAANCAMAAACKN+LIAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAADBQTFRFycnJiYmJra2t9vb2kpKS7e3tgICA5OTkpKSktra20tLSm5ubwMDA29vbd3d3////5P2LPQAAAn5JREFUeNrElul2ozAMhb0bsJDe/23nyhsmzbTNnEzrPxBrsT5rIUa+vU6WV9bJ8VP5waf82DJc1xcsdffNmLuVn8Skb6Tsf2AG+g1M3hIHL5paIyZxMiJlC+yqUHdPdlx/dmnLCXPIUCh4UmIb1ROrJ8WMgXnrRDDx0CoqgVVmr454b34IJ4SoD4taLgGuCMZ4Jxs0JIGt+upReBXlfpOlBE55UcGLg1qBLAc948Is0VsaeQMpXJRw3rLp4DhPaY3OZnFWrb1P4A27YnpvXcW0RSKcUkIrJg9/3gdXHenyfIgp/ZXEb6dB8FQVsxTcyx70CAP6elyGwYhiA8/ejGuc+nuq7IrqYzrEJ6gnM3tTb8e5BrSrCbwX+lC02B3SUXkRMai1auvBLQWKqeHoq/IUzQB+Gjur318Nc7Z5VGNN7WAqOqbaU3r1FJpRHIyL7TWl6sbKTUUdIroDNwyuK5sLZuFWu88xh3RUMy+Y1DENK2ZtTzXbSsTuWZUvTCSOE62NXFwLdLg6ByZKwui5F6YkMsj7DXNV6RFRPfM55r5f5k+yuS9z5LisV0xU25JNXL1Wtmf/YcxR29Nae5LNgYlyiFrpSzYxqYuTG+ZNpUd0hIcR1DCzPrX70CkXZt9tBwzp6M0cHjAJ3UBrbyL0egx6U4ybmGfJtWV1WYiW3lwxrReXvIZw2gUz8/zwdsybSo9Ie1OIHntTXJ20FmMqXph1dx7QpXNCugdMW+fnMml1IKu+xwxONDFjaXO1vofbpL1htmGOEMKKKWF+eEfRriojIp204TTv/0Y9+3fjyj+7o7+Z2hc+vD+DOWfiGzG/+vvxC5hzJr4R86UC+SPAAPcUmZQN0BP2AAAAAElFTkSuQmCC",
    JOB_TITLE      : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG0AAAANCAMAAACU0hA+AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAC1QTFRFiYmJ9vb27e3tpKSkgICA5OTkkpKStra2ycnJm5ubra2twMDA29vbd3d3////XBn6XAAAATBJREFUeNq8kul2xCAIhcEtbvD+j1tEjUlq2+mZnvpnIst8XrjAL59Km2DK67M8chlmoxkRID3f/2WP7lO8pZV0a1y08rOAv6eRdRSQm9DI0ZGL0m8D6aQ0WimTXke2JyRQiKBKdQICPyByTIHZaBgTUcJFSwahzMcIUEpSqLcnZvbkz2zfTZbvysWhVHu2cNEmtFNbCoghn3uTltaq6cM21XHNZk1SojM7abbdXa/24xVPGsorOcLSdqEl6gPd02Z20tSWUtqqDdUtTUdLe9pxPPZ+13ZcXf7Uhl9ow7tLOs2337YZtHXRRrTTZvbT3oQahxfbvdFGo+6N46e9cVZPSjiZi6ezWmvsa2Qn7fSkhEOXxhi6J0ejeNISuQL83sn5N9Xv0qD8H22N7rXzIcAAJahEsPp7aB4AAAAASUVORK5CYII=",
-   TWITTER        : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA31JREFUeNrsV11Ik2EUPnM6TPxjOGRSeJFTVAghLTe1G0EEKQd1IXRTLPRKCexKBW/sJpDypuUPUhd6o3aheZEMLRZDwhgaY4Kh4paI6VRc2BrTnvO2yaTETb9JxHfg+d69P9/7Pe855z3nTHFwcED/sihkgjJBmaBMUCb4HxGsqqqKdGkRcBeoAJyAFeifmJiImmD8KQ6lBXTAJ+D7MeTsYf3rwD3ACNyK9mNxUa5/DawC7wEv8BLQsGaC2lEDb/hHbW0tdXV1UXNzM2VkZPDQTVjgWsxMjM1Zc6tqtZqysrJoYWGBfD5faPoV8AgwA3f0ej21traSSqUiu91Og4ODNDs7e6hRHOZjLAheRvNFq9VSR0cHud1uobWZmZlwopSWlibm8/LyRJ/339raoqGhIRoZGeEhN3CF3QPv/5TSxMv8WFtbo7GxMSotLaWWlhZqb28ng8FAcXG/tyovLz8kJzSgUBBr3WQyiXcgF4EngA+H7pWMIE4bQNPNGlleXqbNzU1KSEig4uJiamtro8bGRsrMzAyR+PM2xseT0WgkpVLJ3Qfc5xYkVVLe4imggc2YmJh45OM1NTWUm5srSB4nOTk5VF1dTdvb2wIOh4OH+eJ8kOoWi42sViuZzWba3d09MqnT6Sg1NfXYl3muqamJSkpKaG9vLzTslSzMwMxf0fTs7+8L30pJSYk6iHq9XgoEAiFTsyglIQhfCbnDM344nU5xWTY2NiIm5/F4qLOzU9xo9uOgOM5MEOS60fi5hRY5dU25XC7q6+uj9fX1iAmyz9lsNhEJ/H4/BdPfjzMRBCm+DfXBMFKPPudVC3c4/lksFuHwJwmvHR0dDXUfAhdAziRFLq4QCbaoSATcpaWlcg53PJaUlCQ+zD55krBZ5+bmQt3nIOeXqlj4xo+dnR2qq6sTDr6ysiLIFRYWUn5+PgVj2l+F4+bw8DANDAxQMGu9iJRcxKkOZrWh0WdnZ4dnhBOFfY01Nz4+HtJyL8jVx6pY4ArmBhcAZWVlVFlZKVJacnLyYcjgvTi+MbHp6WmanJwU2g5KD8g1xLpg7Udzn3+np6dTQUGByB4ajUbkYg7ci4uLND8/Hx5G3gFNIPf5vCrqS8BT4PYJy/m2PwbehgX6c6moXVzzAZx0DcDVIGm2swfgwo/rvVNpTP5XJxOUCcoEZYIyQWnllwADADxxoZVLM9g7AAAAAElFTkSuQmCC",
-   TWITTER_GLOW   : "data:image/png;base64,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",
 };
 
 /*===============================*\
@@ -252,12 +250,13 @@ var BROWSER = {
 }
 
 var PAGEINFO = {
-   URL      : document.location.href,
-   DOMAIN   : document.domain,
-   TYPE     : null,
-   TITLE    : document.title,
-   IN_IFRAME: top != self,
-   BROWSER  : (function(){var ua = navigator.userAgent.toLowerCase();var b;if (ua.contains("firefox")) {b = BROWSER.FIREFOX;} else if(ua.contains("chrome")) {b = BROWSER.CRHOME;} else {b = BROWSER.OTHER;}return b;})(),
+   URL               : document.location.href,
+   DOMAIN            : document.domain,
+   TYPE              : null,
+   TITLE             : document.title,
+   IN_IFRAME         : top != self,
+   BROWSER           : (function(){var ua = navigator.userAgent.toLowerCase();var b;if (ua.contains("firefox")) {b = BROWSER.FIREFOX;this.BROWSER_VERSION = ua.substr(ua.lastIndexOf("firefox/")+8);} else if (ua.contains("chrome")) {b = BROWSER.CRHOME;var ua = navigator.userAgent.toLowerCase();var start = ua.lastIndexOf("chrome/")+7;this.BROWSER_VERSION = ua.substring(start, ua.indexOf(" ", start));} else {b = BROWSER.OTHER;}return b;})(),
+   BROWSER_VERSION   : (function(){var ua = navigator.userAgent.toLowerCase();var b;if (ua.contains("firefox")) {b = ua.substr(ua.lastIndexOf("firefox/")+8);} else if (ua.contains("chrome")) {var ua = navigator.userAgent.toLowerCase();var start = ua.lastIndexOf("chrome/")+7;b = ua.substring(start, ua.indexOf(" ", start));} else {b = null;}return b;})(),
 };
 
 var REVERSE_PAGES = {
@@ -411,7 +410,7 @@ var BRIDGE = {
             document.dispatchEvent(bridge_evt3);
          }
          function convertArgumentsToBridgePass(obj) { 
-            if(Object.prototype.toString.call(obj) != "[object Arguments]" || arguments.length == 0) {
+            if(Object.prototype.toString.call(obj) != "[object Arguments]" && Object.prototype.toString.call(obj) != "[object Object]" || arguments.length == 0) {
                return null;
             }
             //Check each arguement and form a string to pass
@@ -1109,15 +1108,15 @@ function addHeader() {
    BRIDGE.registerFunction("showAbout", function(){
       showPopup(true, "<h1>Jobmine Plus Version "+CONSTANTS.VERSION+"</h1><br/>Hey there!<br/><br/>This is Matthew Ng the creator of Jobmine Plus. I am a System Designs Engineering Student at the University of Waterloo. I created this because Jobmine is not user friendly so this addon/extension should speed things up.<br/><br/>Feel free to email me if there are any problems, concerns or requests for future updates:<br/><a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a><br/><br/>Visit the extensions website for information and future updates:<br/><a href='http://userscripts.org/scripts/show/80771'>http://userscripts.org/scripts/show/80771</a><br/><br/>", "About Me", 400);
    });
-   header += '</ul></nav><div id="uwBanner" class="banner"></div><a target="_blank" title="Follow Me!" href="https://twitter.com/jobmineplus" class="twitter-follow-button" data-button="grey" data-text-color="#FFFFFF" data-link-color="#00AEFF" data-show-count="false"></a><script src="//platform.twitter.com/widgets.js" type="text/javascript"></script></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul><!-- <li class="statusItem">Hi <span id="jbmnplsUserName">'+fname+' '+lname+'!</span><span id="jbmnplsUserID"> ('+studNum+')</span></li> --></ul></div><div id="jbmplsControlPanel"><!-- <a href="#">Settings</a> | --><span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
+   header += '</ul></nav><div id="uwBanner" class="banner"></div><div style="float:right;" id="jbmnplsTwitterHolder">'+attachTwitterButton()+'</div></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul><!-- <li class="statusItem">Hi <span id="jbmnplsUserName">'+fname+' '+lname+'!</span><span id="jbmnplsUserID"> ('+studNum+')</span></li> --></ul></div><div id="jbmplsControlPanel"><!-- <a href="#">Settings</a> | --><span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
    $("body").prepend(header);
-   
 }
 
 /**
  *    Applies the update message to the page
  */
 function addUpdateMessage() {
+   if(UTIL.idExists("jbnplsUpdate")) {return;}
    $(document.body).append("<div style='display:none;' id='jbnplsUpdate'><a style='margin:0 auto;width:500px;' href='"+LINKS.UPDATE_LINK+"'>You are using an old version of Jobmine Plus, click to update.</a><div onclick='this.parentNode.style.visibility=\"hidden\";' class='close'></div></div>");
 }
 
@@ -1146,6 +1145,10 @@ function addProfileNav() {
       navHTML += "</ul></nav>";
       $("body form:eq(0)").append(navHTML);
    }
+}
+
+function attachTwitterButton() {
+   return '<iframe allowtransparency="true" frameborder="0" scrolling="no"src="//platform.twitter.com/widgets/follow_button.html?screen_name=jobmineplus&button=grey"style="width:70px;margin-top:2px;height:20px;"></iframe>';
 }
 
 /**
@@ -1183,6 +1186,19 @@ function showPopup(isBlack, bodyText, title, width, maxHeight, onCloseFunction, 
       } else {
          body.css("height", "auto");
       }
+      
+      //Escape events
+      $(document).bind("keydown",function(e){
+         switch(e.which) {
+            case 27:    //Escape key
+               hidePopup("cancel");   
+               break;
+            default:
+               return;
+               break;
+         }
+         e.preventDefault();
+      });
    } else {
       node.removeAttr("title");
       content.addClass("disabled");
@@ -1213,6 +1229,8 @@ function hidePopup(arg) {
       $("#jbmnplsPopupBody").empty();  //Delete the content
       $("#jbmnplsPopupFrame").attr("src", LINKS.BLANK);
       $("#jbmnplsPopupContent").removeClass("iframe")
+      //Remove events
+      $(document).unbind("keydown");
       //Lag time when closing window so overlay goes quickly
       setTimeout(function(){$("body").removeClass("showPopup").css("padding-right", "50px");},100);
    }
@@ -1361,7 +1379,7 @@ function removeTimer() {
 
 function initRowDeletion() {
    // Delete button for tables
-   $("form:eq(0) > div.jbmnplsTable div.delete").live("click", function (){
+   $("div.jbmnplsTable div.delete").live("click", function (){
       var obj = $(this);
       if (obj.attr("disabled") != null || obj.hasClass("loading")) {  
          return false;
@@ -1964,6 +1982,7 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
       "#jbmnplsSearchCriteria div.fields input[type='input'],#jbmnplsSearchCriteria div.fields input[type='input'].empty" : {
          "border"       :  "1px solid #999",
          "border-radius":  "2px",
+         "-moz-border-radius":  "2px",
          padding        :  "2px",
       },
       "#jbmnplsSearchCriteria div.fields input:focus[type='input'],#jbmnplsSearchCriteria div.fields input[type='input']:hover" : {
@@ -1997,8 +2016,10 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          width          :  "700px",
          padding        :  "15px",
          border         :  "3px solid #222",
+         "-moz-border-radius":  "20px",
          "border-radius":  "20px",
          "box-shadow"   :  "0 0 7px black",
+         "-moz-box-shadow"   :  "0 0 7px black",
          "position"     :  "relative",
          "overflow"     :  "hidden",
          "height"       :  "350px",
@@ -2042,7 +2063,7 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
    var disc3 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP3").html().replace("&nbsp; ", "Select a discipline");
    var filter = $("#UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS").html();
    
-   var html = '<div id="jbmnplsSearchCriteria"><div class="field" style="position:absolute;top:6px;font-size:12px;z-index:3;color:#222;"><input type="checkbox" '+(PREF.load("NO_CLOSE_WHEN_SEARCH", this.checked)?"checked":"")+' id="jbmnplsDontCloseSearch"><label style="position:relative;top:-2px;" for="jbmnplsDontCloseSearch">Do not close when searching</label></div><div id="jbmnplsCloser" class="field"><span class="fakeLink noselect" onclick="var parent=this.parentNode.parentNode;if(parent.className==&quot;closed&quot;){parent.className=&quot;&quot;}else{parent.className=&quot;closed&quot;}">Click to hide/show</span></div><div id="jbmnplsSearchWrapper"><div class="header"><span class="name" style="width:100%; text-align:center;">Disciplines</span></div><div class="fields"><select style="width:32%" id="jbmnplsDisciples1" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP1">'+disc1+'</select><select style="width:32%" id="jbmnplsDisciples2" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP2">'+disc2+'</select><select style="width:32%" id="jbmnplsDisciples3" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP3">'+disc3+'</select></div><div class="header"><span class="name" style="width:21%; text-align:center;" title="Required field">Term*</span><span class="name" style="width:35%; text-align:center;"> Location</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Search Filter*</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Type*</span></div><div class="fields"><select onchange="var obj=document.getElementById(\'UW_CO_JOBSRCH_UW_CO_WT_SESSION\');addchg_win0(obj);obj.value=this.value;" style="width:21%" class="required" id="jbmnplsTerm"><option value="">Select a term</option></select><select style="width:35%" id="jbmnplsLocation" title="Jobmine will ONLY allow you to choose these places!"><option value="0">All locations</option></select><select class="required" style="width:19%" id="jbmnplsJobFilter" name="UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS"><option value="">Select a job filter</option>'+filter+'</select><select onchange="if(this.value!=\'\'){document.getElementById(this.value).checked=true;submitAction_win0(this.form,\'TYPE_COOP\');}" class="required" style="width:19%" id="jbmnplsJobType"><option value="">Select a job type</option><option value="TYPE_COOP">Co-op</option><option value="TYPE_ARCH">Co-op ARCH</option><option value="TYPE_CA">Co-op CA</option><option value="TYPE_TEACH">Co-op TEACH</option><option value="TYPE_PHARM">Co-op PHARM</option><option value="TYPE_ALUM">Alumni</option><option value="TYPE_GRAD">Graduating</option><option value="TYPE_PART_TIME">Other</option><option value="TYPE_SUMMER">Summer </option></select></div><div class="header"><span class="name" style="width:48.5%; text-align:center;">Employer\'s Name</span><span class="name" style="width:48.5%; text-align:center;">Job Title</span></div><div class="fields"><input type="input"  name="UW_CO_JOBSRCH_UW_CO_EMPLYR_NAME" style="width:48.5%" id="jbmnplsEmployer" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"><input name="UW_CO_JOBSRCH_UW_CO_JOB_TITLE" type="input" style="width:48.5%" id="jbmnplsJobTitle" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"></div><div class="header"><span class="name" style="width:100%; text-align:center;">Job Level</span></div><div class="fields"><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_JR").checked?" checked='checked'":"")+' type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_JR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_JR" name="UW_CO_JOBSRCH_UW_CO_COOP_JR"><label for="UW_CO_JOBSRCH_UW_CO_COOP_JR">Junior</label></div><div style="width:20%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_INT").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_COOP_INT" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_INT$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_INT"><label for="UW_CO_JOBSRCH_UW_CO_COOP_INT">Intermediate</label></div><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_SR").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_COOP_SR" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_SR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_SR"><label for="UW_CO_JOBSRCH_UW_CO_COOP_SR">Senior</label></div><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_BACHELOR").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_BACHELOR" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_BACHELOR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_BACHELOR"><label for="UW_CO_JOBSRCH_UW_CO_BACHELOR">Bachelors</label></div><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_MASTERS").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_MASTERS" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_MASTERS$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_MASTERS"><label for="UW_CO_JOBSRCH_UW_CO_MASTERS">Masters</label></div><div style="width:auto;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_PHD").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_PHD" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_PHD$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_PHD"><label for="UW_CO_JOBSRCH_UW_CO_PHD">Ph.D.</label></div></div><div class="fields"><br><input type="button" value="SEARCH" style="width:100%" id="jbmnplsSearchBtn"></div></div></div>';
+   var html = '<div id="jbmnplsSearchCriteria"><div class="field" style="position:absolute;top:6px;font-size:12px;z-index:3;color:#222;"><input type="checkbox" '+(PREF.load("NO_CLOSE_WHEN_SEARCH", this.checked)?"checked":"")+' id="jbmnplsDontCloseSearch"><label style="position:relative;top:-2px;" for="jbmnplsDontCloseSearch">Do not close when searching</label></div><div id="jbmnplsCloser" class="field"><span class="fakeLink noselect" onclick="var parent=this.parentNode.parentNode;if(parent.className==&quot;closed&quot;){parent.className=&quot;&quot;}else{parent.className=&quot;closed&quot;}">Click to hide/show</span></div><div id="jbmnplsSearchWrapper"><div class="header"><span class="name" style="width:100%; text-align:center;">Disciplines</span></div><div class="fields"><select style="width:32%" id="jbmnplsDisciples1" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP1">'+disc1+'</select><select style="width:32%" id="jbmnplsDisciples2" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP2">'+disc2+'</select><select style="width:32%" id="jbmnplsDisciples3" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP3">'+disc3+'</select></div><div class="header"><span class="name" style="width:21%; text-align:center;" title="Required field">Term*</span><span class="name" style="width:35%; text-align:center;"> Location</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Search Filter*</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Type*</span></div><div class="fields"><select onchange="var obj=document.getElementById(\'UW_CO_JOBSRCH_UW_CO_WT_SESSION\');addchg_win0(obj);obj.value=this.value;" style="width:21%" class="required" id="jbmnplsTerm"><option value="">Select a term</option></select><select style="width:35%" id="jbmnplsLocation" title="Jobmine will ONLY allow you to choose these places!"><option value="0">All locations</option></select><select class="required" style="width:19%" id="jbmnplsJobFilter" name="UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS"><option value="">Select a job filter</option>'+filter+'</select><select onchange="if(this.value!=\'\'){document.getElementById(this.value).checked=true;submitAction_win0(this.form,\'TYPE_COOP\');}" class="required" style="width:19%" id="jbmnplsJobType"><option value="">Select a job type</option><option value="TYPE_COOP">Co-op</option><option value="TYPE_ARCH">Co-op ARCH</option><option value="TYPE_CA">Co-op CA</option><option value="TYPE_TEACH">Co-op TEACH</option><option value="TYPE_PHARM">Co-op PHARM</option><option value="TYPE_ALUM">Alumni</option><option value="TYPE_GRAD">Graduating</option><option value="TYPE_PART_TIME">Other</option><option value="TYPE_SUMMER">Summer </option></select></div><div class="header"><span class="name" style="width:48.5%; text-align:center;">Employer\'s Name</span><span class="name" style="width:48.5%; text-align:center;">Job Title</span></div><div class="fields"><input type="input"  name="UW_CO_JOBSRCH_UW_CO_EMPLYR_NAME" style="width:48.5%" id="jbmnplsEmployer" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"><input name="UW_CO_JOBSRCH_UW_CO_JOB_TITLE" type="input" style="width:48.5%" id="jbmnplsJobTitle" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"></div><div class="header"><span class="name" style="width:100%; text-align:center;">Job Level</span></div><div class="fields"><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_JR").checked?" checked='checked'":"")+' type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_JR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_JR" name="UW_CO_JOBSRCH_UW_CO_COOP_JR"><label for="UW_CO_JOBSRCH_UW_CO_COOP_JR">Junior</label></div><div style="width:20%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_INT").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_COOP_INT" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_INT$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_INT"><label for="UW_CO_JOBSRCH_UW_CO_COOP_INT">Intermediate</label></div><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_SR").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_COOP_SR" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_SR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_SR"><label for="UW_CO_JOBSRCH_UW_CO_COOP_SR">Senior</label></div><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_BACHELOR").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_BACHELOR" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_BACHELOR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_BACHELOR"><label for="UW_CO_JOBSRCH_UW_CO_BACHELOR">Bachelors</label></div><div style="width:17%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_MASTERS").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_MASTERS" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_MASTERS$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_MASTERS"><label for="UW_CO_JOBSRCH_UW_CO_MASTERS">Masters</label></div><div style="width:auto;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_PHD").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_PHD" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_PHD$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_PHD"><label for="UW_CO_JOBSRCH_UW_CO_PHD">Ph.D.</label></div></div><div class="fields"><br><input type="button" value="SEARCH" style="width:100%" id="jbmnplsSearchBtn"></div></div></div>';
    $("body > form:eq(0)").prepend(html);
    
    /**
@@ -2224,7 +2245,7 @@ var TABLECOLUMNS = {
       var eHour = finishedDate.getHours();
       var eMin  = finishedDate.getMinutes();
       var dateStr = year + month + day + "T" + sHour.toDigits(2) + sMin.toDigits(2) + "00Z/" + year + month + day + "T" + eHour.toDigits(2) + eMin.toDigits(2) + "00Z";
-      return '<a href="http://www.google.com/calendar/event?action=TEMPLATE&text='+title+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" alt="0" border="0"></a>';
+      return '<a title="Google calendar may have the wrong date, please be aware of day light savings time!" href="http://www.google.com/calendar/event?action=TEMPLATE&text='+title+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" alt="0" border="0"></a>';
    },
    googleCalendarGroup : function(row, rowData, reverseLookup){
       var company = rowData[reverseLookup["Employer Name"]];
@@ -2249,7 +2270,7 @@ var TABLECOLUMNS = {
       var eHour = parseInt(endTime[0],10) + new Date().getTimezoneOffset()/60 + (end[1].toUpperCase() == "AM" ? 0 : 12);
       var eMin = parseInt(endTime[1],10);
       var dateStr = year + month + day + "T" + sHour.toDigits(2) + sMin.toDigits(2) + "00Z/" + year + month + day + "T" + eHour.toDigits(2) + eMin.toDigits(2) + "00Z";
-      return '<a href="http://www.google.com/calendar/event?action=TEMPLATE&text='+title+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" alt="0" border="0"></a>';
+      return '<a title="Google calendar may have the wrong date, please be aware of day light savings time!" href="http://www.google.com/calendar/event?action=TEMPLATE&text='+title+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" alt="0" border="0"></a>';
    },
 }
 
@@ -3382,7 +3403,7 @@ JbmnplsTable.prototype.applyTableSorter = function() {
    }
    //Append events
    this.jInstance.unbind("sortEnd").bind("sortEnd", this.updateCheckboxes);
-   this.jInstance.find("tbody:eq(0) tr").die("click").live("click", this.onClick);
+   this.jInstance.find("tbody tr").die("click").live("click", this.onClick);
    this.appliedSorting = true;
    return this;
 }
@@ -3453,6 +3474,10 @@ if (!PREF.load("HIGHLIGHT_LAST_ROW")) {
 //Elimate their highlight methods
 BRIDGE.addFunction("HighLightTR");
 
+//Destory keypressings and use it for my purposes
+BRIDGE.addJS(function(){window.doKeyPress_win0 = function(){}});
+
+
 /*================================*\
 |*            __CSS__             *|
 \*================================*/
@@ -3462,6 +3487,7 @@ var CSSOBJ = {
     */
    ".draggable.draggable-down:not(.disabled), .draggable.draggable-move:not(.disabled)" : {
       "box-shadow"   :  "0 0 10px white !important",
+      "-moz-box-shadow"   :  "0 0 10px white !important",
       cursor         :  "move !important",
    },
    /**
@@ -3516,7 +3542,6 @@ var CSSOBJ = {
    "a.disabled, span.fakeLink.disabled" : {
       cursor : "default",
    },
-   
    /**
     *    Cannot select any text with this
     */
@@ -3611,7 +3636,7 @@ var CSSOBJ = {
    },
    "#jbmnplsHeader ul li": {
       "float": "left",
-      "margin-left": "25px",
+      "margin-left": "20px",
       "list-style-type": "none",
    },
    "#jbmnplsNav ul li a, #jbmnplsNav ul li .fakeLink": {
@@ -3625,18 +3650,6 @@ var CSSOBJ = {
    },
    "#jbmnplsNav ul li a:hover, #jbmnplsNav ul li .fakeLink:hover": {
       "text-shadow": "0 0 0 transparent, #ffffbe 0 0 0.5em, #ffffbe 0 0 0.5em",
-   },
-   "#jbmnplsTopGroup a.twitter-follow-button" : {
-      display        :  "block",
-      "float"        :  "right",
-      width          :  "40px",
-      position       :  "relative",
-      top            :  "-8px",
-      height         :  "40px",
-      background     :  "no-repeat url('"+IMAGES.TWITTER+"')",
-   },
-   "#jbmnplsTopGroup a.twitter-follow-button:hover" : {
-      background     :  "no-repeat url('"+IMAGES.TWITTER_GLOW+"')",
    },
    "#jbmnplsBottomGroup": {
       "padding": "0px 20px",
@@ -3666,6 +3679,9 @@ var CSSOBJ = {
    "#jbmplsControlPanel a:hover, #jbmplsControlPanel span.fakeLink:hover" : {
       "color" : "#6f6f6f",
    },
+   "#jbmnplsFrameWrapper" : {  
+      background        :  'no-repeat center center url("'+IMAGES.LARGE_LOADING+'")',
+   },
    /**
     *    Profile Nav
     */
@@ -3694,9 +3710,12 @@ var CSSOBJ = {
       "margin-bottom"   :  "10px",
       "margin-left"     :  "-15px",
       "box-shadow"      :  "0 0 9px black",
+      "-moz-box-shadow" :  "0 0 9px black",
       "text-align"      :  "center",
       "border"          :  "2px solid #CCC",
       "border-top"      :  "none",
+      "-moz-border-radius-bottomright"          :  "15px",
+      "-moz-border-radius-bottomleft"          :  "15px",
       "border-bottom-right-radius"          :  "15px",
       "border-bottom-left-radius"          :  "15px",
    },
@@ -3730,6 +3749,7 @@ var CSSOBJ = {
     */
    "div.jbmnplsTable" : {
       "min-height" : "50px",
+      "-moz-border-radius" : "10px",
       "border-radius" : "10px",
       "border" : " 2px solid black",
       "background" : " #333333",
@@ -3893,7 +3913,7 @@ var CSSOBJ = {
       "z-index"   :  "1000",
    },
    "body.showPopup" : {
-      overflow : "hidden",
+      overflow : "hidden !important",
    },
    "html body.showPopup" : {
       "margin-right"  :  DIMENSIONS.SCROLLBAR_WIDTH+"px",
@@ -3930,6 +3950,7 @@ var CSSOBJ = {
       "background-color"   :  "white",
       "border"             :  "black 2px solid",
       "box-shadow"         :  "0 0 7px black",
+      "-moz-box-shadow"         :  "0 0 7px black",
       "position"           :  "relative",
    },
    "#jbmnplsPopup.white div.wrapper div.content .title" : {
@@ -4118,6 +4139,7 @@ var CSSOBJ = {
       "top"             :  "-50px",
       "position"        :  "relative",
       "width"           :  "100%",
+      "-moz-box-shadow"      :  "0 3px 10px #333",
       "box-shadow"      :  "0 3px 10px #333",
       "background"      :  "#fafafa",
       "text-align"      :  "center",
@@ -4169,7 +4191,6 @@ switch (PAGEINFO.TYPE) {
          $(document.body).removeAttr("onload");
          //Delete the useless stuff on home page
          $("body > table").remove();
-         
          /**
           *    Handle what page to go to
           */
@@ -4192,7 +4213,7 @@ switch (PAGEINFO.TYPE) {
          setNavSelection($("#jbmnplsNav a[type='"+currentPage+"']").attr("item"));
          
          //Appends the iframe that holds the content
-         $("body").append("<div id='jbmnplsFrameWrapper'><iframe src='"+link+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div><div id='pthnavcontainer' class='hide'></div>")
+         $("body").append("<div id='jbmnplsFrameWrapper'><iframe style='position:relative;visibility:hidden;' src='"+link+"' frameborder='0' id='jbmnplsWebpage' width='100%' height='100%'/></div><div id='pthnavcontainer' class='hide'></div>")
         
          //Hacked the navigation because we have an iframe
          $("#jbmnplsNav a").click(function(e){
@@ -4210,6 +4231,17 @@ switch (PAGEINFO.TYPE) {
             DEBUGGER.init();
             initDraggable();
          }
+         //Frames
+         function hideFrame(){
+            $("#jbmnplsWebpage").css("visibility", "hidden");     
+         }
+         function showFrame(){
+            setTimeout(function(){  //Must come after Firefox trashes last iframe data before loading next url
+               $("#jbmnplsWebpage").css("visibility", "visible");
+            },1);
+         }
+         BRIDGE.registerFunction("hideFrame",hideFrame);
+         BRIDGE.registerFunction("showFrame",showFrame);
       } else {
          //Cannot have itself in its own iframe
          return;
@@ -4284,6 +4316,7 @@ switch (PAGEINFO.TYPE) {
                   }
                }
             });
+            setTitle("Job Details: "+jobDescriptionData.employerName);
             //Add url a-href to most of the links on page
             jobDescriptionData.description = jobDescriptionData.description.replace(/((http:|https:|www.)[^\s]+)/gi, function(item){
                item = item.replace(/&nbsp;/, "");        //usually this appears at the end of the link
@@ -4302,6 +4335,9 @@ switch (PAGEINFO.TYPE) {
                "body.PSPAGE" : {
                   "overflow-y"  :  "scroll",
                   "padding"     :   "0 50px",
+               },
+               "html,body" : {
+                  "height"       :  "auto !important",
                },
                ".printshow" : {
                   "display" : "none",
@@ -4411,7 +4447,7 @@ switch (PAGEINFO.TYPE) {
                   "color" : " #CCC",
                },
             };
-            var printCSS = "<style>@media print{a{color: black !important;text-decoration: none;}hr{color:black;}.printHide{display:none !important;}#jobDetails .title{color: black !important;}body, #jobDetails.page{width: 100%;padding:0px;margin:0px;-moz-box-shadow: none;-webkit-box-shadow: none;background-color:white;}.printshow{display:inline !important;}}</style>";
+            var printCSS = "<style>@media print{#jbmnplsPopup{display:none !important;}body.PSPAGE.JOB_DETAILS{margin:0;padding:0;}a{color: black !important;text-decoration: none;}hr{color:black;}.printHide{display:none !important;}#jobDetails .title{color: black !important;}body, #jobDetails.page{width: 100%;padding:0px;margin:0px;-moz-box-shadow: none;-webkit-box-shadow: none;background-color:white;}.printshow{display:inline !important;}}</style>";
             //Clean up the page
             form.children("div").remove();
             form.append(newBody).append(toolbar);
@@ -4485,10 +4521,14 @@ switch (PAGEINFO.TYPE) {
          //Record last page visited
          if (PAGEINFO.TYPE != null) {
             PREF.save("LAST_PAGE", REVERSE_PAGES[PAGEINFO.TYPE]);
-            $(window).unload(function(){
-               PREF.save("LAST_PAGE", REVERSE_PAGES[PAGEINFO.TYPE]);
-            });
          }
+         //Iframe is done
+         $(window).unload(function(){
+            if (PAGEINFO.TYPE != null) {
+               PREF.save("LAST_PAGE", REVERSE_PAGES[PAGEINFO.TYPE]);
+            }
+            BRIDGE.addJS(function(){if(window.parent.hideFrame){window.parent.hideFrame();} });
+         });
          
          //Welcome message - only shown once!
          if(PREF.load("SHOW_WELCOME_MSG")) {
@@ -4663,6 +4703,7 @@ switch (PAGEINFO.TYPE) {
                      .addControlButton("Delete Selected", handleCheckedDelete)
                     .addCheckboxes()
                     .appendTo(form);
+               $(document.body).scrollTop(0);
                }break;
             case PAGES.APPLICATIONS:{     /*Expand to see what happens when you reach the applications page*/
                //For merging application
@@ -4713,13 +4754,14 @@ switch (PAGEINFO.TYPE) {
                form.children("div:not('#PAGECONTAINER')").remove();
                $("#win0divPSTOOLBAR").remove();
                $("#PAGECONTAINER>table").css("margin", "0 auto");
-               $("#ACE_width").removeAttr("width").find("tbody>tr:eq(0)>td").eq(-1).attr("width",0);
+               $("#ACE_width").removeAttr("width").find("tbody>tr:eq(0)>td").eq(-1).remove();
                }break;
          }
-      }
+         BRIDGE.addJS(function(){ if(window.parent.showFrame){window.parent.showFrame();} });
+      }        
       break;
 }
-
+ 
 
 
 
