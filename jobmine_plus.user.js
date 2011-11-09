@@ -726,6 +726,8 @@ var MESSAGE = {
    TABLES_NO_SET_ROW    : "Cannot set table rows, use deleteRow() / insertRow() instead.",
    TABLES_NO_SET_COL    : "Cannot set table columns, use deleteColumn() / insertColumn() instead.",
    JOBID_INVALID        : "jobID inputted is not valid.",
+   UNHIDE_COLUMNS       : "Please unhide all columns in Jobmine for this to work.",
+   UNHIDE_COLUMNS_PAGE  : "Please unhide columns in Jobmine for features on this page to work.",
 };
 //Log into firebug
 function Log() {
@@ -2223,6 +2225,18 @@ function makeTable(defaultName, tableID, objectToAppendTo) {
  */
 var TABLECOLUMNS = {
    googleCalendar : function(row, rowData, reverseLookup){
+      if (  !reverseLookup.hasOwnProperty("Employer Name") 
+         || !reverseLookup.hasOwnProperty("Type") 
+         || !reverseLookup.hasOwnProperty("Room") 
+         || !reverseLookup.hasOwnProperty("Job Title") 
+         || !reverseLookup.hasOwnProperty("Interviewer") 
+         || !reverseLookup.hasOwnProperty("Instructions") 
+         || !reverseLookup.hasOwnProperty("Date") 
+         || !reverseLookup.hasOwnProperty("Start Time") 
+         || !reverseLookup.hasOwnProperty("Length") 
+      ) {
+         return MESSAGE.UNHIDE_COLUMNS;
+      }
       var company = rowData[reverseLookup["Employer Name"]];
       var title = encodeURIComponent("Interview with "+company);
       var type = rowData[reverseLookup["Type"]];
@@ -2248,6 +2262,18 @@ var TABLECOLUMNS = {
       return '<a title="Google calendar may have the wrong date, please be aware of day light savings time!" href="http://www.google.com/calendar/event?action=TEMPLATE&text='+title+'&dates='+dateStr+'&details='+details+'&location='+location+'&trp=false&sprop=&sprop=name:" target="_blank"><img src="http://www.google.com/calendar/images/ext/gc_button6.gif" alt="0" border="0"></a>';
    },
    googleCalendarGroup : function(row, rowData, reverseLookup){
+      if (  !reverseLookup.hasOwnProperty("Employer Name") 
+         || !reverseLookup.hasOwnProperty("Type") 
+         || !reverseLookup.hasOwnProperty("Room") 
+         || !reverseLookup.hasOwnProperty("Job Title") 
+         || !reverseLookup.hasOwnProperty("Interviewer") 
+         || !reverseLookup.hasOwnProperty("Instructions") 
+         || !reverseLookup.hasOwnProperty("Date") 
+         || !reverseLookup.hasOwnProperty("Start Time") 
+         || !reverseLookup.hasOwnProperty("Length") 
+      ) {
+         return MESSAGE.UNHIDE_COLUMNS;
+      }
       var company = rowData[reverseLookup["Employer Name"]];
       var title = encodeURIComponent("Interview with "+company);
       var location = rowData[reverseLookup["Room"]];location=location==""?"":encodeURIComponent("Tatham Center Room "+location.substr(2));
@@ -4229,8 +4255,8 @@ switch (PAGEINFO.TYPE) {
          //If debug is on, we can add the debugger window
          if( CONSTANTS.DEBUG_ON) {
             DEBUGGER.init();
-            initDraggable();
          }
+         initDraggable();
          //Frames
          function hideFrame(){
             $("#jbmnplsWebpage").css("visibility", "hidden");     
@@ -4566,27 +4592,40 @@ switch (PAGEINFO.TYPE) {
                BRIDGE.registerFunction("onShortList", onShortList);
                SearchManager.updateLastVisit();
                var table0 = makeTable("Results", "UW_CO_JOBRES_VW$scroll$0");
+               if (table0.columns > 8) {
+                  table0.insertColumn("Hiring Chances", 8, function(row, rowData, reverseLookup){
+                     if(   !reverseLookup.hasOwnProperty("Openings")
+                        || !reverseLookup.hasOwnProperty("# Apps")
+                     ) {
+                        return MESSAGE.UNHIDE_COLUMNS;
+                     }
+                     var openings = rowData[reverseLookup["Openings"]];
+                     var applications = rowData[reverseLookup["# Apps"]];
+                     if (openings.empty()&&applications.empty()){return "";}
+                     openings = openings.empty() ? 0 : parseInt(openings);
+                     applications = applications.empty() ? 1 : parseInt(applications) + 1;
+                     var percentage = Math.round(openings/applications*1000)/10;
+                     var value = (percentage>=100?99.9:percentage) +"%";
+                     return "<span title='Hiring Changes is just Openings/(Applications+1), meaning after you apply this is the percentage. NOT ACCURATE because it does not calculate your skill level'>"+value+"</span>";
+                  })
+               } else {
+                  showMessage(MESSAGE.UNHIDE_COLUMNS_PAGE, 12);
+               }
                table0.applyFilter("Employer Name", TABLEFILTERS.googleSearch)
                      .applyFilter("Location", TABLEFILTERS.googleMap)
-                     .insertColumn("Hiring Chances", 8, function(row, rowData, reverseLookup){
-                        var openings = rowData[reverseLookup["Openings"]];
-                        var applications = rowData[reverseLookup["# Apps"]];
-                        if (openings.empty()&&applications.empty()){return "";}
-                        openings = openings.empty() ? 0 : parseInt(openings);
-                        applications = applications.empty() ? 1 : parseInt(applications) + 1;
-                        var percentage = Math.round(openings/applications*1000)/10;
-                        var value = (percentage>=100?99.9:percentage) +"%";
-                        return "<span title='Hiring Changes is just Openings/(Applications+1), meaning after you apply this is the percentage. NOT ACCURATE because it does not calculate your skill level'>"+value+"</span>";
-                     })
                      .insertColumn("Read Status", 0, function(row, rowData, reverseLookup){
                         var id = rowData[reverseLookup["Job Identifier"]];
-                        if(id.empty()) {return "New";}
-                        if (rowData[reverseLookup["Apply"]] == "Already Applied") {
-                           return "Applied";
-                        } else if (rowData[reverseLookup["Short List"]] == "On Short List") {
-                           return "Shortlisted";
-                        } else if (SearchManager.hasRead(id)) {
-                           return "Read";
+                        if(id != null || id == "") {return "New";}
+                        try{
+                           if (rowData[reverseLookup["Apply"]] == "Already Applied") {
+                              return "Applied";
+                           } else if (rowData[reverseLookup["Short List"]] == "On Short List") {
+                              return "Shortlisted";
+                           } else if (SearchManager.hasRead(id)) {
+                              return "Read";
+                           }
+                        }catch(e){
+                           return MESSAGE.UNHIDE_COLUMNS;
                         }
                         return "New";
                      })
@@ -4688,12 +4727,16 @@ switch (PAGEINFO.TYPE) {
                
                form.find("div").css("display", "none");
                var table = makeTable("Jobs", "UW_CO_STUJOBLST$scrolli$0");
+               if (table.columns > 7) {  
+                  table.setHeaderAt(7, "Delete");
+               } else {
+                  showMessage(MESSAGE.UNHIDE_COLUMNS_PAGE, 12);
+               }
                table.applyFilter("", TABLEFILTERS.deleteRow)
                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
                     .applyFilter("Employer Name", TABLEFILTERS.googleSearch)
                     .applyFilter("Location", TABLEFILTERS.googleMap)
                     .applyFilter("Apply", TABLEFILTERS.fixApply)
-                    .setHeaderAt(7, "Delete")
                     .addControlButton("Select All", function(){
                         $("#"+table.tableID+" input.checkbox").attr("checked", true).parent().parent().addClass("selected");
                      })
@@ -4734,12 +4777,16 @@ switch (PAGEINFO.TYPE) {
                         })
                         .appendTo(form);
                var allApp = makeTable(null, "UW_CO_APPS_VW2$scrolli$0");
-               allApp.merge(7,10,"View/Edit Applications", applicationsMerge)
-                     .applyFilter(10, TABLEFILTERS.deleteRow)
-                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
+               if (allApp.columns > 11) {
+                  allApp.merge(7,10,"View/Edit Applications", applicationsMerge)
+                        .applyFilter(10, TABLEFILTERS.deleteRow)
+                        .setHeaderAt(10, "Delete");
+               } else {
+                  showMessage(MESSAGE.UNHIDE_COLUMNS_PAGE, 12);
+               }
+               allApp.applyFilter("Job Title", TABLEFILTERS.jobDescription)
                      .applyFilter("Employer", TABLEFILTERS.googleSearch)
-                     .setHeaderAt(10, "Delete").appendTo(form);
-               
+                     .appendTo(form);
                //Clean up all webpage :P
                form.children("div:not('.jbmnplsTable')").css("display", "none");
                }break;
