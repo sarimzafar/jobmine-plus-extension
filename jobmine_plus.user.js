@@ -16,6 +16,7 @@
 // @exclude        *WEBLIB_UW_DOCS.UW_CO_DOC_TEXT*
 // @exclude        *UW_CO_STUDENTS.UW_CO_EVALUATION*
 // @exclude        *&jbmnpls=ignore
+// @exclude        *UW_CO_EMPINFO_DTLS*
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -46,7 +47,7 @@
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION           : "2.0.0",
+   VERSION           : "2.0.1",
    DEBUG_ON          : false,
    PAGESIMILAR       : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP    : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -2206,7 +2207,7 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
  *       table.applyFilter(columnInput, filterFunction) //Provided a column, apply a filter when it builds/updates
  *       table.removeFilter(columnInput)        //Provided a column, removes a filter
  *       table.addCheckboxes(columnNumber)      //Adds checkboxes to the table that is all managed by the class; columnNumber is optional, will set to 1st column if null
- *       table.addControlButton(name, onclick_OR_location)   //Adds a control button on the table
+ *       table.addControlButton(name, onclick_OR_location)   //Adds a control button on the table, attaches an array of colours
  *       table.removeControlButton(name)        //Removes a control button by name
  *       table.build()                          //Builds the html of the table (better to run table.appendTo(obj) after create table or parse table)
  *       table.appendTo(objectToAppendTo)       //Appends the object html to an object (can only run once)
@@ -2677,7 +2678,6 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
       var last = rightPanel.last();
       var first = rightPanel.eq(-5);
       //Make sure we can go to different pages; one of them cannot be a span
-      Log(first,last)
       if (first.tag() != "SPAN" || last.tag() != "SPAN") {
          var href;
          var progress = rightPanel.eq(-3).plainText().split(" of ");
@@ -3914,6 +3914,10 @@ var CSSOBJ = {
    "div.jbmnplsTable div.jbmnplsTableControls *.disabled,div.jbmnplsTable div.jbmnplsTableControls a.disabled:hover, div.jbmnplsTable div.jbmnplsTableControls span.fakeLink.disabled:hover" : {
       "color" : "#A0A0A0",
    },
+   "div.jbmnplsTable div.jbmnplsTableControls a.important, div.jbmnplsTable div.jbmnplsTableControls span.fakeLink.important" : {
+      "color" : "skyBlue",
+      "font-weight" : "bold",
+   },
    "div.jbmnplsTable div.jbmnplsTableControls a:hover, div.jbmnplsTable div.jbmnplsTableControls span.fakeLink:hover" : {
       "color" : "white",
    },
@@ -4692,18 +4696,21 @@ switch (PAGEINFO.TYPE) {
                cancelTable.applyFilter("Employer", TABLEFILTERS.googleSearch).appendTo(form);
                }break;
             case PAGES.RANKINGS:{         /*Expand to see what happens when you reach the rankings page*/
-               var table0 = makeTable("Rankings", "UW_CO_STU_RNKV2$scroll$0");
-               form.children("div").remove();
-               table0.addControlButton("Save", function(){
-                        BRIDGE.run(function(){
-                           setSaveText_win0('Saving...');
-                           submitAction_win0(document.win0, '#ICSave');
-                        });     
-                     })
-                     .applyFilter("Job Title", TABLEFILTERS.jobDescription)
-                     .applyFilter("Employer", TABLEFILTERS.googleSearch)
-                     .applyFilter("Work location", TABLEFILTERS.googleMap)
-                     .addControlButton("Rankings Info", "http://www.cecs.uwaterloo.ca/manual/first_cycle/4_11.php").appendTo(form);
+               //var table0 = makeTable("Rankings", "UW_CO_STU_RNKV2$scroll$0");
+               //var text = $(UTIL.getID('#ICSave')).attr("onclick").getTextBetween("javascript:", ";");
+               //form.children("div").remove();
+               //table0.addControlButton("Save", function(){
+               //         BRIDGE.run("function(){"+text+"}");     
+               //      })
+               //      .applyFilter("Job Title", TABLEFILTERS.jobDescription)
+               //      .applyFilter("Employer", TABLEFILTERS.googleSearch)
+               //      .applyFilter("Work location", TABLEFILTERS.googleMap)
+               //      .addControlButton("Rankings Info", "http://www.cecs.uwaterloo.ca/manual/first_cycle/4_11.php").appendTo(form);
+               //$("#"+table0.id+" div.jbmnplsTableControls span:contains('Save')").addClass("important");
+               
+               $(UTIL.getID('#ICSave')).click(function(){
+                  showMessage("Trying to Save...", 6000);
+               });
                }break;
             case PAGES.DOCUMENTS:{        /*Expand to see what happens when you reach the documents page*/
                var marks = $("#win0divSHOW_MARKS a.PSHYPERLINK").attr("href");
