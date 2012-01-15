@@ -1,11 +1,16 @@
 Issues:
 
 Optional Fixes:
-   - work on loading pages without that obvious change?
 
 Features:
+   - add settings
 
 Added in this release
+   Fixed the following...
+   - problem with job descriptions
+   - winter has a problem with guessing the term
+   - The search table doesnt include view 100 ??? 
+   - fixed twitter width
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html

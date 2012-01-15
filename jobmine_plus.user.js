@@ -47,7 +47,7 @@
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION           : "2.0.1",
+   VERSION           : "2.0.2",
    DEBUG_ON          : false,
    PAGESIMILAR       : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP    : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -739,7 +739,7 @@ var MESSAGE = {
 };
 //Log into firebug
 function Log() {
-   if(arguments == 0) {return;}
+   if(arguments.length == 0) {return;}
    console.log("JbmnPls Log: ",arguments);
 }
 //Throw an error
@@ -1127,7 +1127,7 @@ function addHeader() {
  */
 function addUpdateMessage() {
    if(UTIL.idExists("jbnplsUpdate")) {return;}
-   $(document.body).append("<div style='display:none;' id='jbnplsUpdate'><a style='margin:0 auto;width:500px;' href='"+LINKS.UPDATE_LINK+"'>You are using an old version of Jobmine Plus, click to update.</a><div onclick='this.parentNode.style.visibility=\"hidden\";' class='close'></div></div>");
+   $(document.body).append("<div style='display:none;' id='jbnplsUpdate'><a title='You know you want to click this' class='update-link' style='margin:0 auto;width:500px;' href='"+LINKS.UPDATE_LINK+"'>You are using an old version of Jobmine Plus, click to update.</a><div onclick='this.parentNode.style.visibility=\"hidden\";' class='close'></div></div>");
 }
 
 /**
@@ -1158,7 +1158,7 @@ function addProfileNav() {
 }
 
 function attachTwitterButton() {
-   return '<iframe allowtransparency="true" frameborder="0" scrolling="no"src="//platform.twitter.com/widgets/follow_button.html?screen_name=jobmineplus&button=grey"style="width:70px;margin-top:2px;height:20px;"></iframe>';
+   return '<iframe allowtransparency="true" frameborder="0" scrolling="no"src="//platform.twitter.com/widgets/follow_button.html?screen_name=jobmineplus&button=grey&show_count=false&	show_screen_name=false"style="width:70px;margin-top:2px;height:20px;"></iframe>';
 }
 
 /**
@@ -1442,6 +1442,7 @@ function getPredictedTerm(month, year) {
 function initDraggable() {
    $("body .draggable .draggable-region").live("mousedown", function(evt){
       try{
+      $("body").addClass("noselect");
       var obj = $(this);
       var clkObj = $(evt.target);
       //Return if disabled
@@ -1472,6 +1473,7 @@ function initDraggable() {
          wholeObj.css({"left" : (relX+(mRelX-ancX))+"px", "top" : (relY+(mRelY-ancY))+"px"});
       })
       .bind("mouseup.draggable mouseleave.draggable", function(){
+         $("body").removeClass("noselect");
          var wholeObj = obj.closest(".draggable");
          wholeObj.removeClass("draggable-down draggable-move").removeAttr("draggableAnchor");
          $(this).unbind(".draggable").css({"display": "none", "cursor" : "auto"});
@@ -2091,9 +2093,10 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
    
    //Get the term dropdown finished
    var nowTerm = UTIL.getID('UW_CO_JOBSRCH_UW_CO_WT_SESSION').value;
-   var termHTML = "";
+   var termHTML = "";      
    var date = new Date();
-   for(var y=date.getFullYear(); y<date.getFullYear()+2; y++) {
+   var startYear = date.getMonth() < 4 ? date.getFullYear()-1 : date.getFullYear();
+   for(var y=startYear; y<startYear+2; y++) {
       var m = 0;
       for(var i=0; i<3; i++) {
          var year = y;
@@ -2702,7 +2705,7 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
                   var totalPages = this.maxPages = Math.ceil(parseInt(item[1]) / difference);
                   var currentPage = Math.ceil(endRangeNum / difference);
                }
-               pageStrBuffer += " " + currentPage + "/" + totalPages;
+               pageStrBuffer += " <span title='Current page/total pages'>" + currentPage + "/" + totalPages + "</span>";
             } else if (item.tag() == "A") {
                href = item.attr("href");
                href = href.substr(href.indexOf("submitA"));
@@ -2718,9 +2721,9 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
       //View 100/25
       var view100 = rightPanel.eq(-8);
       var text = view100.plainText();
-      if (view100.tag() == "A" && (text == "View All" || text == "View 25")) {
+      if (view100.tag() == "A" && (text == "View 100" || text == "View 25")) {
          var link = view100.attr("href");
-         this.view100 = '<span class="fakeLink" onclick="document.getElementById(\''+this.id+'\').className=\'jbmnplsTable loading\';'+link.substr(link.indexOf(":")+1)+'">'+text+'</span>'
+         this.view100 = '<span class="fakeLink" onclick="document.getElementById(\''+this.id+'\').className=\'jbmnplsTable loading\';'+link.substr(link.indexOf(":")+1)+'">'+text+' jobs/page</span>';
       }
    }/* else {}    Only displays page numbers, so useless*/
    
@@ -3525,6 +3528,8 @@ var CSSOBJ = {
    ".draggable.draggable-down:not(.disabled), .draggable.draggable-move:not(.disabled)" : {
       "box-shadow"   :  "0 0 10px white !important",
       "-moz-box-shadow"   :  "0 0 10px white !important",
+   },
+   ".draggable-region:not(.disabled)" : {
       cursor         :  "move !important",
    },
    /**
@@ -4185,6 +4190,9 @@ var CSSOBJ = {
       "background"      :  "#fafafa",
       "text-align"      :  "center",
    },
+   "#jbmnplsMessage, #jbnplsUpdate .update-link:hover" : {
+      'color'           :  '#777',
+   },
    "#jbnplsUpdate" : {
       "position"        :  "fixed",
       top               :  0,
@@ -4289,6 +4297,11 @@ switch (PAGEINFO.TYPE) {
       }
       }break;
    case PAGES.LOGIN:{      /*Expand to see what happens when you reach login page*/
+      //To avoid hanging if you have been kicked off
+      if(PAGEINFO.IN_IFRAME) {
+         top.location.href = LINKS.LOGIN;
+         return;
+      }
       function setAutoComplete(flag){
          if(flag) {
             $("#userid").attr("autocomplete", "on").attr("value", defaultUser.toLowerCase());
@@ -4335,25 +4348,28 @@ switch (PAGEINFO.TYPE) {
             //Data that needs to be extracted from the page, this object holds it all
             var jobDescriptionData = {
                employerName   : "",    position       : "",    location       : "",    openings       : "",    jobLevels      : "",    grades         : "",
-               comments       : "",    description    : "",    openDate       : "",    cecsCoord      : "",    disciplines    : "",    closeDate      : ""
+               comments       : "",    description    : "",    openDate       : "",    cecsCoord      : "",    disciplines    : "",    closeDate      : "",
+               wtSupport: ""
             };
             $("#ACE_width span").each(function(index){
                var text = $(this).plainText();
+               Log(index,text)
                if(text != ""){
                   switch(index){
-                     case 1:  jobDescriptionData.openDate      = text;        break;
-                     case 2:  jobDescriptionData.closeDate     = text;        break;
-                     case 5:  jobDescriptionData.employerName  = text;        break;
-                     case 6:  jobDescriptionData.position      = text;        break;
-                     case 7:  jobDescriptionData.grades        = text;        break;
-                     case 8:  jobDescriptionData.location      = text;        break;
-                     case 9:  jobDescriptionData.openings      = text;        break;
-                     case 10: jobDescriptionData.disciplines   = text+", ";   break;
-                     case 11: jobDescriptionData.disciplines  += text;        break;
-                     case 12: jobDescriptionData.jobLevels     = text;        break;
-                     case 13: jobDescriptionData.cecsCoord     = text;        break;
-                     case 14: jobDescriptionData.comments      = text;        break;
-                     case 16: jobDescriptionData.description   = $(this).html();        break;
+                     case 3:  jobDescriptionData.openDate      = text;        break;
+                     case 4:  jobDescriptionData.closeDate     = text;        break;
+                     case 10: jobDescriptionData.employerName  = text;        break;
+                     case 12: jobDescriptionData.position      = text;        break;
+                     case 14: jobDescriptionData.grades        = text;        break;
+                     case 16: jobDescriptionData.location      = text;        break;
+                     case 18: jobDescriptionData.openings      = text;        break;
+                     case 20: jobDescriptionData.disciplines   = text+", ";   break;
+                     case 21: jobDescriptionData.disciplines  += text;        break;
+                     case 23: jobDescriptionData.jobLevels     = text;        break;
+                     case 27: jobDescriptionData.wtSupport     = text;        break;
+                     case 26: jobDescriptionData.cecsCoord     = text;        break;
+                     case 29: jobDescriptionData.comments      = text;        break;
+                     case 31: jobDescriptionData.description   = $(this).html();        break;
                   }
                }
             });
@@ -4371,7 +4387,7 @@ switch (PAGEINFO.TYPE) {
                return "<a href='"+item+"' target='_blank'>"+item+"</a>" + (endPunctuation ? endPunctuation : "");
             });
             var toolbar =  "<div id='toolbar' class='printHide'>Don't like this look for your job descriptions? <span id='showOldDetailsBtn' class='fakeLink' href='#'>Click here to change it back</span></div>";
-            var newBody =  "<table class='page' id='jobDetails' cellspacing='0' cellpadding='0'><tr><td valign='top' id='header'><span class='title'>Employer: <a class='printHide' target='_blank' title='Google search "+jobDescriptionData.employerName+"' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"'>"+(jobDescriptionData.employerName.length > 48 ? jobDescriptionData.employerName.substring(0,48)+"..." : jobDescriptionData.employerName)+"</a><a class='printshow' href='#'>"+jobDescriptionData.employerName+"</a></span><input class='button printHide' onclick='window.print();' type='button' value='Print Job Description'/><br/><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Job Title:</td><td valign='top'>"+jobDescriptionData.position+"</td></tr><tr><td valign='top' class='category'>Work Location:</td><td valign='top'><a target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"+"+encodeURIComponent(jobDescriptionData.location)+"' title='Search location' class='location'>"+jobDescriptionData.location+"</a></td></tr><tr><td valign='top' class='category'>Available Openings:</td><td valign='top'>"+jobDescriptionData.openings+"</td></tr></table></td><td valign='top' class='right'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Levels:</td><td valign='top'>"+jobDescriptionData.jobLevels+"</td></tr><tr><td valign='top' class='category'>Grades:</td><td valign='top'>"+jobDescriptionData.grades+"</td></tr></table><input style='margin-top:10px;' class='button printHide' onclick='invokeEmployerPopup();' type='button' value='View Employer Profile'/></td></tr></table><br/>"+(jobDescriptionData.comments==""?"":"<table id='comments' cellspacing='0' cellpadding='0'><tr><td class='category' valign='top'>Comments:</td><td class='important' valign='top'>"+jobDescriptionData.comments+"</td></tr></table>")+"<hr/></td></tr><tr><td valign='top' id='content'><div class='title'>Description</div><div class='body'>"+jobDescriptionData.description+"</div></td></tr><tr><td valign='top' id='footer'><hr/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Posting Open Date:</td><td valign='top'>"+jobDescriptionData.openDate+"</td></tr><tr><td valign='top' class='category'>CECS Field Co-ordinator:</td><td valign='top'>"+jobDescriptionData.cecsCoord+"</td></tr><tr><td colspan='2'><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Disciplines:</td><td valign='top'>"+jobDescriptionData.disciplines+"</td></tr></table></td></tr></table></td><td valign='top' class='right'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Last Day to Apply:</td><td valign='top'>"+jobDescriptionData.closeDate+"</td></tr></table></td></tr></table><hr class='printHide'/></td></tr></table>";
+            var newBody =  "<table class='page' id='jobDetails' cellspacing='0' cellpadding='0'><tr><td valign='top' id='header'><span class='title'>Employer: <a class='printHide' target='_blank' title='Google search "+jobDescriptionData.employerName+"' href='http://www.google.ca/#hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"'>"+(jobDescriptionData.employerName.length > 48 ? jobDescriptionData.employerName.substring(0,48)+"..." : jobDescriptionData.employerName)+"</a><a class='printshow' href='#'>"+jobDescriptionData.employerName+"</a></span><input class='button printHide' onclick='window.print();' type='button' value='Print Job Description'/><br/><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='left category'>Job Title:</td><td valign='top' class='left description'>"+jobDescriptionData.position+"</td><td valign='top' class='category right'>Levels:</td><td valign='top' class='right description'>"+jobDescriptionData.jobLevels+"</td></tr><tr><td valign='top' class='left category'>Work Location:</td><td valign='top' class='left description'><a target='_blank' href='http://maps.google.ca/maps?hl=en&q="+encodeURIComponent(jobDescriptionData.employerName)+"+"+encodeURIComponent(jobDescriptionData.location)+"' title='Search location' class='location'>"+jobDescriptionData.location+"</a></td><td valign='top' class='category right'>Grades:</td><td valign='top' class='right description'>"+jobDescriptionData.grades+"</td></tr><tr><td valign='top' class='left category'>Available Openings:</td><td valign='top' class='left description'>"+jobDescriptionData.openings+"</td><td valign='top' class='category right'></td><td valign='top' class='right description'></td></tr></table><input class='button printHide' onclick='invokeEmployerPopup();' type='button' value='View Employer Profile'/><br/><br/>"+(jobDescriptionData.comments==""?"":"<table id='comments' cellspacing='0' cellpadding='0'><tr><td class='category' valign='top'>Comments:</td><td class='important' valign='top'>"+jobDescriptionData.comments+"</td></tr></table>")+"<hr/></td></tr><tr><td valign='top' id='content'><div class='title'>Description</div><div class='body'>"+jobDescriptionData.description+"</div></td></tr><tr><td valign='top' id='footer'><hr/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='left'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Posting Open Date:</td><td valign='top'>"+jobDescriptionData.openDate+"</td></tr><tr><td valign='top' class='category'>CECS Field Co-ordinator:</td><td valign='top'>"+jobDescriptionData.cecsCoord+"</td></tr><tr><td valign='top' class='category'>Work Term Support:</td><td valign='top'>"+jobDescriptionData.wtSupport+"</td></tr><tr><td colspan='2'><br/><table class='jobDescriptionArea' cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Disciplines:</td><td valign='top' class='left' style='white-space:normal;'>"+jobDescriptionData.disciplines+"</td></tr></table></td></tr></table></td><td valign='top' class='right'><table cellspacing='0' cellpadding='0'><tr><td valign='top' class='category'>Last Day to Apply:</td><td valign='top'>"+jobDescriptionData.closeDate+"</td></tr></table></td></tr></table><hr class='printHide'/></td></tr></table>";
             var detailsCss = {
                "body.PSPAGE" : {
                   "overflow-y"  :  "scroll",
@@ -4420,7 +4436,7 @@ switch (PAGEINFO.TYPE) {
                ".jobDescriptionArea .left" : {
                   "width" : "100%",
                },
-               ".jobDescriptionArea .right td" : {
+               "#header .jobDescriptionArea td, #footer .jobDescriptionArea td" : {
                   "white-space" : "nowrap",
                },
                ".jobDescriptionArea a.location" : {
@@ -4430,7 +4446,6 @@ switch (PAGEINFO.TYPE) {
                ".jobDescriptionArea .category" : {
                   "font-weight" : "bold",
                   "padding-right" : "10px",
-                  "white-space" : "nowrap",
                   "width" : "10px",
                },
                "#comments" : {
