@@ -33,6 +33,7 @@
    __HIGHLIGHTING__
    __AJAX_FUNCTIONS__
    __SEARCH_MANAGER__
+   __SETTINGS__
    __JOB_SEARCH_CRITERIA__
    __TABLE__
    __CLEAN_UP__
@@ -48,7 +49,7 @@
 \*===============================*/
 var CONSTANTS = {
    VERSION           : "2.0.2",
-   DEBUG_ON          : false,
+   DEBUG_ON          : true,
    PAGESIMILAR       : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP    : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
    EXTRA_URL_TEXT    : "__Jobmine_Plus_has_taken_over_Jobmine",
@@ -111,7 +112,7 @@ var OBJECTS = {
 };
 
 var LARGESTRINGS = {
-   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' class='title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><div id='jbmnplsPopupFrameWrapper'><iframe id='jbmnplsPopupFrame' allowtransparency='true' frameborder='no' width='100%' height='100%' class='frame'></iframe></div><div id='jbmnplsPopupFooter' class='footer'><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
+   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' class='noselect title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><div id='jbmnplsPopupSettings' class='body'></div><div id='jbmnplsPopupFrameWrapper'><iframe id='jbmnplsPopupFrame' allowtransparency='true' frameborder='no' width='100%' height='100%' class='frame'></iframe></div><div id='jbmnplsPopupFooter' class='footer noselect'><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
 };
 
 var IMAGES = {
@@ -206,6 +207,15 @@ Array.prototype.last = function(index){
    if (this.empty()) {return null;}
    return this[this.length-1];
 }
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
+
 
 /**
  *    Utilities
@@ -1118,7 +1128,7 @@ function addHeader() {
    BRIDGE.registerFunction("showAbout", function(){
       showPopup(true, "<h1>Jobmine Plus Version "+CONSTANTS.VERSION+"</h1><br/>Hey there!<br/><br/>This is Matthew Ng the creator of Jobmine Plus. I am a System Designs Engineering Student at the University of Waterloo. I created this because Jobmine is not user friendly so this addon/extension should speed things up.<br/><br/>Feel free to email me if there are any problems, concerns or requests for future updates:<br/><a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a><br/><br/>Visit the extensions website for information and future updates:<br/><a href='http://userscripts.org/scripts/show/80771'>http://userscripts.org/scripts/show/80771</a><br/><br/>", "About Me", 400);
    });
-   header += '</ul></nav><div id="uwBanner" class="banner"></div><div style="float:right;" id="jbmnplsTwitterHolder">'+attachTwitterButton()+'</div></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul><!-- <li class="statusItem">Hi <span id="jbmnplsUserName">'+fname+' '+lname+'!</span><span id="jbmnplsUserID"> ('+studNum+')</span></li> --></ul></div><div id="jbmplsControlPanel"><!-- <a href="#">Settings</a> | --><span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
+   header += '</ul></nav><div id="uwBanner" class="banner"></div><div style="float:right;" id="jbmnplsTwitterHolder">'+attachTwitterButton()+'</div></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul><!-- <li class="statusItem">Hi <span id="jbmnplsUserName">'+fname+' '+lname+'!</span><span id="jbmnplsUserID"> ('+studNum+')</span></li> --></ul></div><div id="jbmplsControlPanel"><span class="fakeLink" onclick="showSettings();">Settings</span> | <span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
    $("body").prepend(header);
 }
 
@@ -1198,7 +1208,7 @@ function showPopup(isBlack, bodyText, title, width, maxHeight, onCloseFunction, 
       }
       
       //Escape events
-      $(document).bind("keydown",function(e){
+      $(document).unbind("keydown").bind("keydown",function(e){
          switch(e.which) {
             case 27:    //Escape key
                hidePopup("cancel");   
@@ -1955,6 +1965,163 @@ var SearchManager = {
       }
    },
 };
+}
+
+/*================================*\
+|*          __SETTINGS__          *|
+\*================================*/
+{/*Expand to see settings*/
+var SETTINGS = {
+   template  : {
+      'General'   : {
+         'default_page' : {
+            'label' : 'Set your default login page',
+            'type' : 'dropdown',
+            'data' : NAVIGATION,
+            'defaultValue' : 4,
+            //'detail' : 'Some text',
+            //'onchange' : function(){},
+         },
+         'kill_timer' : {
+            'label' : 'Kill login timer',
+            'type' : 'checkbox',
+            'detail' : 'If checked, you will not be forced offline being idle.',
+         },
+         'auto_refresh' : {
+            'label' : 'Auto-refresh rate',
+            'type' : 'textfield',
+            'defaultValue' : 0,
+            'detail' : 'Page refreshes at the inputted min. (0 = Off)',
+         },
+      }, 
+      'Pages'     : {
+         'search' : {
+            'label' : 'Job Search',
+            'type' : 'title',
+         },
+            'search_close' : {
+               'label'  : 'Minimize Criteria',
+               'detail' : 'Do not minimize search criteria when searching.',
+               'type' : 'checkbox',
+            },
+            'auto_search' : {
+               'label' : 'Auto Search',
+               'detail': 'Will search immediately once entering this page.',
+               'type' : 'checkbox',
+            },
+         'job_details' : {
+            'label' : 'Job Details',
+            'type' : 'title',
+         },
+            'show_old' : {
+               'label' : 'Show old page',
+               'detail': 'This would show the original job details page',
+               'type' : 'checkbox',
+            },
+      },
+   },
+   selected : null,
+   build  : function() {
+      //Build only if nothing is inside the settings div
+      var settingObj = $("#jbmnplsPopupSettings");
+      if(!settingObj.children().exists()) {
+         var template = this.template;
+         var navHtml = "<nav id='settings-nav' class='noselect'><ul>";
+         var bodyHtml = "";
+         for(var navItem in template) {
+            var navItemLC = navItem.toLowerCase();
+            navHtml += "<li class='settings-nav-item "+navItemLC+"'>" + navItem + "</li>";
+            bodyHtml += "<div id='settings-" + navItemLC + "' class='settings-panel'>";
+            for(var fieldName in template[navItem]) {
+               fieldName = fieldName.toLowerCase();
+               //Build each field entry
+               var fieldEntry = template[navItem][fieldName];
+               Assert(fieldEntry.label && fieldEntry.type, "Settings cannot be built because '" + fieldName + "' is maliformed and does not have label and/or type.");
+               
+               if(fieldEntry.type == "title") {
+                  bodyHtml += "<div class='settings-entry " + navItemLC + "-" + fieldName + "'><span class='settings-entry-title'>" + fieldEntry.label + "</span></div>";
+               } else {
+                  bodyHtml += "<div class='settings-entry " + navItemLC + "-" + fieldName + "'><span class='settings-entry-label'>" + fieldEntry.label + "</span>";
+                  if(fieldEntry.detail) {
+                     bodyHtml += "<span class='settings-entry-detail'>" + fieldEntry.detail + "</span>";
+                  }
+                  var changetext = '';
+                  if(fieldEntry.onchange != null && UTIL.isFunction(fieldEntry.onchange)) {
+                     changetext = "onchange='settings_"+navItemLC+"_"+fieldName+"()'";
+                     BRIDGE.registerFunction("settings_"+navItemLC+"_"+fieldName, fieldEntry.onchange);
+                  }
+                  var id = "settings-" + navItemLC + "-" + fieldName.replace(/\s|_/, "-");
+                  bodyHtml += "<span class='settings-entry-input'>";
+                  switch(fieldEntry.type) {
+                     case 'dropdown': 
+                        Assert(fieldEntry.data, "Settings cannot be built because '" + fieldName + "' is a dropdown but has no data.");
+                        var defaultSelection = fieldEntry.defaultValue && UTIL.isNumeric(fieldEntry.defaultValue) ? fieldEntry.defaultValue : 0;
+                        var ddData = "";
+                        var counter = 0;
+                        for(var i in fieldEntry.data) {
+                           ddData += "<option class='settings-dropdown-option' "+(counter==defaultSelection?"selected='selected'":"")+" value='"+fieldEntry.data[i].toString().toLowerCase()+"'>" + fieldEntry.data[i] + "</option>";
+                           counter++;
+                        }
+                        bodyHtml += "<select "+changetext+" id='"+id+"' class='settings-dropdown'>"+ddData+"</select>";
+                        break;
+                     case 'textfield':
+                        bodyHtml += "<input "+changetext+" "+(fieldEntry.defaultValue!=null&&fieldEntry.defaultValue.toString()!=''?"value='"+fieldEntry.defaultValue+"'":"")+" type='text' id='"+id+"' class='settings-textfield'/>";
+                        break;
+                     case 'checkbox':
+                        bodyHtml += "<input "+changetext+" "+(fieldEntry.defaultValue===true?"checked='checked'":"")+" type='checkbox' id='"+id+"' class='settings-checkbox'/>";
+                        break;
+                     default:
+                        Throw("There is no such thing as a setting's type as '" + fieldEntry.type + "'");
+                        break;
+                  }
+                  bodyHtml += "</span></div>";
+               }
+            }
+            bodyHtml += "</div>";
+         }
+         navHtml += "</ul></nav>";
+         settingObj.html(navHtml + bodyHtml);
+
+         $('#settings-nav li').unbind('click').bind('click', function(){
+            var navItem = $(this).plainText();
+            SETTINGS.switchPanel(navItem);
+         });
+      }
+   },
+   reset : function() {
+   },
+   handleClose  : function(action) {
+      var settingObj = $("#jbmnplsPopupSettings");
+      $("#jbmnplsPopupContent").addClass('noselect');
+      switch(action) {
+         case "cancel":
+            break;
+         case "save":
+            break;
+      }
+   },
+   show  : function() { //Must call SETTINGS as this
+      showPopup(true, '', "Settings", 600, SETTINGS.handleClose);
+      SETTINGS.build();
+      $("#jbmnplsPopupContent").removeClass('noselect');
+      var settingObj = $("#jbmnplsPopupSettings");
+      //Here we need to put all the values that are from preferences just for the first page
+      SETTINGS.switchPanel('General');
+   },
+   switchPanel : function(navItem) {
+      if(this.template.hasOwnProperty(navItem) && this.selected != navItem) {
+         var navItemLC = navItem.toLowerCase();
+         $("#jbmnplsPopupSettings .settings-panel.open").removeClass("open");
+         $("#settings-"+navItemLC).addClass("open");
+         this.selected = navItem;
+         $("#settings-nav li.selected").removeClass("selected");
+         $("#settings-nav li."+navItemLC).addClass("selected");
+         
+         //Load the preferences now!!!
+      }
+   },
+};
+BRIDGE.registerFunction("showSettings", SETTINGS.show);
 }
 
 /*================================*\
@@ -3672,14 +3839,16 @@ var CSSOBJ = {
       "float": "left",
       "padding-top": "2px",
    },
-   "#jbmnplsHeader ul": {
+   "nav ul": {
       "padding": "0",
       "margin": "0",
    },
-   "#jbmnplsHeader ul li": {
-      "float": "left",
-      "margin-left": "20px",
+   "nav ul li": {
       "list-style-type": "none",
+      "float": "left",
+   },
+   "#jbmnplsHeader ul li": {
+      "margin-left": "20px",
    },
    "#jbmnplsNav ul li a, #jbmnplsNav ul li .fakeLink": {
       "color": "white",
@@ -4218,6 +4387,81 @@ var CSSOBJ = {
       "padding-right"   :  "20px",
       "font-size"       :  "10px",
    },
+   /**
+    *    Jobmine Plus Settings
+    */
+   '#jbmnplsPopup #jbmnplsPopupSettings' : {  
+      "display"         : 'none',
+   },
+   '#jbmnplsPopupSettings *' : {
+      'font-size'       : '12px',
+      'font-family'     : 'Verdana, Arial, sans-serif',
+   },
+   '#jbmnplsPopup[name="settings"] #jbmnplsPopupSettings' : {  
+      "display"         : 'block',
+   },
+   '#jbmnplsPopupSettings .settings-panel' : {
+      'display'         : 'none',
+      'padding'         : '10px 0',
+   },
+   '#jbmnplsPopupSettings .settings-panel.open' : {
+      'display'         : 'block',
+   },
+   '#jbmnplsPopupSettings nav' : {
+      'background'      : '#7f7f7f',
+      'height'          : '30px',
+      'border-bottom'   : '2px solid black',
+   },
+   '#jbmnplsPopupSettings nav li' : {
+      'color'           : 'white',
+      'font-size'       : '13px',
+      'width'           : Math.floor(100/Object.size(SETTINGS.template)) + "%",
+   },
+   '#jbmnplsPopupSettings nav li.selected' : {
+      'background'      : '#999',
+   },
+   '#jbmnplsPopupSettings nav li:hover' : {
+      'cursor'          : 'pointer',
+      'background'      : '#AAA',
+   },
+   '#jbmnplsPopupSettings nav li, #jbmnplsPopupSettings .settings-entry' : {
+      'padding'         : '5px 10px 8px',
+      '-webkit-box-sizing' : 'border-box',
+      '-moz-box-sizing' : 'border-box',
+      'box-sizing'      : 'border-box',
+      'position'        : 'relative',
+   },
+   '#jbmnplsPopupSettings .settings-entry .settings-entry-input' : {
+      'float'           : 'right',
+      'width'           : '180px',
+   },
+   '#jbmnplsPopupSettings .settings-entry-input .settings-textfield, #jbmnplsPopupSettings .settings-entry-input select' : {
+      'width'           : '100%',
+   },
+   '#jbmnplsPopupSettings .settings-entry-input .settings-checkbox,#jbmnplsPopupSettings .settings-entry-input .settings-dropdown' : {
+      'position'        : 'relative',
+      'top'             : '-1px',
+   },
+   '#jbmnplsPopupSettings .settings-entry-input .settings-textfield' : {
+      'position'        : 'relative',
+      'top'             : '-2px',
+   },
+   '#jbmnplsPopupSettings .settings-entry .settings-entry-detail' : {
+      'position'        : 'absolute',
+      'left'            : '140px',
+      'top'             : '7px',
+      'color'           : '#777',
+      'font-style'      : 'italic',
+      'font-size'       : '10px',
+   },
+   '#jbmnplsPopupSettings .settings-entry .settings-entry-label' : {
+      'margin-left'     :  '5px',
+   },
+   '#jbmnplsPopupSettings .settings-entry .settings-entry-title' : {
+      'font-weight'     : 'bold',
+   },
+   
+   
 };
 appendCSS(CSSOBJ);
 
