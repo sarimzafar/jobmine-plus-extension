@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset=utf-8 />
+   <title>Basic Get DataURL</title>
+   <style>
+      body,html{
+         margin:0;
+         padding:0;
+      }
+      #droparea{
+         position:fixed;
+         height:70%;
+         width:100%;
+         border: 2px solid black;
+         bottom:0;
+      }
+      #result{
+         position:fixed;
+         height:25%;
+         overflow:scroll-y;
+         width:100%;
+         border: 2px solid red;
+         top:0;
+      }
+   </style>
+   <script>
+      var c = document.createElement("canvas");
+      var img = document.createElement("img");
+      function load(){
+         var area = document.getElementById('droparea');
+         area.addEventListener('drop', handletherest, false);
+         area.addEventListener('dragenter', cancelAction, false);
+         area.addEventListener('dragexit', cancelAction, false);
+         area.addEventListener('dragover', cancelAction, false);
+      }
+      
+      function cancelAction(e){
+         e.stopPropagation();
+         e.preventDefault();
+      }
+      
+      function handletherest(e){
+         cancelAction(e);
+         var files = e.dataTransfer.files;
+         
+         if(files.length > 0) {
+            var file = files[0];
+            var reader = new FileReader();
+            // init the reader event handlers
+            reader.onload = getDataURL;
+            // begin the read operation
+            reader.readAsDataURL(file);
+         }
+      }
+      
+      function getDataURL(e) {
+         img.src = e.target.result;
+         c.width = img.width;
+         c.height = img.height;
+         var context = c.getContext('2d');
+         context.drawImage(img, 0, 0);
+         try{
+         data = c.toDataURL();
+            document.getElementById("result").innerHTML = data;
+         }catch(e){
+            alert("Error has occurred");
+         }    
+      }
+   </script>
+</head>
+<body onload='load()'>
+   <div id='droparea'>Drop image here...</div>
+   <div id='result'></div>
+</body>
+</html>
