@@ -3,14 +3,18 @@ Issues:
 Optional Fixes:
 
 Features:
-   - add settings
 
 Added in this release
+   - settings
+   - status bar under navigation
+   - able to refresh page
+   - kills server timer
+   - auto search the search page on arrival
+   - log in default page set
+   
    Fixed the following...
-   - problem with job descriptions
-   - winter has a problem with guessing the term
-   - The search table doesnt include view 100 ??? 
-   - fixed twitter width
+   - skills page is now usuable
+   
 
 How to compress code
 1. http://fmarcia.info/jsmin/test.html
