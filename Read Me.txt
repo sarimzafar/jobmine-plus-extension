@@ -1,15 +1,7 @@
 Issues:
-	- sorting dates is broken for months
-	- skills removes save button after trying add a new skill
-	- kill timer isnt working?
-	- settings dropdown is forced to profile initially but goes to applications
-	- firefox 13+ cannot render the employee page
-	- statusbar shows extra active app
-	- chrome gets kicked out autotimer kicks it out <---major
 
 Optional Fixes/Features:
 	- fix the rankings page (temp solution can be just css fix)
-	- remove the student number for status bar
 	- click company should go to the job's company in employee info if exists <---really hard to do
 
 Features:
@@ -25,7 +17,4 @@ Added/Fixed in this release
    - statusbar shows extra active app
    - fixed the default page not matching correct location
    - fixed the chrome not killing timer
-   
-   Fixed the following...
-   - skills page is now usuable
    
