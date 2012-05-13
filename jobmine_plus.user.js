@@ -49,7 +49,7 @@
 \*===============================*/
 var CONSTANTS = {
    VERSION              : "2.0.3",
-   DEBUG_ON             : false,
+   DEBUG_ON             : true,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
    EXTRA_URL_TEXT       : "__Jobmine_Plus_has_taken_over_Jobmine",
@@ -719,22 +719,6 @@ BRIDGE.init();
 (function($){$.extend({tablesorter:new function(){var parsers=[],widgets=[];this.defaults={cssHeader:"header",cssAsc:"headerSortUp",cssDesc:"headerSortDown",cssChildRow:"expand-child",sortInitialOrder:"asc",sortMultiSortKey:"shiftKey",sortForce:null,sortAppend:null,sortLocaleCompare:true,textExtraction:"simple",parsers:{},widgets:[],widgetZebra:{css:["even","odd"]},headers:{},widthFixed:false,cancelSelection:true,sortList:[],headerList:[],dateFormat:"us",decimal:'/\.|\,/g',onRenderHeader:null,selectorHeaders:'thead th',debug:false};function benchmark(s,d){log(s+","+(new Date().getTime()-d.getTime())+"ms");}this.benchmark=benchmark;function log(s){if(typeof console!="undefined"&&typeof console.debug!="undefined"){console.log(s);}else{alert(s);}}function buildParserCache(table,$headers){if(table.config.debug){var parsersDebug="";}if(table.tBodies.length==0)return;var rows=table.tBodies[0].rows;if(rows[0]){var list=[],cells=rows[0].cells,l=cells.length;for(var i=0;i<l;i++){var p=false;if($.metadata&&($($headers[i]).metadata()&&$($headers[i]).metadata().sorter)){p=getParserById($($headers[i]).metadata().sorter);}else if((table.config.headers[i]&&table.config.headers[i].sorter)){p=getParserById(table.config.headers[i].sorter);}if(!p){p=detectParserForColumn(table,rows,-1,i);}if(table.config.debug){parsersDebug+="column:"+i+" parser:"+p.id+"\n";}list.push(p);}}if(table.config.debug){log(parsersDebug);}return list;};function detectParserForColumn(table,rows,rowIndex,cellIndex){var l=parsers.length,node=false,nodeValue=false,keepLooking=true;while(nodeValue==''&&keepLooking){rowIndex++;if(rows[rowIndex]){node=getNodeFromRowAndCellIndex(rows,rowIndex,cellIndex);nodeValue=trimAndGetNodeText(table.config,node);if(table.config.debug){log('Checking if value was empty on row:'+rowIndex);}}else{keepLooking=false;}}for(var i=1;i<l;i++){if(parsers[i].is(nodeValue,table,node)){return parsers[i];}}return parsers[0];}function getNodeFromRowAndCellIndex(rows,rowIndex,cellIndex){return rows[rowIndex].cells[cellIndex];}function trimAndGetNodeText(config,node){return $.trim(getElementText(config,node));}function getParserById(name){var l=parsers.length;for(var i=0;i<l;i++){if(parsers[i].id.toLowerCase()==name.toLowerCase()){return parsers[i];}}return false;}function buildCache(table){if(table.config.debug){var cacheTime=new Date();}var totalRows=(table.tBodies[0]&&table.tBodies[0].rows.length)||0,totalCells=(table.tBodies[0].rows[0]&&table.tBodies[0].rows[0].cells.length)||0,parsers=table.config.parsers,cache={row:[],normalized:[]};for(var i=0;i<totalRows;++i){var c=$(table.tBodies[0].rows[i]),cols=[];if(c.hasClass(table.config.cssChildRow)){cache.row[cache.row.length-1]=cache.row[cache.row.length-1].add(c);continue;}cache.row.push(c);for(var j=0;j<totalCells;++j){cols.push(parsers[j].format(getElementText(table.config,c[0].cells[j]),table,c[0].cells[j]));}cols.push(cache.normalized.length);cache.normalized.push(cols);cols=null;};if(table.config.debug){benchmark("Building cache for "+totalRows+" rows:",cacheTime);}return cache;};function getElementText(config,node){var text="";if(!node)return"";if(!config.supportsTextContent)config.supportsTextContent=node.textContent||false;if(config.textExtraction=="simple"){if(config.supportsTextContent){text=node.textContent;}else{if(node.childNodes[0]&&node.childNodes[0].hasChildNodes()){text=node.childNodes[0].innerHTML;}else{text=node.innerHTML;}}}else{if(typeof(config.textExtraction)=="function"){text=config.textExtraction(node);}else{text=$(node).text();}}return text;}function appendToTable(table,cache){if(table.config.debug){var appendTime=new Date()}var c=cache,r=c.row,n=c.normalized,totalRows=n.length,checkCell=(n[0].length-1),tableBody=$(table.tBodies[0]),rows=[];for(var i=0;i<totalRows;i++){var pos=n[i][checkCell];rows.push(r[pos]);if(!table.config.appender){var l=r[pos].length;for(var j=0;j<l;j++){tableBody[0].appendChild(r[pos][j]);}}}if(table.config.appender){table.config.appender(table,rows);}rows=null;if(table.config.debug){benchmark("Rebuilt table:",appendTime);}applyWidget(table);setTimeout(function(){$(table).trigger("sortEnd");},0);};function buildHeaders(table){if(table.config.debug){var time=new Date();}var meta=($.metadata)?true:false;var header_index=computeTableHeaderCellIndexes(table);$tableHeaders=$(table.config.selectorHeaders,table).each(function(index){this.column=header_index[this.parentNode.rowIndex+"-"+this.cellIndex];this.order=formatSortingOrder(table.config.sortInitialOrder);this.count=this.order;if(checkHeaderMetadata(this)||checkHeaderOptions(table,index))this.sortDisabled=true;if(checkHeaderOptionsSortingLocked(table,index))this.order=this.lockedOrder=checkHeaderOptionsSortingLocked(table,index);if(!this.sortDisabled){var $th=$(this).addClass(table.config.cssHeader);if(table.config.onRenderHeader)table.config.onRenderHeader.apply($th);}table.config.headerList[index]=this;});if(table.config.debug){benchmark("Built headers:",time);log($tableHeaders);}return $tableHeaders;};function computeTableHeaderCellIndexes(t){var matrix=[];var lookup={};var thead=t.getElementsByTagName('THEAD')[0];var trs=thead.getElementsByTagName('TR');for(var i=0;i<trs.length;i++){var cells=trs[i].cells;for(var j=0;j<cells.length;j++){var c=cells[j];var rowIndex=c.parentNode.rowIndex;var cellId=rowIndex+"-"+c.cellIndex;var rowSpan=c.rowSpan||1;var colSpan=c.colSpan||1; var firstAvailCol;if(typeof(matrix[rowIndex])=="undefined"){matrix[rowIndex]=[];}for(var k=0;k<matrix[rowIndex].length+1;k++){if(typeof(matrix[rowIndex][k])=="undefined"){firstAvailCol=k;break;}}lookup[cellId]=firstAvailCol;for(var k=rowIndex;k<rowIndex+rowSpan;k++){if(typeof(matrix[k])=="undefined"){matrix[k]=[];}var matrixrow=matrix[k];for(var l=firstAvailCol;l<firstAvailCol+colSpan;l++){matrixrow[l]="x";}}}}return lookup;}function checkCellColSpan(table,rows,row){var arr=[],r=table.tHead.rows,c=r[row].cells;for(var i=0;i<c.length;i++){var cell=c[i];if(cell.colSpan>1){arr=arr.concat(checkCellColSpan(table,headerArr,row++));}else{if(table.tHead.length==1||(cell.rowSpan>1||!r[row+1])){arr.push(cell);}}}return arr;};function checkHeaderMetadata(cell){if(($.metadata)&&($(cell).metadata().sorter===false)){return true;};return false;}function checkHeaderOptions(table,i){if((table.config.headers[i])&&(table.config.headers[i].sorter===false)){return true;};return false;}function checkHeaderOptionsSortingLocked(table,i){if((table.config.headers[i])&&(table.config.headers[i].lockedOrder))return table.config.headers[i].lockedOrder;return false;}function applyWidget(table){var c=table.config.widgets;var l=c.length;for(var i=0;i<l;i++){getWidgetById(c[i]).format(table);}}function getWidgetById(name){var l=widgets.length;for(var i=0;i<l;i++){if(widgets[i].id.toLowerCase()==name.toLowerCase()){return widgets[i];}}};function formatSortingOrder(v){if(typeof(v)!="Number"){return(v.toLowerCase()=="desc")?1:0;}else{return(v==1)?1:0;}}function isValueInArray(v,a){var l=a.length;for(var i=0;i<l;i++){if(a[i][0]==v){return true;}}return false;}function setHeadersCss(table,$headers,list,css){$headers.removeClass(css[0]).removeClass(css[1]);var h=[];$headers.each(function(offset){if(!this.sortDisabled){h[this.column]=$(this);}});var l=list.length;for(var i=0;i<l;i++){h[list[i][0]].addClass(css[list[i][1]]);}}function fixColumnWidth(table,$headers){var c=table.config;if(c.widthFixed){var colgroup=$('<colgroup>');$("tr:first td",table.tBodies[0]).each(function(){colgroup.append($('<col>').css('width',$(this).width()));});$(table).prepend(colgroup);};}function updateHeaderSortCount(table,sortList){var c=table.config,l=sortList.length;for(var i=0;i<l;i++){var s=sortList[i],o=c.headerList[s[0]];o.count=s[1];o.count++;}}function multisort(table,sortList,cache){if(table.config.debug){var sortTime=new Date();}var dynamicExp="var sortWrapper = function(a,b) {",l=sortList.length;for(var i=0;i<l;i++){var c=sortList[i][0];var order=sortList[i][1];var s=(table.config.parsers[c].type=="text")?((order==0)?makeSortFunction("text","asc",c):makeSortFunction("text","desc",c)):((order==0)?makeSortFunction("numeric","asc",c):makeSortFunction("numeric","desc",c));var e="e"+i;dynamicExp+="var "+e+" = "+s;dynamicExp+="if("+e+") { return "+e+"; } ";dynamicExp+="else { ";}var orgOrderCol=cache.normalized[0].length-1;dynamicExp+="return a["+orgOrderCol+"]-b["+orgOrderCol+"];";for(var i=0;i<l;i++){dynamicExp+="}; ";}dynamicExp+="return 0; ";dynamicExp+="}; ";if(table.config.debug){benchmark("Evaling expression:"+dynamicExp,new Date());}eval(dynamicExp);cache.normalized.sort(sortWrapper);if(table.config.debug){benchmark("Sorting on "+sortList.toString()+" and dir "+order+" time:",sortTime);}return cache;};function makeSortFunction(type,direction,index){var a="a["+index+"]",b="b["+index+"]";if(type=='text'&&direction=='asc'){return"("+a+" == "+b+" ? 0 : ("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : ("+a+" < "+b+") ? -1 : 1 )));";}else if(type=='text'&&direction=='desc'){return"("+a+" == "+b+" ? 0 : ("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : ("+b+" < "+a+") ? -1 : 1 )));";}else if(type=='numeric'&&direction=='asc'){return"("+a+" === null && "+b+" === null) ? 0 :("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : "+a+" - "+b+"));";}else if(type=='numeric'&&direction=='desc'){return"("+a+" === null && "+b+" === null) ? 0 :("+a+" === null ? Number.POSITIVE_INFINITY : ("+b+" === null ? Number.NEGATIVE_INFINITY : "+b+" - "+a+"));";}};function makeSortText(i){return"((a["+i+"] < b["+i+"]) ? -1 : ((a["+i+"] > b["+i+"]) ? 1 : 0));";};function makeSortTextDesc(i){return"((b["+i+"] < a["+i+"]) ? -1 : ((b["+i+"] > a["+i+"]) ? 1 : 0));";};function makeSortNumeric(i){return"a["+i+"]-b["+i+"];";};function makeSortNumericDesc(i){return"b["+i+"]-a["+i+"];";};function sortText(a,b){if(table.config.sortLocaleCompare)return a.localeCompare(b);return((a<b)?-1:((a>b)?1:0));};function sortTextDesc(a,b){if(table.config.sortLocaleCompare)return b.localeCompare(a);return((b<a)?-1:((b>a)?1:0));};function sortNumeric(a,b){return a-b;};function sortNumericDesc(a,b){return b-a;};function getCachedSortType(parsers,i){return parsers[i].type;};this.construct=function(settings){return this.each(function(){if(!this.tHead||!this.tBodies)return;var $this,$document,$headers,cache,config,shiftDown=0,sortOrder;this.config={};config=$.extend(this.config,$.tablesorter.defaults,settings);$this=$(this);$.data(this,"tablesorter",config);$headers=buildHeaders(this);this.config.parsers=buildParserCache(this,$headers);cache=buildCache(this);var sortCSS=[config.cssDesc,config.cssAsc];fixColumnWidth(this);$headers.click(function(e){var totalRows=($this[0].tBodies[0]&&$this[0].tBodies[0].rows.length)||0;if(!this.sortDisabled&&totalRows>0){$this.trigger("sortStart");var $cell=$(this);var i=this.column;this.order=this.count++%2;if(this.lockedOrder)this.order=this.lockedOrder;if(!e[config.sortMultiSortKey]){config.sortList=[];if(config.sortForce!=null){var a=config.sortForce;for(var j=0;j<a.length;j++){if(a[j][0]!=i){config.sortList.push(a[j]);}}}config.sortList.push([i,this.order]);}else{if(isValueInArray(i,config.sortList)){for(var j=0;j<config.sortList.length;j++){var s=config.sortList[j],o=config.headerList[s[0]];if(s[0]==i){o.count=s[1];o.count++;s[1]=o.count%2;}}}else{config.sortList.push([i,this.order]);}};setTimeout(function(){setHeadersCss($this[0],$headers,config.sortList,sortCSS);appendToTable($this[0],multisort($this[0],config.sortList,cache));},1);return false;}}).mousedown(function(){if(config.cancelSelection){this.onselectstart=function(){return false};return false;}});$this.bind("update",function(){var me=this;setTimeout(function(){me.config.parsers=buildParserCache(me,$headers);cache=buildCache(me);},1);}).bind("updateCell",function(e,cell){var config=this.config;var pos=[(cell.parentNode.rowIndex-1),cell.cellIndex];cache.normalized[pos[0]][pos[1]]=config.parsers[pos[1]].format(getElementText(config,cell),cell);}).bind("sorton",function(e,list){$(this).trigger("sortStart");config.sortList=list;var sortList=config.sortList;updateHeaderSortCount(this,sortList);setHeadersCss(this,$headers,sortList,sortCSS);appendToTable(this,multisort(this,sortList,cache));}).bind("appendCache",function(){appendToTable(this,cache);}).bind("applyWidgetId",function(e,id){getWidgetById(id).format(this);}).bind("applyWidgets",function(){applyWidget(this);});if($.metadata&&($(this).metadata()&&$(this).metadata().sortlist)){config.sortList=$(this).metadata().sortlist;}if(config.sortList.length>0){$this.trigger("sorton",[config.sortList]);}applyWidget(this);});};this.addParser=function(parser){var l=parsers.length,a=true;for(var i=0;i<l;i++){if(parsers[i].id.toLowerCase()==parser.id.toLowerCase()){a=false;}}if(a){parsers.push(parser);};};this.addWidget=function(widget){widgets.push(widget);};this.formatFloat=function(s){var i=parseFloat(s);return(isNaN(i))?0:i;};this.formatInt=function(s){var i=parseInt(s);return(isNaN(i))?0:i;};this.isDigit=function(s,config){return/^[-+]?\d*$/.test($.trim(s.replace(/[,.']/g,'')));};this.clearTableBody=function(table){if($.browser.msie){function empty(){while(this.firstChild)this.removeChild(this.firstChild);}empty.apply(table.tBodies[0]);}else{table.tBodies[0].innerHTML="";}};}});$.fn.extend({tablesorter:$.tablesorter.construct});var ts=$.tablesorter;ts.addParser({id:"text",is:function(s){return true;},format:function(s){return $.trim(s.toLocaleLowerCase());},type:"text"});ts.addParser({id:"digit",is:function(s,table){var c=table.config;return $.tablesorter.isDigit(s,c);},format:function(s){return $.tablesorter.formatFloat(s);},type:"numeric"});ts.addParser({id:"currency",is:function(s){return/^[A￡$a?￢?.]/.test(s);},format:function(s){return $.tablesorter.formatFloat(s.replace(new RegExp(/[A￡$a?￢]/g),""));},type:"numeric"});ts.addParser({id:"ipAddress",is:function(s){return/^\d{2,3}[\.]\d{2,3}[\.]\d{2,3}[\.]\d{2,3}$/.test(s);},format:function(s){var a=s.split("."),r="",l=a.length;for(var i=0;i<l;i++){var item=a[i];if(item.length==2){r+="0"+item;}else{r+=item;}}return $.tablesorter.formatFloat(r);},type:"numeric"});ts.addParser({id:"url",is:function(s){return/^(https?|ftp|file):\/\/$/.test(s);},format:function(s){return jQuery.trim(s.replace(new RegExp(/(https?|ftp|file):\/\//),''));},type:"text"});ts.addParser({id:"isoDate",is:function(s){return/^\d{4}[\/-]\d{1,2}[\/-]\d{1,2}$/.test(s);},format:function(s){return $.tablesorter.formatFloat((s!="")?new Date(s.replace(new RegExp(/-/g),"/")).getTime():"0");},type:"numeric"});ts.addParser({id:"percent",is:function(s){return/\%$/.test($.trim(s));},format:function(s){return $.tablesorter.formatFloat(s.replace(new RegExp(/%/g),""));},type:"numeric"});ts.addParser({id:"usLongDate",is:function(s){return s.match(new RegExp(/^[A-Za-z]{3,10}\.? [0-9]{1,2}, ([0-9]{4}|'?[0-9]{2}) (([0-2]?[0-9]:[0-5][0-9])|([0-1]?[0-9]:[0-5][0-9]\s(AM|PM)))$/));},format:function(s){return $.tablesorter.formatFloat(new Date(s).getTime());},type:"numeric"});ts.addParser({id:"shortDate",is:function(s){return/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(s);},format:function(s,table){var c=table.config;s=s.replace(/\-/g,"/");if(c.dateFormat=="us"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,"$3/$1/$2");}else if(c.dateFormat=="uk"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,"$3/$2/$1");}else if(c.dateFormat=="dd/mm/yy"||c.dateFormat=="dd-mm-yy"){s=s.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})/,"$1/$2/$3");}return $.tablesorter.formatFloat(new Date(s).getTime());},type:"numeric"});ts.addParser({id:"time",is:function(s){return/^(([0-2]?[0-9]:[0-5][0-9])|([0-1]?[0-9]:[0-5][0-9]\s(am|pm)))$/.test(s);},format:function(s){return $.tablesorter.formatFloat(new Date("2000/01/01 "+s).getTime());},type:"numeric"});ts.addParser({id:"metadata",is:function(s){return false;},format:function(s,table,cell){var c=table.config,p=(!c.parserMetadataName)?'sortValue':c.parserMetadataName;return $(cell).metadata()[p];},type:"numeric"});ts.addWidget({id:"zebra",format:function(table){if(table.config.debug){var time=new Date();}var $tr,row=-1,odd;$("tr:visible",table.tBodies[0]).each(function(i){$tr=$(this);if(!$tr.hasClass(table.config.cssChildRow))row++;odd=(row%2==0);$tr.removeClass(table.config.widgetZebra.css[odd?0:1]).addClass(table.config.widgetZebra.css[odd?1:0])});if(table.config.debug){$.tablesorter.benchmark("Applying Zebra widget",time);}}});})(jQuery);
 
 /**
- *    Tablesorter filters
- */
-$.tablesorter.addParser({
-   id: 'text',
-   is: function(s)
-   {
-      return false;
-   },
-   format: function(s, table, element)
-   {
-      return $(element).text();
-   },
-   type: 'text'
-}); 
-
-/**
  *    jQuery Extended Functions
  */
 //Plaintext: returns empty if text does not exist or trimmed text from element, also replaces &nbsp;
@@ -754,6 +738,41 @@ jQuery.fn.tag = function() {
 jQuery.fn.outerHTML = function() {
     return $('<div>').append( this.eq(0).clone() ).html();
 };
+
+/**
+ *    Tablesorter filters
+ */
+$.tablesorter.addParser({
+   id: 'plainText',
+   is: function(s)
+   {
+      return false;
+   },
+   format: function(s, table, element)
+   {
+      return $(element).plainText();
+   },
+   type: 'text'
+}); 
+
+$.tablesorter.addParser({
+   id: 'date',
+   is: function(s)
+   {
+      return false;
+   },
+   format: function(s, table, element)
+   {    
+      var date = s.split(' ');
+      if (date == null || date == "") {return 0;}
+      var month = parseMonth(date[1]),
+          day = parseInt(date[0], 10),
+          year = parseInt(date[2], 10);
+      return new Date(year, month, day).getTime();
+   },
+   type: 'numeric'
+}); 
+
 }
 
 /*================================*\
@@ -1488,12 +1507,20 @@ function initRowDeletion() {
  */
 function initStatusBar() {
    if(OBJECTS.STATUS_TIMER == null) {
-      var html = '<li class="status-item hide"><span class="bold">Hi <span id="jbmnpls-status-user-name"></span></span> (<span id="jbmnpls-status-user-id"></span>)</li>';
+      var html = '<li class="status-item hide"><span class="bold">Hi <span id="jbmnpls-status-user-name"></span></span></li>';
       html +=     '<li class="status-item hide"><span class="bold">Active Apps: </span><span id="jbmnpls-status-active-apps"></span></li>';
       html +=     '<li class="status-item hide"><span class="bold">Apps Left: </span><span id="jbmnpls-status-apps-left"></span></li>';
       html +=     '<li class="status-item hide"><span class="bold">Interviews: </span><span id="jbmnpls-status-interviews"></span></li>';
       $("#jbmnplsStatus ul").append(html);
       updateStatusBar();
+      invokeUpdateStatusBarUpdate();
+   }
+}
+function invokeUpdateStatusBarUpdate(optionalDoIt) {
+   if (!optionalDoIt && OBJECTS.STATUS_TIMER) {
+      clearInterval(OBJECTS.STATUS_TIMER);
+      OBJECTS.STATUS_TIMER = null;
+   } else if(!OBJECTS.STATUS_TIMER) {
       OBJECTS.STATUS_TIMER = setInterval(updateStatusBar, CONSTANTS.STATUS_UPDATE_TIME * 60 * 1000);    //Also kills php timer
    }
 }
@@ -1503,10 +1530,10 @@ function updateStatusBar() {
       PREF.remove("WORK_TERM_URL");
       asyncEnsureWorkTermLinkExists(updateStatusBar);
    }
-   
+   var headerExists = $("#jbmnplsHeader").exists();
    //Get the name and id
    $.get(LINKS.WORK_TERM, function(response){
-      if(PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
+      if(headerExists && PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
          response = response.toLowerCase();
          if(response == 'you are not authorized to view this page.') {
             retry();
@@ -1519,8 +1546,7 @@ function updateStatusBar() {
          var id = response.substring(start_id, response.indexOf("<br>", start_id));
          var segmentedName = name.split(' ');
          name = segmentedName[0] + " " + segmentedName[segmentedName.length-1];
-         $("#jbmnpls-status-user-name").text(name);
-         $("#jbmnpls-status-user-id").text(id).parent().removeClass("hide");
+         $("#jbmnpls-status-user-name").text(name).parents("li").removeClass("hide");
       }
    }).error(function(){
       //Error so we will try to crawl and get the url again
@@ -1529,49 +1555,53 @@ function updateStatusBar() {
       retry();
    });
    
-   if(PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
-      //Get the active applications count
-      $.get(LINKS.APPLICATIONS, function(response){
-         if(response == 'you are not authorized to view this page.') {
-            Log("Error reading applications, are you logged in?");
-            return;
-         }
-         var searchFor = "win0divUW_CO_JB_TITLE";
-         var activeApps = 0;
-         var position = response.indexOf("UW_CO_STU_APPSV$scroll$0");
-         var endbound = response.indexOf("win0divUW_CO_APPS_VW2$0", position);
-         position = response.indexOf(searchFor, position);
+   if (headerExists) {
+      if(PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
+         //Get the active applications count
+         $.get(LINKS.APPLICATIONS, function(response){
+            if(response == 'you are not authorized to view this page.') {
+               Log("Error reading applications, are you logged in?");
+               return;
+            }
+            var searchFor = "win0divUW_CO_JB_TITLE";
+            var activeApps = 0;
+            var position = response.indexOf("UW_CO_STU_APPSV$scroll$0");
+            var endbound = response.indexOf("win0divUW_CO_APPS_VW2$0", position);
+            position = response.indexOf(searchFor, position);
+            
+            //Look for the text and count how many till the endbound crossed
+            while(position < endbound && position > 0) { //Crosses or gets -1 for not finding it
+               position = response.indexOf(searchFor, position + searchFor.length);
+               if (position < endbound) {
+                  activeApps++;
+               }
+            }
+            $("#jbmnpls-status-active-apps").text(activeApps).parent().removeClass("hide");
+         });
          
-         //Look for the text and count how many till the endbound crossed
-         while(position < endbound && position >= 0) { //Crosses or gets -1 for not finding it
-            position = response.indexOf(searchFor, position + searchFor.length);
-            activeApps++;
-         }
-         $("#jbmnpls-status-active-apps").text(activeApps).parent().removeClass("hide");
-      });
-      
-      //Get the number of applications left
-      $.get(LINKS.SEARCH, function(response){
-         if(response == 'you are not authorized to view this page.') {
-            Log("Error reading search, are you logged in?");
-            return;
-         }
-         var start = response.indexOf("='UW_CO_JOBSRCHDW_UW_CO_MAX_NUM_APPL");
-         start = response.indexOf(">", start) + 1;
-         var appsLeft = response.substring(start, response.indexOf("<", start));
-         if(UTIL.isNumeric(appsLeft)) {
-            $("#jbmnpls-status-apps-left").text(appsLeft).parent().removeClass("hide");
-         }
-      });
-      
-      /* IMPLEMENT WHEN HAVING INTERVIEWS IN ACCOUNT
-      //Get the number of interviews
-      $.get(LINKS.INTERVIEWS, function(response){
-         if(response == 'you are not authorized to view this page.') {
-            Log("Error reading interviews, are you logged in?");
-            return;
-         }
-      });*/
+         //Get the number of applications left
+         $.get(LINKS.SEARCH, function(response){
+            if(response == 'you are not authorized to view this page.') {
+               Log("Error reading search, are you logged in?");
+               return;
+            }
+            var start = response.indexOf("='UW_CO_JOBSRCHDW_UW_CO_MAX_NUM_APPL");
+            start = response.indexOf(">", start) + 1;
+            var appsLeft = response.substring(start, response.indexOf("<", start));
+            if(UTIL.isNumeric(appsLeft)) {
+               $("#jbmnpls-status-apps-left").text(appsLeft).parent().removeClass("hide");
+            }
+         });
+         
+         /* IMPLEMENT WHEN HAVING INTERVIEWS IN ACCOUNT
+         //Get the number of interviews
+         $.get(LINKS.INTERVIEWS, function(response){
+            if(response == 'you are not authorized to view this page.') {
+               Log("Error reading interviews, are you logged in?");
+               return;
+            }
+         });*/
+      }
    }
 }
 
@@ -1726,7 +1756,7 @@ function asyncEnsureWorkTermLinkExists(callback) { //Somewhat dangerous because 
             callback.call(this, link);
             return;
          }
-         callback.call(this, false);
+         callback.call(this, null);
       });
    } else {
       LINKS.WORK_TERM = urlFromStorage;
@@ -1811,7 +1841,7 @@ var HIGHLIGHT = {
       }
    },
 };
-//LOGIN          : "LOGIN",
+//   LOGIN          : "LOGIN",
 //   HOME           : "HOME",
 //   DOCUMENTS      : "DOCUMENTS",
 //   PROFILE        : "PROFILE",
@@ -3892,15 +3922,16 @@ JbmnplsTable.prototype.applyTableSorter = function() {
       case PAGES.LIST: 
          this.jInstance.tablesorter({
             headers : {
-               5:{sorter : "text"},
+               7:{sorter : "date"}
             }
          });
          break;
       case PAGES.APPLICATIONS:
          this.jInstance.tablesorter({
             headers : {
-               5:{sorter : "text"},
-               6:{sorter : "text"},
+               5:{sorter : "plainText"},
+               6:{sorter : "plainText"},
+               9:{sorter : "date"}
             }
          });
          break;
@@ -4938,7 +4969,6 @@ switch (PAGEINFO.TYPE) {
             };
             $("#ACE_width span").each(function(index){
                var text = $(this).plainText();
-               Log(index,text)
                if(text != ""){
                   switch(index){
                      case 3:  jobDescriptionData.openDate      = text;        break;
@@ -5004,6 +5034,7 @@ switch (PAGEINFO.TYPE) {
                   "margin" : " 50px auto",
                   "-moz-box-shadow" : " 0 0 1em black",
                   "-webkit-box-shadow" : " 0 0 1em black",
+                  "box-shadow" : " 0 0 1em black",
                   "background-color" : " #f6f6f6",
                   "padding" : " 35px 20px",
                   "font-family" : " Arial, Verdana, san-serif",
@@ -5102,11 +5133,9 @@ switch (PAGEINFO.TYPE) {
             
             BRIDGE.registerFunction("invokeEmployerPopup", function(){  
                showPopup(true, null, "Employer Profile", 550, null, null, PAGEINFO.URL+"&jbmnpls=employeeInfo");
-               $("#jbmnplsPopupFrame").attr("state", "loading").css("visibility", "hidden").unbind().bind("load", function(){
+               $("#jbmnplsPopupFrame").css("visibility", "hidden").unbind().bind("load", function(){
                   var obj = $(this);
-                  if (obj.attr("state") == "loading") {
-                     obj.removeAttr("state");
-                  } else {
+                  if (obj.contents().find("#win0divUW_CO_JOBDTL_VW_UW_CO_PROFILE").exists()) {
                      obj.css("visibility", "visible");
                   }
                });
@@ -5125,6 +5154,9 @@ switch (PAGEINFO.TYPE) {
          }
       } else if(PAGEINFO.URL.contains("&jbmnpls=employeeInfo")) {    //In iframe being loaded for finding employee info
          BRIDGE.run(function(){submitAction_win0(document.win0,'#ICPanel1');});
+      }
+      if(PREF.load("SETTINGS_GENERAL_KILL_TIMER", null, false)) {
+         asyncEnsureWorkTermLinkExists(invokeUpdateStatusBarUpdate);
       }
    }break;
    case PAGES.EMPLOYEE_PROF:{
@@ -5397,7 +5429,7 @@ switch (PAGEINFO.TYPE) {
          case PAGES.APPLICATIONS:{     /*Expand to see what happens when you reach the applications page*/
             //For merging application
             var applicationsMerge = function(a,b,r){
-               if (a == "Edit Application") {
+               if (a === "" || a == "Edit Application") {
                   return b;
                } else {
                   var searchFor = "javascript:"; var start = a.indexOf(searchFor) + searchFor.length; searchFor = "UW_CO_APPLY_HL2$";
@@ -5466,7 +5498,7 @@ switch (PAGEINFO.TYPE) {
             $("#PAGECONTAINER>table").css("margin", "0 auto");
             $("#ACE_width").removeAttr("width").find("tbody>tr:eq(0)>td").eq(-1).remove();
             if(saveButton) {
-               $("#ACE_width").append(saveHTML);
+               $("#PAGECONTAINER").append(saveHTML);
             }
             }break;
       }

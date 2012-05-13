@@ -1,22 +1,29 @@
 Issues:
+	- sorting dates is broken for months
+	- skills removes save button after trying add a new skill
+	- kill timer isnt working?
+	- settings dropdown is forced to profile initially but goes to applications
+	- firefox 13+ cannot render the employee page
+	- statusbar shows extra active app
+	- chrome gets kicked out autotimer kicks it out <---major
 
-Optional Fixes:
+Optional Fixes/Features:
+	- fix the rankings page (temp solution can be just css fix)
+	- remove the student number for status bar
+	- click company should go to the job's company in employee info if exists <---really hard to do
 
 Features:
+	- notifications for interviews (ajax request every 5 min?)
 
-Added in this release
-   - settings
-   - status bar under navigation
-   - able to refresh page
-   - kills server timer
-   - auto search the search page on arrival
-   - log in default page set
+Added/Fixed in this release
+   - removed student number
+   - fixed skills save button
+   - fixed sorting dates
+   - minor glitch to having edit button when only one row on applications table
+   - fixed css box shadow on details page
+   - fixed details page showing the employeers data to show on Firefox 13+
+   - statusbar shows extra active app
    
    Fixed the following...
    - skills page is now usuable
    
-
-How to compress code
-1. http://fmarcia.info/jsmin/test.html
-2. Then use notepad++ to do a regex on "\r\n" and replace that with nothing
-     Error: then check the file make sure semicolons and brakets are applied
