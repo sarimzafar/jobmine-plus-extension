@@ -23,6 +23,8 @@ Added/Fixed in this release
    - fixed css box shadow on details page
    - fixed details page showing the employeers data to show on Firefox 13+
    - statusbar shows extra active app
+   - fixed the default page not matching correct location
+   - fixed the chrome not killing timer
    
    Fixed the following...
    - skills page is now usuable

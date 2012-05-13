@@ -48,8 +48,8 @@
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION              : "2.0.3",
-   DEBUG_ON             : true,
+   VERSION              : "2.0.4",
+   DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
    EXTRA_URL_TEXT       : "__Jobmine_Plus_has_taken_over_Jobmine",
@@ -1477,6 +1477,8 @@ function removeTimer() {
          clearupTimeout();
       }
    });
+   BRIDGE.addFunction("isSignout", function(){return false;});
+   BRIDGE.addFunction("isSessionLoggedout", function(){return false;});
 }
 
 function initRowDeletion() {
@@ -2215,7 +2217,7 @@ var SETTINGS = {
             'label' : 'Default Page when Logged In',
             'type' : SETTINGS_FIELD_TYPES.DROPDOWN,
             'data' : NAVIGATION,
-            'defaultValue' : 4,
+            'defaultValue' : "applications",
             //'detail' : 'Some text',
             //'onchange' : function(){},
          },
@@ -2307,10 +2309,8 @@ var SETTINGS = {
                         Assert(fieldEntry.data, "Settings cannot be built because '" + fieldName + "' is a dropdown but has no data.");
                         var defaultSelection = fieldEntry.defaultValue && UTIL.isNumeric(fieldEntry.defaultValue) ? fieldEntry.defaultValue : 0;
                         var ddData = "";
-                        var counter = 0;
                         for(var value in fieldEntry.data) {
-                           ddData += "<option "+(counter==defaultSelection?"selected='selected'":"")+" value='"+value.toString().toLowerCase()+"'>" + fieldEntry.data[value] + "</option>";
-                           counter++;
+                           ddData += "<option value='"+value.toString().toLowerCase()+"'>" + fieldEntry.data[value] + "</option>";
                         }
                         bodyHtml += "<select "+changetext+" id='"+id+"' class='settings-dropdown'>"+ddData+"</select>";
                         break;
