@@ -17,6 +17,8 @@
 // @exclude        *UW_CO_STUDENTS.UW_CO_EVALUATION*
 // @exclude        *&jbmnpls=ignore
 // @exclude        *UW_CO_EMPINFO_DTLS*
+// @grant          GM_getValue
+// @version        2.0.5
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -40,15 +42,13 @@
    __CSS__
    __INDIVIDUAL_PAGES__
 
-
-
 ==========Table of Contents============*/
 
 /*===============================*\
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION              : "2.0.4",
+   VERSION              : "2.0.5",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -1559,27 +1559,28 @@ function updateStatusBar() {
    
    if (headerExists) {
       if(PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
-         //Get the active applications count
-         $.get(LINKS.APPLICATIONS, function(response){
-            if(response == 'you are not authorized to view this page.') {
-               Log("Error reading applications, are you logged in?");
-               return;
-            }
-            var searchFor = "win0divUW_CO_JB_TITLE";
-            var activeApps = 0;
-            var position = response.indexOf("UW_CO_STU_APPSV$scroll$0");
-            var endbound = response.indexOf("win0divUW_CO_APPS_VW2$0", position);
-            position = response.indexOf(searchFor, position);
+         //Get the active applications count  
+         // TODO: Error in counting, quick fix done
+         //$.get(LINKS.APPLICATIONS, function(response){
+         //   if(response == 'you are not authorized to view this page.') {
+         //      Log("Error reading applications, are you logged in?");
+         //      return;
+         //   }
+         //   var searchFor = "win0divUW_CO_JB_TITLE";
+         //   var activeApps = 0;
+         //   var position = response.indexOf("UW_CO_STU_APPSV$scroll$0");
+         //   var endbound = response.indexOf("win0divUW_CO_APPS_VW2$0", position);
+         //   position = response.indexOf(searchFor, position);
             
             //Look for the text and count how many till the endbound crossed
-            while(position < endbound && position > 0) { //Crosses or gets -1 for not finding it
-               position = response.indexOf(searchFor, position + searchFor.length);
-               if (position < endbound) {
-                  activeApps++;
-               }
-            }
-            $("#jbmnpls-status-active-apps").text(activeApps).parent().removeClass("hide");
-         });
+         //   while(position < endbound && position > 0) { //Crosses or gets -1 for not finding it
+         //      position = response.indexOf(searchFor, position + searchFor.length);
+         //      if (position < endbound) {
+         //         activeApps++;
+         //      }
+         //   }
+         //   $("#jbmnpls-status-active-apps").text(activeApps).parent().removeClass("hide");
+         //});
          
          //Get the number of applications left
          $.get(LINKS.SEARCH, function(response){
@@ -1592,6 +1593,7 @@ function updateStatusBar() {
             var appsLeft = response.substring(start, response.indexOf("<", start));
             if(UTIL.isNumeric(appsLeft)) {
                $("#jbmnpls-status-apps-left").text(appsLeft).parent().removeClass("hide");
+               $("#jbmnpls-status-active-apps").text(50-appsLeft).parent().removeClass("hide");
             }
          });
          
