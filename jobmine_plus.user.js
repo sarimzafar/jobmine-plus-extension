@@ -66,7 +66,7 @@ var LINKS = {
    HOME        : CONSTANTS.PAGESIMILARTOP + "EMPLOYEE/WORK/h/?tab=DEFAULT",
    LOGIN       : CONSTANTS.PAGESIMILAR + "?cmd=login&languageCd=ENG",
    LOGOUT      : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/?cmd=logout",
-   DOCUMENTS   : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STUDDOCS",
+   DOCUMENTS   : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STU_DOCS",
    PROFILE     : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STUDENT",
    SKILLS      : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STUDENT?PAGE=UW_CO_STU_SKL_MTN",
    SEARCH      : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_JOBSRCH",
@@ -3128,7 +3128,9 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
    listOfHeaderObjs.each(function(a){
       var header = $(this).plainText();
       filters[header] = TABLEFILTERS.normal;
-      headers.push(header);
+      if (headers.indexOf(header) === -1) {
+         headers.push(header);
+      }
    });
    this.headers = headers;
    if (!isUpdatingInfo) {
