@@ -1551,29 +1551,6 @@ function updateStatusBar() {
    
    if (headerExists) {
       if(PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
-         //Get the active applications count  
-         // TODO: Error in counting, quick fix done
-         //$.get(LINKS.APPLICATIONS, function(response){
-         //   if(response == 'you are not authorized to view this page.') {
-         //      Log("Error reading applications, are you logged in?");
-         //      return;
-         //   }
-         //   var searchFor = "win0divUW_CO_JB_TITLE";
-         //   var activeApps = 0;
-         //   var position = response.indexOf("UW_CO_STU_APPSV$scroll$0");
-         //   var endbound = response.indexOf("win0divUW_CO_APPS_VW2$0", position);
-         //   position = response.indexOf(searchFor, position);
-            
-            //Look for the text and count how many till the endbound crossed
-         //   while(position < endbound && position > 0) { //Crosses or gets -1 for not finding it
-         //      position = response.indexOf(searchFor, position + searchFor.length);
-         //      if (position < endbound) {
-         //         activeApps++;
-         //      }
-         //   }
-         //   $("#jbmnpls-status-active-apps").text(activeApps).parent().removeClass("hide");
-         //});
-         
          //Get the number of applications left
          $.get(LINKS.SEARCH, function(response){
             if(response == 'you are not authorized to view this page.') {
@@ -5429,6 +5406,7 @@ switch (PAGEINFO.TYPE) {
                         return cell;
                      })
                      .appendTo(form);
+                     
             var allApp = makeTable(null, "UW_CO_APPS_VW2$scrolli$0");
             if (allApp.columns > 11) {
                allApp.merge(7,10,"View/Edit Applications", applicationsMerge)
