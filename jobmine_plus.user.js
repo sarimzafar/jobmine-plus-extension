@@ -358,26 +358,26 @@ if(PAGEINFO.URL.contains(LINKS.EMPLYR_TOP) || PAGEINFO.URL.contains(LINKS.EMPLYR
 } else if (PAGEINFO.TITLE.contains("Student Ranking")) {
    PAGEINFO.TYPE = PAGES.RANKINGS; 
 } else {
-   switch(PAGEINFO.TITLE) {
-      case "Resumes":               PAGEINFO.TYPE = PAGES.DOCUMENTS;    break;
-      case "Job Search Component":  PAGEINFO.TYPE = PAGES.SEARCH;       break;
-      case "Job Short List":        PAGEINFO.TYPE = PAGES.LIST;         break;
-      case "Student App Summary":   PAGEINFO.TYPE = PAGES.APPLICATIONS; break;
-      case "Student Interviews":    PAGEINFO.TYPE = PAGES.INTERVIEWS;   break;
-      case "Student Data":          //Handle each profile page differently
-         try{
-         var selectedText = UTIL.getID("selected").getElementsByTagName("span")[0].firstChild.nodeValue;
-         switch(selectedText.trim().toLowerCase()) {
-            case "skills inventory":      PAGEINFO.TYPE = PAGES.SKILLS;    break;
-            case "acad info.":            PAGEINFO.TYPE = PAGES.ACADEMIC;  break;
-            case "student personal info": PAGEINFO.TYPE = PAGES.PERSONAL;  break;
-            case "term cards":            PAGEINFO.TYPE = PAGES.PROFILE;   break;
-            default:
-               throw new Error("Unhandled new nav item: "+selectedText.toLowerCase().trim());
-               break;
-         }
-         }catch(e){alert("There is a problem with the Profile page, cannot parse selected tab\n"+e);}
-         break;
+    switch(PAGEINFO.TITLE) {
+        case "Student PDF Library":   PAGEINFO.TYPE = PAGES.DOCUMENTS;    break;
+        case "Job Search Component":  PAGEINFO.TYPE = PAGES.SEARCH;       break;
+        case "Job Short List":        PAGEINFO.TYPE = PAGES.LIST;         break;
+        case "Student App Summary":   PAGEINFO.TYPE = PAGES.APPLICATIONS; break;
+        case "Student Interviews":    PAGEINFO.TYPE = PAGES.INTERVIEWS;   break;
+        case "Student Data":          //Handle each profile page differently
+            try{
+                var selectedText = UTIL.getID("selected").getElementsByTagName("span")[0].firstChild.nodeValue;
+                switch(selectedText.trim().toLowerCase()) {
+                    case "skills inventory":      PAGEINFO.TYPE = PAGES.SKILLS;    break;
+                    case "acad info.":            PAGEINFO.TYPE = PAGES.ACADEMIC;  break;
+                    case "student personal info": PAGEINFO.TYPE = PAGES.PERSONAL;  break;
+                    case "term cards":            PAGEINFO.TYPE = PAGES.PROFILE;   break;
+                    default:
+                        throw new Error("Unhandled new nav item: "+selectedText.toLowerCase().trim());
+                        break;
+                }
+            }catch(e){alert("There is a problem with the Profile page, cannot parse selected tab\n"+e);}
+        break;
    }
 }
 if (PAGEINFO.TYPE != null) {
@@ -5310,21 +5310,17 @@ switch (PAGEINFO.TYPE) {
             });
             }break;
          case PAGES.DOCUMENTS:{        /*Expand to see what happens when you reach the documents page*/
-            var marks = $("#win0divSHOW_MARKS a.PSHYPERLINK").attr("href");
-            var history = $("#win0divVIEW_WORK_HISTORY a.PSHYPERLINK").attr("href");
-            var newResume = $("#UW_CO_DOC_ADD").attr("href");
-            var table0 = makeTable("Resumes", "UW_CO_RESUMES$scrolli$0");
-            if (table0.rows < 3) {  //Max 3 resumes
-               table0.addControlButton("New Resume", function(){
-                  BRIDGE.run(function(){aAction0_win0(document.win0,'UW_CO_DOC_ADD');});    
-               });     
-            }
-            form.children("div").remove();      //Remove useless stuff
-            table0.addControlButton("View Marks", marks).addControlButton("View Work History", history)
-                  .applyFilter("Resume", function(cell, row, rowData, reverseLookup){
-                     return (row == 0 ? cell + "<span class='details noselect'>(Default Resume)</span>" : cell);
-                  })
-                  .appendTo(form);
+            var docCSS = {
+                "#win0divPSPANELTABS, \
+                 #PAGEBAR, \
+                 #ACE_width > tbody > tr:nth-child(1), \
+                 #ACE_width > tbody > tr:nth-child(2), \
+                 #ACE_width > tbody > tr:nth-child(3) \
+                " : {
+                    "display" : "none !important",
+                }
+            };
+            appendCSS(docCSS);
             }break;
          case PAGES.LIST: {            /*Expand to see what happens when you reach the job shortlist page*/
             //Handles multi delete
