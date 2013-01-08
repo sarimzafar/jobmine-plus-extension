@@ -1549,33 +1549,34 @@ function updateStatusBar() {
         }
    });
    
-   if (headerExists) {
-      if(PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
-         //Get the number of applications left
-         $.get(LINKS.SEARCH, function(response){
+    if (headerExists) {
+        if(PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
+            //Get the number of applications left
+            $.get(LINKS.SEARCH, function(response){
+                if(response == 'you are not authorized to view this page.') {
+                    Log("Error reading search, are you logged in?");
+                    return;
+                }
+                var start = response.indexOf("='UW_CO_JOBSRCHDW_UW_CO_MAX_NUM_APPL");
+                start = response.indexOf(">", start) + 1;
+                var appsLeft = response.substring(start, response.indexOf("<", start));
+                if(UTIL.isNumeric(appsLeft)) {
+                    var activeApps = Math.max(50-appsLeft, 0);
+                    $("#jbmnpls-status-apps-left").text(appsLeft).parent().removeClass("hide");
+                    $("#jbmnpls-status-active-apps").text(activeApps).parent().removeClass("hide");
+                }
+            });
+
+            /* IMPLEMENT WHEN HAVING INTERVIEWS IN ACCOUNT
+            //Get the number of interviews
+            $.get(LINKS.INTERVIEWS, function(response){
             if(response == 'you are not authorized to view this page.') {
-               Log("Error reading search, are you logged in?");
-               return;
+            Log("Error reading interviews, are you logged in?");
+            return;
             }
-            var start = response.indexOf("='UW_CO_JOBSRCHDW_UW_CO_MAX_NUM_APPL");
-            start = response.indexOf(">", start) + 1;
-            var appsLeft = response.substring(start, response.indexOf("<", start));
-            if(UTIL.isNumeric(appsLeft)) {
-               $("#jbmnpls-status-apps-left").text(appsLeft).parent().removeClass("hide");
-               $("#jbmnpls-status-active-apps").text(50-appsLeft).parent().removeClass("hide");
-            }
-         });
-         
-         /* IMPLEMENT WHEN HAVING INTERVIEWS IN ACCOUNT
-         //Get the number of interviews
-         $.get(LINKS.INTERVIEWS, function(response){
-            if(response == 'you are not authorized to view this page.') {
-               Log("Error reading interviews, are you logged in?");
-               return;
-            }
-         });*/
-      }
-   }
+            });*/
+        }
+    }
 }
 
 /**
