@@ -1509,7 +1509,7 @@ function initRowDeletion() {
  */
 function initStatusBar() {
    if(OBJECTS.STATUS_TIMER == null) {
-      var html = '<li class="status-item hide"><span class="bold">Hi <span id="jbmnpls-status-user-name"></span></span></li>';
+      var html = '<li class="status-item hide"><span class="bold">Hi <span id="jbmnpls-status-user-name"></span>!</span></li>';
       html +=     '<li class="status-item hide"><span class="bold">Active Apps: </span><span id="jbmnpls-status-active-apps"></span></li>';
       html +=     '<li class="status-item hide"><span class="bold">Apps Left: </span><span id="jbmnpls-status-apps-left"></span></li>';
       html +=     '<li class="status-item hide"><span class="bold">Interviews: </span><span id="jbmnpls-status-interviews"></span></li>';
@@ -1527,34 +1527,26 @@ function invokeUpdateStatusBarUpdate(optionalDoIt) {
    }
 }
 function updateStatusBar() {
-   function retry() {
-      LINKS.WORK_TERM = null;
-      PREF.remove("WORK_TERM_URL");
-      asyncEnsureWorkTermLinkExists(updateStatusBar);
-   }
    var headerExists = $("#jbmnplsHeader").exists();
-   //Get the name and id
-   $.get(LINKS.WORK_TERM, function(response){
-      if(headerExists && PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
-         response = response.toLowerCase();
-         if(response == 'you are not authorized to view this page.') {
-            retry();
-            return;
-         }
-         //Start parsing the html
-         var start_name = response.indexOf("<b>") + 3;     //3 -> <b>
-         var start_id = response.indexOf("<br>", start_name) + 4;
-         var name = response.substring(start_name, start_id - 4).replace(/&nbsp;/g, " ").capitalizeAllFirstLetters();
-         var id = response.substring(start_id, response.indexOf("<br>", start_id));
-         var segmentedName = name.split(' ');
-         name = segmentedName[0] + " " + segmentedName[segmentedName.length-1];
-         $("#jbmnpls-status-user-name").text(name).parents("li").removeClass("hide");
-      }
-   }).error(function(){
-      //Error so we will try to crawl and get the url again
-      //It is nearly impossible for this to go into infinite loop
-      Log("ERROR occurred trying to get the url for work term, has it changed? Trying to pull a new one from documents.");
-      retry();
+   //Get the name
+   $.get(LINKS.RANKINGS, function(response){
+        if(headerExists && PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
+            //Start parsing the html
+            var name, end,
+                start = response.indexOf("id='UW_CO_STUDENT_UW_CO_PREF_NAME'");
+            if (start == -1) {
+                start = response.indexOf('id="UW_CO_STUDENT_UW_CO_PREF_NAME"');
+            }
+            if (start == -1) {
+                name == "Unknown";
+            } else {
+                start = response.indexOf('>', start) + 1;
+                end = response.indexOf("<", start);
+                var fullName = response.substring(start, end).split(",");
+                name = fullName[1] + " " + fullName[0];     // last name and then first name
+            }
+            $("#jbmnpls-status-user-name").text(name).parents("li").removeClass("hide");
+        }
    });
    
    if (headerExists) {
@@ -1745,27 +1737,6 @@ function parseMonth(prefix) {
       }
    }
    return -1;
-}
-
-function asyncEnsureWorkTermLinkExists(callback) { //Somewhat dangerous because synchronized
-   var urlFromStorage = PREF.load("WORK_TERM_URL");
-   if(LINKS.WORK_TERM == null && urlFromStorage == null) {
-      $.get(LINKS.DOCUMENTS, function(response){
-         var start = response.lastIndexOf("href", response.indexOf("View Work History")) + 6;  //6 -> href='
-         var end  = response.indexOf("'", start);
-         var link = response.substring(start, end);
-         if(link.startsWith(CONSTANTS.PAGESIMILAR)) {
-            LINKS.WORK_TERM = link;
-            PREF.save('WORK_TERM_URL', link);
-            callback.call(this, link);
-            return;
-         }
-         callback.call(this, null);
-      });
-   } else {
-      LINKS.WORK_TERM = urlFromStorage;
-      callback.call(this, LINKS.WORK_TERM);
-   }
 }
 }
 
@@ -4914,7 +4885,7 @@ switch (PAGEINFO.TYPE) {
          //Cannot have itself in its own iframe
          return;
       }
-      asyncEnsureWorkTermLinkExists( initStatusBar );
+      initStatusBar();
       }break;
    case PAGES.LOGIN:{      /*Expand to see what happens when you reach login page*/
       //To avoid hanging if you have been kicked off
@@ -5160,7 +5131,7 @@ switch (PAGEINFO.TYPE) {
          BRIDGE.run(function(){submitAction_win0(document.win0,'#ICPanel1');});
       }
       if(PREF.load("SETTINGS_GENERAL_KILL_TIMER", null, false)) {
-         asyncEnsureWorkTermLinkExists(invokeUpdateStatusBarUpdate);
+         invokeUpdateStatusBarUpdate(LINKS.RANKINGS);
       }
    }break;
    case PAGES.EMPLOYEE_PROF:{
