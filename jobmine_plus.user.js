@@ -1922,6 +1922,29 @@ function initAjaxCapture() {
                allowResubmit();
                dataArrayAsString = [];
                text.replace(/;">([^<]+)<\/a/gim, function(a,b){dataArrayAsString.push(b);});
+            } else if (name === "UW_CO_PDF_LINKS_UW_CO_MARKS_VIEW"
+                     ||name === "UW_CO_PDF_LINKS_UW_CO_WHIST_VIEW"
+                     ||name.indexOf("UW_CO_PDF_LINKS_UW_CO_PACKAGE_VIEW") == 0
+                     ||name.indexOf("UW_CO_PDF_LINKS_UW_CO_DOC_VIEW") == 0) {
+                  // Handle pdf's going new tab
+                  var end, start;
+                  start = text.indexOf("window.open('");
+                  if (start === -1) {
+                     start = text.indexOf('window.open("');
+                     if (start === -1) {
+                        showMessage("Failed to retrieve PDF, please report at jobmineplus@gmail.com.");
+                        this.bInProcess = false;
+                        return;
+                     }
+                     start += ("window.open('").length;
+                     end = text.indexOf('"', start);
+                  } else {
+                     start += ("window.open('").length
+                     end = text.indexOf("'", start);
+                  }
+                  url = text.substring(start, end);
+                  name = "documents-pdf-download";
+                  this.bInProcess = false;
             } else {
                //Run and parse
                if(name == "TYPE_COOP") {
@@ -1958,6 +1981,24 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
          },5000);
       });
       return;
+   } else if (name === "documents-pdf-download") {
+      $.get(url, function(data){
+         var end, start = data.indexOf("url=");
+         if (start != -1) {
+            start += ("url=").length;
+            end = data.indexOf(".pdf", start) + 4;
+            if (end !== -1) {
+               var pdfUrl = data.substring(start, end);
+               window.open(pdfUrl);
+               showMessage("PDF is ready for download or viewing.");
+               return;
+            }
+         }
+         showMessage("Failed to retrieve PDF, please report at jobmineplus@gmail.com.");
+      });
+      return;
+   } else if (name.startsWith('UW_CO_PDF_WRK_UW_CO_DOC_DELETE$')) {
+      showMessage("Successfully deleted the resume.");
    }
    switch(PAGEINFO.TYPE) {
      /* case PAGES.INTERVIEWS:      //Not to release in First release
@@ -1967,6 +2008,11 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
             //iframeRunFunction(UTIL.getID("jbmnplsPopupFrame"))
          }
          break;*/
+      case PAGES.DOCUMENTS: 
+         if (isSaving) {
+            showMessage("Successfully saved the resume name.");
+         }
+         break;
       case PAGES.SEARCH:
          //Clicked search button
          var table = TABLES[0];        //Results table
@@ -5310,6 +5356,7 @@ switch (PAGEINFO.TYPE) {
             });
             }break;
          case PAGES.DOCUMENTS:{        /*Expand to see what happens when you reach the documents page*/
+            // Lazy styling without removing elements
             var docCSS = {
                 "#win0divPSPANELTABS, \
                  #PAGEBAR, \
@@ -5321,6 +5368,18 @@ switch (PAGEINFO.TYPE) {
                 }
             };
             appendCSS(docCSS);
+            
+            // Show message when going to download pdf
+            $("#UW_CO_PDF_LINKS_UW_CO_MARKS_VIEW, #UW_CO_PDF_LINKS_UW_CO_WHIST_VIEW")
+            .add(document.getElementById("UW_CO_PDF_LINKS_UW_CO_DOC_VIEW$0"))
+            .add(document.getElementById("UW_CO_PDF_LINKS_UW_CO_DOC_VIEW$1"))
+            .add(document.getElementById("UW_CO_PDF_LINKS_UW_CO_DOC_VIEW$2"))
+            .add(document.getElementById("UW_CO_PDF_LINKS_UW_CO_PACKAGE_VIEW$0"))
+            .add(document.getElementById("UW_CO_PDF_LINKS_UW_CO_PACKAGE_VIEW$1"))
+            .add(document.getElementById("UW_CO_PDF_LINKS_UW_CO_PACKAGE_VIEW$2"))
+            .click(function(){
+               showMessage('Please wait, retrieving download...');
+            });
             }break;
          case PAGES.LIST: {            /*Expand to see what happens when you reach the job shortlist page*/
             //Handles multi delete
