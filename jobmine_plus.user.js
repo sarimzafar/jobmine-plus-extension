@@ -18,7 +18,7 @@
 // @exclude        *&jbmnpls=ignore
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.0.5
+// @version        2.0.6
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -48,7 +48,7 @@
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION              : "2.0.5",
+   VERSION              : "2.0.6",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
