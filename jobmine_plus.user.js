@@ -3217,7 +3217,7 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
       //View All/25
       var viewAll = rightPanel.eq(-8);
       var text = viewAll.plainText();
-      if (viewAll.tag() == "A" && (text == "View All" || text == "View 25")) {
+      if (viewAll.tag() == "A" && (text == "View All" || text == "View 100" || text == "View 25")) {
          var link = viewAll.attr("href");
          this.viewAll = '<span class="fakeLink" onclick="document.getElementById(\''+this.id+'\').className=\'jbmnplsTable loading\';'+link.substr(link.indexOf(":")+1)+'">'+text+' jobs/page</span>';
       }
