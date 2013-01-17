@@ -18,7 +18,7 @@
 // @exclude        *&jbmnpls=ignore
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.0.6
+// @version        2.0.7
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -48,7 +48,7 @@
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION              : "2.0.6",
+   VERSION              : "2.0.7",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -286,7 +286,7 @@ if (document.body == null || document.body.className == "PSSRCHPAGE") {
 
 var BROWSER = {
    FIREFOX  : 0,
-   CRHOME   : 1,
+   CHROME   : 1,
    OTHER    : 2,
 }
 
@@ -296,7 +296,7 @@ var PAGEINFO = {
    TYPE              : null,
    TITLE             : document.title,
    IN_IFRAME         : top != self,
-   BROWSER           : (function(){var ua = navigator.userAgent.toLowerCase();var b;if (ua.contains("firefox")) {b = BROWSER.FIREFOX;this.BROWSER_VERSION = ua.substr(ua.lastIndexOf("firefox/")+8);} else if (ua.contains("chrome")) {b = BROWSER.CRHOME;var ua = navigator.userAgent.toLowerCase();var start = ua.lastIndexOf("chrome/")+7;this.BROWSER_VERSION = ua.substring(start, ua.indexOf(" ", start));} else {b = BROWSER.OTHER;}return b;})(),
+   BROWSER           : (function(){var ua = navigator.userAgent.toLowerCase();var b;if (ua.contains("firefox")) {b = BROWSER.FIREFOX;this.BROWSER_VERSION = ua.substr(ua.lastIndexOf("firefox/")+8);} else if (ua.contains("chrome")) {b = BROWSER.CHROME;var ua = navigator.userAgent.toLowerCase();var start = ua.lastIndexOf("chrome/")+7;this.BROWSER_VERSION = ua.substring(start, ua.indexOf(" ", start));} else {b = BROWSER.OTHER;}return b;})(),
    BROWSER_VERSION   : (function(){var ua = navigator.userAgent.toLowerCase();var b;if (ua.contains("firefox")) {b = ua.substr(ua.lastIndexOf("firefox/")+8);} else if (ua.contains("chrome")) {var ua = navigator.userAgent.toLowerCase();var start = ua.lastIndexOf("chrome/")+7;b = ua.substring(start, ua.indexOf(" ", start));} else {b = null;}return b;})(),
 };
 
@@ -1400,7 +1400,10 @@ function closeMessage() {
 //Update Message
 function addUpdateMessage() {
    if(UTIL.idExists("jbnplsUpdate")) {return;}
-   $(document.body).append("<div style='display:none;' id='jbnplsUpdate'><a title='You know you want to click this' class='update-link' style='margin:0 auto;width:500px;' href='"+LINKS.UPDATE_LINK+"'>You are using an old version of Jobmine Plus, click to update.</a><div onclick='this.parentNode.style.visibility=\"hidden\";' class='close'></div></div>");
+   var message = "You are using an old version of Jobmine Plus, click to update" + (PAGEINFO.BROWSER == BROWSER.CHROME ? " (make sure you have NinjaKit installed)":'');
+   $(document.body).append("<div style='display:none;' id='jbnplsUpdate'>\
+        <a title='You know you want to click this' class='update-link' style='margin:0 auto;width:500px;' href='"+LINKS.UPDATE_LINK+"'>\
+            " + message + "</a><div onclick='this.parentNode.style.visibility=\"hidden\";' class='close'></div></div>");
    $("#jbnplsUpdate a").one('click',function(){
       $(this).parent().css("visibility", "hidden");
       showPopup(true, "If you actually updated, you will see all the changes when you refresh this page.", "Jobmine Plus is Updated!", 300);
