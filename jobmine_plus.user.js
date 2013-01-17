@@ -2024,8 +2024,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
             || name.startsWith("UW_CO_JOBRES_VW$htop$")        //First button
          ) {
             table.update().setLoading(false);
-            var appsLeft = $("#UW_CO_JOBSRCHDW_UW_CO_MAX_NUM_APPL").plainText();
-            $("#jbmnpls_Results_AppsLeft").text(appsLeft);
+            $("#jbmnpls_total_job").text(table.jobLength);
             hidePopup();
          } else if(name == "TYPE_COOP") {
             var type = $("#jbmnplsJobType");
@@ -2935,6 +2934,7 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    this.maxPages = -1;
    this.excel = "";
    this.viewAll = "";
+   this.jobLength = 0;
    
    //Object Queues
    this.filters = {};
@@ -3194,6 +3194,7 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
                var endRangeNum = parseInt(item[0].split("-")[1]);
                var totalPages;
                var currentPage;
+               this.jobLength = parseInt(item[1]);
                if (endRangeNum == item[1]) {    //Last page
                   currentPage = totalPages = this.maxPages;
                } else {
@@ -5305,8 +5306,9 @@ switch (PAGEINFO.TYPE) {
                      table0.jInstance.find("tbody tr").children(":first-child:contains('Read')").text("New");
                   })
                   .appendTo(form);
+                  
             var appsLeft = $("#UW_CO_JOBSRCHDW_UW_CO_MAX_NUM_APPL").plainText();
-            $("#jbmnpls_Results_TableCount").parent().append(" | Applications Left: <span id='jbmnpls_Results_AppsLeft'>"+appsLeft+"</span>");
+            $("#jbmnpls_Results_TableCount").parent().append(" | Total Jobs: <span id='jbmnpls_total_job'>"+table0.jobLength+"</span>");
             if(PREF.load("SETTINGS_PAGES_AUTO_SEARCH", null, false)) {
                showPopup(false, "Please wait while Jobmine receives the search results.<br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>", "Search is in Progress",550);
             }
