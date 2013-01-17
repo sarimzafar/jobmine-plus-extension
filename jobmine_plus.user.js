@@ -2934,7 +2934,7 @@ function JbmnplsTable (defaultName, tableID, objectToAppendTo) {
    this.pageControls = null;
    this.maxPages = -1;
    this.excel = "";
-   this.view100 = "";
+   this.viewAll = "";
    
    //Object Queues
    this.filters = {};
@@ -3214,12 +3214,12 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
       } else {
          this.pageControls = null;
       }
-      //View 100/25
-      var view100 = rightPanel.eq(-8);
-      var text = view100.plainText();
-      if (view100.tag() == "A" && (text == "View 100" || text == "View 25")) {
-         var link = view100.attr("href");
-         this.view100 = '<span class="fakeLink" onclick="document.getElementById(\''+this.id+'\').className=\'jbmnplsTable loading\';'+link.substr(link.indexOf(":")+1)+'">'+text+' jobs/page</span>';
+      //View All/25
+      var viewAll = rightPanel.eq(-8);
+      var text = viewAll.plainText();
+      if (viewAll.tag() == "A" && (text == "View All" || text == "View 25")) {
+         var link = viewAll.attr("href");
+         this.viewAll = '<span class="fakeLink" onclick="document.getElementById(\''+this.id+'\').className=\'jbmnplsTable loading\';'+link.substr(link.indexOf(":")+1)+'">'+text+' jobs/page</span>';
       }
    }/* else {}    Only displays page numbers, so useless*/
    
@@ -3736,8 +3736,8 @@ JbmnplsTable.prototype.buildControls = function() {
          returnStr += " | <a class='options' target='_blank' href='"+value+"'>"+name+"</a>";
       }
    }
-   if(!this.view100.empty()) {
-      returnStr += " | " + this.view100;
+   if(!this.viewAll.empty()) {
+      returnStr += " | " + this.viewAll;
    }
    if (this.pageControls != null) {
      returnStr += " |" + this.pageControls;
