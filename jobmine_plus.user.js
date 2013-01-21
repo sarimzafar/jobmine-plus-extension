@@ -118,7 +118,7 @@ var OBJECTS = {
 };
 
 var LARGESTRINGS = {
-   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' class='noselect title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><div id='jbmnplsPopupSettings' class='body'></div><div id='jbmnplsPopupFrameWrapper'><iframe id='jbmnplsPopupFrame' allowtransparency='true' frameborder='no' width='100%' height='100%' class='frame'></iframe></div><div id='jbmnplsPopupFooter' class='footer noselect'><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
+   POPUP : "<div id='jbmnplsPopup'><div class='wrapper'><div id='jbmnplsPopupContent' class='content draggable noselect'><div id='jbmnplsPopupTitle' class='noselect title draggable-region'></div><div id='jbmnplsPopupBody' class='body'></div><div id='jbmnplsPopupSettings' class='body'></div><div id='jbmnplsPopupFrameWrapper'><iframe id='jbmnplsPopupFrame' allowtransparency='true' frameborder='no' width='100%' height='100%' class='frame'></iframe></div><div id='jbmnplsPopupFooter' class='footer noselect'><span class='fakeLink submit' onclick='hidePopup(\"save\");' title='Click to submit.'>Submit and Close</span><span class='fakeLink save' onclick='hidePopup(\"save\");' title='Click to save.'>Save and Close</span><span title='Click to cancel.' onclick='hidePopup(\"cancel\");' class='fakeLink cancel'>Cancel</span><span onclick='hidePopup(\"close\");' class='fakeLink close' title='Click to close.'>Close</span></div></div></div>",
 };
 
 var IMAGES = {
@@ -1446,6 +1446,7 @@ function handleCustomize(tableNum, columnNum) {
          case "save": 
             PREF.save("HIDDEN_HEADERS", tableNum, table.getColumnsHidden());
             showMessage("The table's headers customization has been saved.", 5);
+            return true;
             break;
       }
    }
@@ -1695,14 +1696,26 @@ function isScrollbarShown() {
    return $(document).height() > $(window).height();
 }
 
-function invokeApplyPopup(jobId) {
+function invokeApplyPopup(jobId, title) {
    if (typeof (OBJECTS.UWATERLOO_ID) === "undefined") {
       alert("Failed to get user id, please report this to jobmineplus@gmail.com.");
       return;
    }
-   showPopup(true, null, "Submit Application", 500, null, function(type){
+   title = title || "Submit Application";
+   showPopup(true, null, title, 500, null, function(type){
       if (type == "save") {
-         //TODO
+         var $frame = $("#jbmnplsPopupFrame"),
+             doc = $frame.contents().get(0),
+             $submitButton = $(doc.getElementById('UW_CO_APPWRK_UW_CO_CONFIRM_APP'));
+         if ($submitButton.exists()) {
+            $submitButton.click();
+         } else {
+            // Runs a message saying to select or upload a resume.
+            BRIDGE.run(function(){
+               var frame = document.getElementById('jbmnplsPopupFrame');
+               frame.contentWindow.showMessage("Please select/upload a resume.", 7);
+            });
+         }
          return false;
       }
    }, LINKS.APPLY + jobId + "&UW_CO_STU_ID=" + OBJECTS.UWATERLOO_ID);
@@ -2063,6 +2076,13 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
          break;
       case PAGES.APPLY:
          $('#UW_CO_APPDOCWRK_UW_CO_DOC_NUM option:eq(0)').text("Choose");
+         if (name === "UW_CO_APPWRK_UW_CO_CONFIRM_APP") {
+            BRIDGE.run(function(){
+               var p = window.parent;
+               p.hidePopup();
+               p.showMessage("Application has been submitted");
+            });
+         }
          break;
       case PAGES.SEARCH:
          //Clicked search button
@@ -4660,7 +4680,8 @@ var CSSOBJ = {
       "float"           :  "right",
       "padding-right"   :  "10px",
    },
-   "#jbmnplsPopup.black #jbmnplsPopupFooter span.save.fakeLink" : {
+   "#jbmnplsPopup.black #jbmnplsPopupFooter span.save.fakeLink,\
+    #jbmnplsPopup.black #jbmnplsPopupFooter span.submit.fakeLink" : {
       "float"           :  "left",
       "padding-left"    :  "10px",
    },
@@ -4687,7 +4708,9 @@ var CSSOBJ = {
    /**
     *    Jobmine Plus Popup: Employer info under job details
     */
-   "#jbmnplsPopup[name='employer_profile'].black span.save,#jbmnplsPopup[name='employer_profile'].black span.cancel" : {
+   "#jbmnplsPopup[name='employer_profile'].black span.submit,\
+    #jbmnplsPopup[name='employer_profile'].black span.save,\
+    #jbmnplsPopup[name='employer_profile'].black span.cancel" : {
       "display"         :  "none",
    },
    "#jbmnplsPopup[name='employer_profile'].black #jbmnplsPopupFooter span.close" : {
@@ -4738,6 +4761,9 @@ var CSSOBJ = {
       "margin"          :  "10px 20px 0",
       "float"           :  "left",
    },
+    "#jbmnplsPopup[name='customize'] span.submit" : {
+      'display'         :  'none',
+   },
    
    /**
     *    Jobmine Plus About Me
@@ -4753,7 +4779,9 @@ var CSSOBJ = {
       "font-size"       :  "16px",
       "margin"          :  "0 0px 10px",
    },
-   "#jbmnplsPopup[name='about_me'].black span.save,#jbmnplsPopup[name='about_me'].black span.cancel" : {
+   "#jbmnplsPopup[name='about_me'].black span.submit,\
+    #jbmnplsPopup[name='about_me'].black span.save,\
+    #jbmnplsPopup[name='about_me'].black span.cancel" : {
       "display"         :  "none",
    },
    "#jbmnplsPopup[name='about_me'].black #jbmnplsPopupFooter span.close" : {
@@ -4783,7 +4811,9 @@ var CSSOBJ = {
       "color"           :  "#444",
       "font-size"       :  "10px",
    },
-   "#jbmnplsPopup[name='welcome!'].black span.save,#jbmnplsPopup[name='welcome!'].black span.cancel" : {
+   "#jbmnplsPopup[name='welcome!'].black span.submit,\
+    #jbmnplsPopup[name='welcome!'].black span.save,\
+    #jbmnplsPopup[name='welcome!'].black span.cancel" : {
       "display"         :  "none",
    },
    "#jbmnplsPopup[name='welcome!'].black #jbmnplsPopupFooter span.close" : {
@@ -4844,7 +4874,9 @@ var CSSOBJ = {
       'height'          :  '200px !important',
       'padding'         :  '10px',
    },
-   "#jbmnplsPopup[name='jobmine_plus_is_updated!'] span.save, #jbmnplsPopup[name='jobmine_plus_is_updated!'] span.cancel" : {
+   "#jbmnplsPopup[name='jobmine_plus_is_updated!'] span.submit,\
+    #jbmnplsPopup[name='jobmine_plus_is_updated!'] span.save,\
+    #jbmnplsPopup[name='jobmine_plus_is_updated!'] span.cancel" : {
       'display'         :  'none',
    },
    
@@ -4922,8 +4954,22 @@ var CSSOBJ = {
    '#jbmnplsPopupSettings .settings-entry .settings-entry-title' : {
       'font-weight'     : 'bold',
    },
+   "#jbmnplsPopup[name='settings'] span.submit" : {
+      'display'         :  'none',
+   },
+  
+   /**
+    *    Jobmine Plus Apply Popup
+    */
+   "#jbmnplsPopup[name='edit_application'] span.save,\
+    #jbmnplsPopup[name='submit_application'] span.save" : {
+      'display'         :  'none',
+   },
    
-   
+   "#jbmnplsPopup[name='edit_application'] #jbmnplsPopupFrame,\
+    #jbmnplsPopup[name='submit_application'] #jbmnplsPopupFrame" : {
+      'height'          :  '230px',
+   },
 };
 appendCSS(CSSOBJ);
 
@@ -5264,9 +5310,6 @@ switch (PAGEINFO.TYPE) {
    }break;
    case PAGES.APPLY:{      /*Expand to see what happens when you apply*/
       initAjaxCapture();
-      
-      // Submit button  UW_CO_APPWRK_UW_CO_ATTACHADD
-      
       var viewLink = $('#UW_CO_PDF_LINKS_UW_CO_DOC_VIEW').attr('href'),
           message = $('#UW_CO_APPDOCWRK_UW_CO_ALL_TEXT').val(),
           $dropdown = $("#UW_CO_APPDOCWRK_UW_CO_DOC_NUM");
