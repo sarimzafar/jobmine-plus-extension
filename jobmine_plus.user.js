@@ -18,7 +18,7 @@
 // @exclude        *&jbmnpls=ignore
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.0.8
+// @version        2.0.9
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -48,7 +48,7 @@
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION              : "2.0.8",
+   VERSION              : "2.0.9",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -3286,6 +3286,13 @@ JbmnplsTable.prototype.setHeaderAt = function(index, newName) {
    Assert(UTIL.inRange(index, this.columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
    //Hold old info and apply the new ones to the header and the filter
    var oldHeader = this.headers[index];
+   var originalHeader = newName;
+   var counter = -1;
+   do {
+      counter++;
+      newName = originalHeader + "_" + counter;
+   } while(this.headers.indexOf(newName) > 0);
+   newName = originalHeader + "_" + counter;
    
    //No need to update header
    if (oldHeader == newName) {
@@ -3326,6 +3333,13 @@ JbmnplsTable.prototype.insertColumn = function(headerName, index_OR_filterFuncti
       return false;
    }
    //Add the column now
+   var originalHeader = headerName;
+   var counter = -1;
+   do {
+      counter++;
+      headerName = originalHeader + "_" + counter;
+   } while(this.headers.indexOf(headerName) > 0);
+   headerName = originalHeader + "_" + counter;
    this.columnQueue[headerName] = {type: "insert", index: index, filter: data};
    this.internalInsertColumn(headerName, index, data);
    data = null;
@@ -3347,7 +3361,8 @@ JbmnplsTable.prototype.internalInsertColumn = function(headerName, index, data) 
    }
    var reverseLookup = {};
    for(var i=0; i<this.columns; i++) {
-      reverseLookup[this.headers[i]] = i;
+      var visibleHeader = this.headers[i].substring(0, this.headers[i].lastIndexOf("_"));
+      reverseLookup[visibleHeader] = i;
    }
    this.headers.splice(index, 0, headerName);
    this.filters[headerName] = TABLEFILTERS.normal;
@@ -3646,19 +3661,21 @@ JbmnplsTable.prototype.trim = function() {
 /**
  *    Apply a filter so it filters columns when it builds
  */
-JbmnplsTable.prototype.applyFilter = function(columnInput, filterFunction) {
-
+JbmnplsTable.prototype.applyFilter = function(columnInput, filterFunction, index) {
    if (this.empty() || columnInput == null || !UTIL.isFunction(filterFunction)) {
       return false;
    }
-   if (this.filters.hasOwnProperty(columnInput)) {
-       //We inputted a header
-      this.filters[columnInput] = filterFunction;
-   } else if(UTIL.isNumeric(columnInput)) {
+   if(UTIL.isNumeric(columnInput)) {
       //We inputted a Number
       Assert(UTIL.inRange(columnInput, this.columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
       var header = this.headers[columnInput];
       this.filters[header] = filterFunction;
+      return this;
+   }
+   columnInput += "_" + (index?index:"0");
+   if (this.filters.hasOwnProperty(columnInput)) {
+      //We inputted a header
+      this.filters[columnInput] = filterFunction;
    }
    return this;
 }
@@ -3666,19 +3683,22 @@ JbmnplsTable.prototype.applyFilter = function(columnInput, filterFunction) {
 /**
  *    Removes a filter for a column
  */
-JbmnplsTable.prototype.removeFilter = function(columnInput) {
+JbmnplsTable.prototype.removeFilter = function(columnInput, index) {
    if (this.empty() || columnInput == null) {
       return false;
-   } 
-   if (this.filters.hasOwnProperty(columnInput)) {
-       //We inputted a header
-      this.filters[columnInput] = TABLEFILTERS.normal;
-   } else if(UTIL.isNumeric(columnInput)) {
+   }
+   if(UTIL.isNumeric(columnInput)) {
       //We inputted a Number
       Assert(UTIL.inRange(columnInput, this.columns-1), MESSAGE.ARRAY_OUT_OF_BOUNDS);
       var header = this.headers[columnInput];
       this.filters[header] = TABLEFILTERS.normal;
+      return this;
    }
+   columnInput += "_" + (index?index:"0");
+   if (this.filters.hasOwnProperty(columnInput)) {
+      //We inputted a header
+      this.filters[columnInput] = TABLEFILTERS.normal;
+   } 
    return this;
 }
 
@@ -3847,14 +3867,16 @@ JbmnplsTable.prototype.updateCells = function() {
       if(i >= originalHeaders.length) {   //Start Adding
          var headerName = this.headers[i];
          headerName = headerName.charAt(0) == "{" && headerName.charAt(headerName.length-1) == "}" ? "" : headerName;
-         originalHeaders.parent().append("<th col='"+i+"'>"+headerName+"</th>");
+         var displayHeader = headerName.substring(0, headerName.lastIndexOf('_'));
+         originalHeaders.parent().append("<th col='"+i+"'>"+displayHeader+"</th>");
       } else if(i >= columns) {           //Start removing
             originalHeaders.eq(i).remove();   
       } else {                            //Write the new header
          var headerName = this.headers[i];
-         inverseHeaderLookup[headerName] = i;
          headerName = headerName.charAt(0) == "{" && headerName.charAt(headerName.length-1) == "}" ? "" : headerName;
-         originalHeaders.eq(i).attr("col", i).text(headerName);
+         var displayHeader = headerName.substring(0, headerName.lastIndexOf('_'));
+         inverseHeaderLookup[displayHeader] = i;
+         originalHeaders.eq(i).attr("col", i).text(displayHeader);
       }
    }
    //Rows: Insert/Remove new rows and write their cell data
