@@ -18,7 +18,7 @@
 // @exclude        *&jbmnpls=ignore
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.0.7
+// @version        2.0.8
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -48,7 +48,7 @@
 |*        __CONSTANTS__          *|
 \*===============================*/
 var CONSTANTS = {
-   VERSION              : "2.0.7",
+   VERSION              : "2.0.8",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -3126,11 +3126,15 @@ JbmnplsTable.prototype.parseTable = function(_srcID) {
    var headers = [];
    var filters = {};
    listOfHeaderObjs.each(function(a){
-      var header = $(this).plainText();
+      var originalHeader = header = $(this).plainText();
+      var counter = -1;
+      do {
+         counter++;
+         header = originalHeader + "_" + counter;
+      } while(headers.indexOf(header) > 0);
+      header = originalHeader + "_" + counter;
       filters[header] = TABLEFILTERS.normal;
-      if (headers.indexOf(header) === -1) {
-         headers.push(header);
-      }
+      headers.push(header);
    });
    this.headers = headers;
    if (!isUpdatingInfo) {
@@ -3775,6 +3779,8 @@ JbmnplsTable.prototype.build = function() {
    for (var h = 0; h < this.columns; h++) {
       if (h < this.headers.length) {
          var header = this.headers[h];
+         var end = header.lastIndexOf("_");
+         header = header.substring(0, end);
          inverseHeaderLookup[header] = h;
          if (header.charAt(0) == "{" && header.charAt(header.length-1) == "}") {
             header = "";
@@ -5471,10 +5477,11 @@ switch (PAGEINFO.TYPE) {
                      .appendTo(form);
                      
             var allApp = makeTable(null, "UW_CO_APPS_VW2$scrolli$0");
+            var columnLength = allApp.columns;
             if (allApp.columns > 11) {
-               allApp.merge(7,10,"View/Edit Applications", applicationsMerge)
-                     .applyFilter(10, TABLEFILTERS.deleteRow)
-                     .setHeaderAt(10, "Delete");
+               // Apply the delete button
+               allApp.applyFilter(columnLength - 1, TABLEFILTERS.deleteRow)
+                     .setHeaderAt(columnLength - 1, "Delete");
             } else {
                showMessage(MESSAGE.UNHIDE_COLUMNS_PAGE, 12);
             }
