@@ -72,6 +72,7 @@ var LINKS = {
    SEARCH      : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_JOBSRCH",
    LIST        : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_JOB_SLIST",
    APPLICATIONS: CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_APP_SUMMARY",
+   APPLY       : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_CT_STU_APP.GBL?Action=A&UW_CO_JOB_ID=",     //UW_CO_STU_ID
    INTERVIEWS  : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STU_INTVS",
    RANKINGS    : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_STU_RNK2",
    JOB_DESCR   : CONSTANTS.PAGESIMILAR + "EMPLOYEE/WORK/c/UW_CO_STUDENTS.UW_CO_JOBDTLS?UW_CO_JOB_ID=",
@@ -113,6 +114,7 @@ var OBJECTS = {
    MESSAGE_TIMER  :  null,
    STATUS_TIMER   :  null,
    REFRESH_TIMER  :  null,
+   UWATERLOO_ID   :  null,
 };
 
 var LARGESTRINGS = {
@@ -308,6 +310,7 @@ var REVERSE_PAGES = {
    PERSONAL_INFO     : "PERSONAL",
    ACADEMIC_INFO     : "ACADEMIC",
    SKILLS_INVENTORY  : "SKILLS",
+   APPLY             : "APPLY",
    SEARCH            : "SEARCH",
    SHORT_LIST        : "LIST",
    APPLICATIONS      : "APPLICATIONS",
@@ -325,6 +328,7 @@ var PAGES = {
    PERSONAL       : "PERSONAL_INFO",
    ACADEMIC       : "ACADEMIC_INFO",
    SKILLS         : "SKILLS_INVENTORY",
+   APPLY          : "APPLY",
    SEARCH         : "SEARCH",
    LIST           : "SHORT_LIST",
    APPLICATIONS   : "APPLICATIONS",
@@ -359,11 +363,12 @@ if(PAGEINFO.URL.contains(LINKS.EMPLYR_TOP) || PAGEINFO.URL.contains(LINKS.EMPLYR
    PAGEINFO.TYPE = PAGES.RANKINGS; 
 } else {
     switch(PAGEINFO.TITLE) {
-        case "Student PDF Library":   PAGEINFO.TYPE = PAGES.DOCUMENTS;    break;
-        case "Job Search Component":  PAGEINFO.TYPE = PAGES.SEARCH;       break;
-        case "Job Short List":        PAGEINFO.TYPE = PAGES.LIST;         break;
-        case "Student App Summary":   PAGEINFO.TYPE = PAGES.APPLICATIONS; break;
-        case "Student Interviews":    PAGEINFO.TYPE = PAGES.INTERVIEWS;   break;
+        case "Student PDF Library":                PAGEINFO.TYPE = PAGES.DOCUMENTS;    break;
+        case "Job Search Component":               PAGEINFO.TYPE = PAGES.SEARCH;       break;
+        case "Job Short List":                     PAGEINFO.TYPE = PAGES.LIST;         break;
+        case "Student App Summary":                PAGEINFO.TYPE = PAGES.APPLICATIONS; break;
+        case "Student Interviews":                 PAGEINFO.TYPE = PAGES.INTERVIEWS;   break;
+        case "Create / Maintain student Apps":     PAGEINFO.TYPE = PAGES.APPLY;        break;
         case "Student Data":          //Handle each profile page differently
             try{
                 var selectedText = UTIL.getID("selected").getElementsByTagName("span")[0].firstChild.nodeValue;
@@ -475,6 +480,7 @@ var BRIDGE = {
                   if((typeof currentObj).toLowerCase() != "object") {
                      returnStr += currentObj;
                   } else if (Object.prototype.toString.call( currentObj ) === '[object Array]') {
+                     currentObj.push(1);
                      returnStr += currentObj.join("{|||}");
                   } else {
                      return null;
@@ -523,7 +529,9 @@ var BRIDGE = {
                if (args[i] == "(|||)") {  //<---if null exists
                   tempArgs.push(null);
                } else if(args[i].indexOf("{|||}") != -1) {  
-                  tempArgs.push(args[i].split("{|||}"));
+                  var arg = args[i].split("{|||}");
+                  arg.pop();
+                  tempArgs.push(arg);
                } else {
                   var value = args[i];
                   switch( value.toUpperCase() ) {
@@ -1307,12 +1315,13 @@ function showPopup(isBlack, bodyText, title, width, maxHeight, onCloseFunction, 
 function hidePopup(arg) {
    var popup = $("#jbmnplsPopup");
    if (popup.exists()) {
-      popup.css("display", "none")
-            .removeAttr("name");
-      if(OBJECTS.ONPOPUPCLOSE != null) { 
-         OBJECTS.ONPOPUPCLOSE.call(this,arg);
+      if(OBJECTS.ONPOPUPCLOSE != null) {
+         if (!OBJECTS.ONPOPUPCLOSE.call(this,arg) && arg == 'save') { 
+            return;
+         }
          OBJECTS.ONPOPUPCLOSE = null;
       }
+      popup.css("display", "none").removeAttr("name");
       $("#jbmnplsPopupBody").empty();  //Delete the content
       $("#jbmnplsPopupFrame").attr("src", LINKS.BLANK);
       $("#jbmnplsPopupContent").removeClass("iframe")
@@ -1686,6 +1695,20 @@ function isScrollbarShown() {
    return $(document).height() > $(window).height();
 }
 
+function invokeApplyPopup(jobId) {
+   if (typeof (OBJECTS.UWATERLOO_ID) === "undefined") {
+      alert("Failed to get user id, please report this to jobmineplus@gmail.com.");
+      return;
+   }
+   showPopup(true, null, "Submit Application", 500, null, function(type){
+      if (type == "save") {
+         //TODO
+         return false;
+      }
+   }, LINKS.APPLY + jobId + "&UW_CO_STU_ID=" + OBJECTS.UWATERLOO_ID);
+}
+BRIDGE.registerFunction("invokeApplyPopup", invokeApplyPopup);
+
 function appendCSS(cssObj) {
    var cssString = "";
    for(var selector in cssObj) {
@@ -1913,7 +1936,7 @@ function initAjaxCapture() {
             var url = null;
             var text = req.responseText;
             var popupOccurs = false;
-            if(name.indexOf("hexcel") != -1) {  
+            if(name.indexOf("hexcel") != -1) { 
                try{
                   var start = text.indexOf(";window.open('"+commonURL+"?cmd=viewattach&userfile=ps.xls") + 14;
                   url = text.substring(start, text.indexOf("',", start));
@@ -1950,6 +1973,18 @@ function initAjaxCapture() {
                   url = text.substring(start, end);
                   name = "documents-pdf-download";
                   this.bInProcess = false;
+            } else if (name == "UW_CO_APPDOCWRK_UW_CO_DOC_NUM") {
+               var findStart = "id='UW_CO_STU_DOCS_UW_CO_DOC_DESC'>",
+                   findEnd = "</span>",
+                   start = text.indexOf(findStart);
+               if (start != -1) {
+                  start += findStart.length;
+                  var end = text.indexOf(findEnd, start);
+                  var resumeName = text.substring(start, end);
+                  dataArrayAsString = [];
+                  dataArrayAsString.push(resumeName);
+                  this.onload.call(this);
+               }
             } else {
                //Run and parse
                if(name == "TYPE_COOP") {
@@ -1995,13 +2030,21 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
             if (end !== -1) {
                var pdfUrl = data.substring(start, end);
                window.open(pdfUrl);
-               showMessage("PDF is ready for download or viewing.");
+               showMessage("PDF is ready for viewing.");
                return;
             }
          }
          showMessage("Failed to retrieve PDF, please report at jobmineplus@gmail.com.");
       });
       return;
+   } else if (name == "UW_CO_APPDOCWRK_UW_CO_DOC_NUM") {
+      if (dataArrayAsString && !dataArrayAsString.empty()) {
+         var resumeName = dataArrayAsString[0];
+         if (resumeName == "&nbsp;") {
+            resumeName = "<span style='color:red'>Please select/upload a resume.</span>";
+         }
+         $('#resume-name').html(resumeName);
+      }
    } else if (name.startsWith('UW_CO_PDF_WRK_UW_CO_DOC_DELETE$')) {
       showMessage("Successfully deleted the resume.");
    }
@@ -2017,6 +2060,9 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
          if (isSaving) {
             showMessage("Successfully saved the resume name.");
          }
+         break;
+      case PAGES.APPLY:
+         $('#UW_CO_APPDOCWRK_UW_CO_DOC_NUM option:eq(0)').text("Choose");
          break;
       case PAGES.SEARCH:
          //Clicked search button
@@ -2382,6 +2428,7 @@ var SETTINGS = {
                $("#jbmnplsStatus").addClass("hide");
             }
             invokeRefreshTimer();
+            return true;
             break;
       }
    },
@@ -2884,10 +2931,22 @@ var TABLEFILTERS = {
    fixApply : function(cell, row, rowData, reverseLookup){ 
       //If link
       if(cell.contains("<a")) {
-         var searchFor = "javascript:"; var start = cell.indexOf(searchFor) + searchFor.length; searchFor = "UW_CO_APPLY_HL$";
-         var point1 = cell.indexOf(searchFor, start) + searchFor.length; var point2 = cell.indexOf("'", point1) + 1;
-         var end = cell.indexOf('"', point2);  var part1 = cell.substring(start, point1);  var part2 = cell.substring(point2, end);
-         return '<span class="fakeLink" onclick="var row=this.parentNode.parentNode.getAttribute(\'row\');'+part1+'\'+row'+part2+'">Apply</span>';
+         //invokeApplyPopup
+         var lookup;
+         if (reverseLookup.hasOwnProperty('Job Identifier')) {
+            lookup = reverseLookup['Job Identifier'];
+         } else if (reverseLookup.hasOwnProperty('Job ID')) {
+            lookup = reverseLookup['Job ID'];
+         } else {
+            return "Job ID does not exist";
+         }
+         var jobId = rowData[lookup],
+             text = cell.getTextBetween(">", "<");
+         //var searchFor = "javascript:"; var start = cell.indexOf(searchFor) + searchFor.length; searchFor = "UW_CO_APPLY_HL$";
+         //var point1 = cell.indexOf(searchFor, start) + searchFor.length; var point2 = cell.indexOf("'", point1) + 1;
+         //var end = cell.indexOf('"', point2);  var part1 = cell.substring(start, point1);  var part2 = cell.substring(point2, end);
+         //return '<span class="fakeLink" onclick="var row=this.parentNode.parentNode.getAttribute(\'row\');'+part1+'\'+row'+part2+'">Apply</span>';
+         return '<span class="fakeLink" onclick="invokeApplyPopup(\'' + jobId + '\');">' + text + '</span>';
       }
       return cell;
    },
@@ -4872,6 +4931,7 @@ appendCSS(CSSOBJ);
 |*     __INDIVIDUAL_PAGES__       *|
 \*================================*/
 //See if we are at home page
+OBJECTS.UWATERLOO_ID = $('#UW_CO_STUDENT_UW_CO_STU_ID').plainText();
 switch (PAGEINFO.TYPE) {
    case PAGES.HOME:{       /*Expand to see what happens when you reach home page*/
       if (!PAGEINFO.IN_IFRAME) {
@@ -5202,7 +5262,105 @@ switch (PAGEINFO.TYPE) {
          trs.eq(1).remove();trs.eq(2).remove();
       }
    }break;
+   case PAGES.APPLY:{      /*Expand to see what happens when you apply*/
+      initAjaxCapture();
+      
+      // Submit button  UW_CO_APPWRK_UW_CO_ATTACHADD
+      
+      var viewLink = $('#UW_CO_PDF_LINKS_UW_CO_DOC_VIEW').attr('href'),
+          message = $('#UW_CO_APPDOCWRK_UW_CO_ALL_TEXT').val(),
+          $dropdown = $("#UW_CO_APPDOCWRK_UW_CO_DOC_NUM");
+      
+      var resumeName = "Loading...";
+      if (message.contains("Upload cancelled.")) {
+         // Put back the resume name if failed to Updating
+         //resumeName = "";
+      } else if (message.contains('Your PDF document has been successfully')) {
+         resumeName = "[Uploaded Resume]";
+      }
+      $(document.body).append("<span id='or-text'>OR</span>").append(
+         '<span id="resume-holder">\
+            <span id="resume-name">' + resumeName + '</span> <a href="' + viewLink + '">(View)</a>\
+          </span>');
+      console.log(message);
+    
+      // Show the first resume
+      if (message == "") {
+         $dropdown.val(1).change();
+      }
+      $dropdown.find(':first-child').text("Choose");
+      
+      var cssObj = {
+         'body, html' : {
+            'overflow' : 'hidden !important',
+         },
+         'body > form': {
+            'position'  : 'fixed',
+            'top'       : '-4000px',
+         },
+         '#UW_CO_APPDOCWRK_UW_CO_DOC_NUM_LBL,\
+          #UW_CO_APPDOCWRK_UW_CO_DOC_NUM,\
+          #UW_CO_JOBDTL_VW_UW_CO_PARENT_NAME,\
+          #UW_CO_JOBDTL_VW_UW_CO_JOB_TITLE,\
+          #win0divlblUW_CO_APPS_UW_CO_APPL_MARKS,\
+          #UW_CO_APPS_UW_CO_APPL_MARKS,\
+          #or-text,\
+          #resume-holder,\
+          #win0divUW_CO_APPWRK_UW_CO_ATTACHADD' : {
+            'position'  : 'fixed',
+            'top'       : '15px',
+            'left'      : '20px',
+            'font-size' : '14px',
+         },
+         '#UW_CO_JOBDTL_VW_UW_CO_PARENT_NAME' : {     // Employer
+            'font-size'   : '20px',
+            'font-weight' : 'bold',
+         },
+         '#UW_CO_JOBDTL_VW_UW_CO_JOB_TITLE' : {       // Job title
+            'top'       : '40px',
+         },
+         '#UW_CO_APPDOCWRK_UW_CO_DOC_NUM_LBL' : {     // Resume label
+            'top'       : '105px',
+         },
+         '#UW_CO_APPDOCWRK_UW_CO_DOC_NUM' : {         // Resume Dropdown
+            'top'       : '135px',
+            'left'      : '110px',
+            'width'     : '108px !important',
+            'height'    : '21px',
+         },
+         '#win0divUW_CO_APPWRK_UW_CO_ATTACHADD' : {   // Resume Upload Button
+            'top'       : '135px',
+            'left'      : '280px',
+         },
+         '#win0divlblUW_CO_APPS_UW_CO_APPL_MARKS' : { // Include grades label
+            'top'       : '80px',
+         },
+         '#UW_CO_APPS_UW_CO_APPL_MARKS' : {           // Include grades dropdown
+            'top'       : '78px',
+            'left'      : '130px',
+         },
+         '#resume-holder *' : { 
+            'font-size' : '14px',
+         },
+         '#resume-holder' : {
+            'top'       : '105px',
+            'left'      : '85px',
+         },
+         '#or-text' : {
+            'top'       : '137px',
+            'left'      : '238px',
+         },
+      };
+      var $dropdown = $("#UW_CO_APPS_UW_CO_APPL_MARKS");
+      var hideGrades = $dropdown.attr('disabled') !== null;
+      cssObj["#UW_CO_APPS_UW_CO_APPL_MARKS,#win0divlblUW_CO_APPS_UW_CO_APPL_MARKS"] = {
+         'display' : (hideGrades?"none":"block"),
+      };
+      appendCSS(cssObj);
+   }
+   break;
    default:
+      {        /*Expand to see what this section*/
       //Redirect to home page if necessary the top is not already at home
       if (!PAGEINFO.IN_IFRAME) { 
          redirect(LINKS.HOME);
@@ -5252,6 +5410,7 @@ switch (PAGEINFO.TYPE) {
             function(){   //Callback
                PREF.save("SHOW_WELCOME_MSG", false);     //Clicking close will never let you see the message again
             });
+      }
       }
       
       //Parse Individual pages here
