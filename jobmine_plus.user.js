@@ -2080,7 +2080,11 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
             BRIDGE.run(function(){
                var p = window.parent;
                p.hidePopup();
-               p.showMessage("Application has been submitted");
+               if (p.document.body.className.indexOf("APPLICATIONS") != -1) {
+                  p.showMessage("Application has been successfully edited.");
+               } else {
+                  p.showMessage("Application has been successfully submitted.");
+               }
             });
          }
          break;
@@ -2952,7 +2956,7 @@ var TABLEFILTERS = {
       //If link
       if(cell.contains("<a")) {
          //invokeApplyPopup
-         var lookup;
+         var lookup, jobId, text, title;
          if (reverseLookup.hasOwnProperty('Job Identifier')) {
             lookup = reverseLookup['Job Identifier'];
          } else if (reverseLookup.hasOwnProperty('Job ID')) {
@@ -2960,23 +2964,10 @@ var TABLEFILTERS = {
          } else {
             return "Job ID does not exist";
          }
-         var jobId = rowData[lookup],
-             text = cell.getTextBetween(">", "<");
-         //var searchFor = "javascript:"; var start = cell.indexOf(searchFor) + searchFor.length; searchFor = "UW_CO_APPLY_HL$";
-         //var point1 = cell.indexOf(searchFor, start) + searchFor.length; var point2 = cell.indexOf("'", point1) + 1;
-         //var end = cell.indexOf('"', point2);  var part1 = cell.substring(start, point1);  var part2 = cell.substring(point2, end);
-         //return '<span class="fakeLink" onclick="var row=this.parentNode.parentNode.getAttribute(\'row\');'+part1+'\'+row'+part2+'">Apply</span>';
-         return '<span class="fakeLink" onclick="invokeApplyPopup(\'' + jobId + '\');">' + text + '</span>';
-      }
-      return cell;
-   },
-   fixEditApplication : function(cell, row, rowData, reverseLookup){ 
-      //If link
-      if(cell.contains("<a")) {
-         var searchFor = "javascript:"; var start = cell.indexOf(searchFor) + searchFor.length; searchFor = "UW_CO_APPLY_HL1$";
-         var point1 = cell.indexOf(searchFor, start) + searchFor.length; var point2 = cell.indexOf("'", point1) + 1;
-         var end = cell.indexOf('"', point2);  var part1 = cell.substring(start, point1);  var part2 = cell.substring(point2, end);
-         return '<span class="fakeLink" onclick="var row=this.parentNode.parentNode.getAttribute(\'row\');'+part1+'\'+row'+part2+'">Edit Applications</span>';
+         jobId = rowData[lookup],
+         text = cell.getTextBetween(">", "<");
+         title = (cell.contains("Edit Application")?"Edit":"Submit") + " Application";
+         return '<span class="fakeLink" onclick="invokeApplyPopup(\'' + jobId + '\', \'' + title + '\');">' + text + '</span>';
       }
       return cell;
    },
@@ -5672,22 +5663,10 @@ switch (PAGEINFO.TYPE) {
             }, null, {appsLeft: appsLeft} );
             }break;
          case PAGES.APPLICATIONS:{     /*Expand to see what happens when you reach the applications page*/
-            //For merging application
-            var applicationsMerge = function(a,b,r){
-               if (a === "" || a == "Edit Application") {
-                  return b;
-               } else {
-                  var searchFor = "javascript:"; var start = a.indexOf(searchFor) + searchFor.length; searchFor = "UW_CO_APPLY_HL2$";
-                  var point1 = a.indexOf(searchFor, start) + searchFor.length; var point2 = a.indexOf("'", point1) + 1;
-                  var end = a.indexOf('"', point2);  var part1 = a.substring(start, point1);  var part2 = a.substring(point2, end);
-                  var firstLink = '<span class="fakeLink" onclick="var row=this.parentNode.parentNode.getAttribute(\'row\');'+part1+'\'+row'+part2+'">Edit</span>';
-                  return firstLink + " | " + b.replaceLast(" Package", "");
-               }
-            }
             //Pull and make new tables
             var activeApp = makeTable(null, "UW_CO_STU_APPSV$scroll$0");
             activeApp.applyFilter("Job Title", TABLEFILTERS.jobDescription)
-                     .applyFilter("View Details", TABLEFILTERS.fixEditApplication)
+                     .applyFilter("View Details", TABLEFILTERS.fixApply)
                      .applyFilter("Employer", TABLEFILTERS.googleSearch)
                      .applyFilter("Job Status", function(cell, row, rowData, reverseLookup){
                         if (reverseLookup.hasOwnProperty("Job ID")) {
@@ -5710,6 +5689,7 @@ switch (PAGEINFO.TYPE) {
                showMessage(MESSAGE.UNHIDE_COLUMNS_PAGE, 12);
             }
             allApp.applyFilter("Job Title", TABLEFILTERS.jobDescription)
+                  .applyFilter("View Details", TABLEFILTERS.fixApply)      
                   .applyFilter("Employer", TABLEFILTERS.googleSearch)
                   .appendTo(form);
             //Clean up all webpage :P
