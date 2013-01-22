@@ -1594,6 +1594,31 @@ function updateStatusBar() {
     }
 }
 
+function changeStatusValues(activeApps) { 
+   if (PAGEINFO.TYPE == PAGES.HOME) {
+      $("#jbmnpls-status-active-apps").text(activeApps);
+      var left = Math.max(50 - activeApps, 0);
+      $("#jbmnpls-status-apps-left").text(left);
+   } else {
+      BRIDGE.run(function(){
+         window.parent.changeStatusValues(activeApps);
+      }, null, {activeApps:activeApps});
+   }
+}
+BRIDGE.registerFunction("changeStatusValues", changeStatusValues);
+
+function increaseActiveStatusValue(byHowMuch) { 
+   if (PAGEINFO.TYPE == PAGES.HOME) {
+      var active = parseInt($("#jbmnpls-status-active-apps").plainText());
+      changeStatusValues(active + parseInt(byHowMuch));
+   } else {
+      BRIDGE.run(function(){
+         window.parent.increaseActiveStatusValue(byHowMuch);
+      }, null, {byHowMuch:byHowMuch});
+   }
+}
+BRIDGE.registerFunction("increaseActiveStatusValue", increaseActiveStatusValue);
+
 /**
  *    Returns the current term in Jobmine's format
  */
@@ -1751,6 +1776,7 @@ function finishApplying() {
          // Change the row text and highlight
          $tr.children().eq(applyCol).html("Already Applied");
          HIGHLIGHT.apply($tr);
+         increaseActiveStatusValue(1);
          break;
    }
 }
@@ -2216,6 +2242,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
                      var activeTable = TABLES[0];     //Active table
                      var rowToDelete = $("#"+activeTable.tableID+" tbody td:contains('"+id+"')").parent().attr("row");
                      activeTable.deleteRow(rowToDelete);
+                     increaseActiveStatusValue(-1);
                   }
                   tableObj.deleteRow(deletedRowNumber);
                   jobFinished = true;
@@ -5553,7 +5580,7 @@ switch (PAGEINFO.TYPE) {
                      }
                      return data;
                   })
-                  .applyFilter("Apply", TABLEFILTERS.fixApply)
+                  //.applyFilter("Apply", TABLEFILTERS.fixApply)        //TODO fix bug when changing pages
                   .applyFilter("Short List", function(cell, row, rowData, reverseLookup){
                      var action = cell.match(/hAction[^;]+;/);
                      if (action==null) {return cell}
@@ -5732,12 +5759,7 @@ switch (PAGEINFO.TYPE) {
             form.children("div:not('.jbmnplsTable')").css("display", "none");
             
             //Update the active applications count
-            BRIDGE.run(function(){
-               var activeAppsNode = window.parent.document.getElementById('jbmnpls-status-active-apps');
-               if(activeAppsNode) {
-                  activeAppsNode.innerHTML = activeAppsLeft;
-               }
-            }, null, {activeAppsLeft: activeApp.rows} );
+            changeStatusValues(activeApp.rows);
             }break;
          case PAGES.PROFILE:{          /*Expand to see what happens when you reach the profile page*/ 
             var table0 = makeTable("Profile", "UW_CO_STDTERMVW$scroll$0");
