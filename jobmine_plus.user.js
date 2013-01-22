@@ -1339,7 +1339,6 @@ function isPopupShown(strictIsBlack){
 function resetPopupPosition() {
    var content = $("#jbmnplsPopupContent");
    content.css("top", (-content.outerHeight()/2)+"px").css("left", (-content.outerWidth()/2) + "px");
-   $('body').scrollTop(0);
 }
 
 /**
@@ -5518,6 +5517,7 @@ switch (PAGEINFO.TYPE) {
                      }
                      return data;
                   })
+                  .applyFilter("Apply", TABLEFILTERS.fixApply)
                   .applyFilter("Short List", function(cell, row, rowData, reverseLookup){
                      var action = cell.match(/hAction[^;]+;/);
                      if (action==null) {return cell}
