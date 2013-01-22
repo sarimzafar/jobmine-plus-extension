@@ -50,13 +50,15 @@
 {/*Expand to see the constants*/
 var CONSTANTS = {
    VERSION              : "2.0.9",
-   DEBUG_ON             : false,
+   DEBUG_ON             : true,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
    EXTRA_URL_TEXT       : "__Jobmine_Plus_has_taken_over_Jobmine",
    MESSAGE_TIME_OUT     : 8,   //10 sec
    SEARCH_DAYS_CLEAR    : 30,  //30 days before ids will clear out
-   STATUS_UPDATE_TIME   : 10  //10 mins
+   STATUS_UPDATE_TIME   : 10,  //10 mins
+   RESUME_DELIMITOR1    : "{|||}",
+   RESUME_DELIMITOR2    : "[|||]",
 };
 
 var DIMENSIONS = {
@@ -156,8 +158,8 @@ var INPUT_RESTRICTIONS = {
 |*    __PROTOTYPE_FUNCTIONS__    *|
 \*===============================*/
 {/*Expand to see the prototype functions*/
-String.prototype.contains = function(string){
-   return this.indexOf(string) >= 0;
+String.prototype.contains = function(string, from){
+   return this.indexOf(string, from) >= 0;
 }
 String.prototype.empty = function(){
    return this == null || this.length == 0 || this == "";
@@ -205,6 +207,10 @@ String.prototype.getTextBetween=function(front, end){
 String.prototype.replaceCharCodes=function(){
    if (this==null){return null;}
    return this.replace(/&amp;/g, "&").replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&quot;/g, "\"");
+};
+String.prototype.replaceHTMLCodes=function(){
+   if (this==null){return null;}
+   return this.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 };
 String.prototype.capitalizeAllFirstLetters = function() {
    return this.replace(/\b[a-z]/g, function(letter){
@@ -946,6 +952,7 @@ var PREF = {
       LAST_ACCESSED_SEARCH : new Date().getTime(),
       SHOW_WELCOME_MSG     : true,
       WORK_TERM_URL        : null,
+      RESUMES              : "",
       PAGE : {
          HIDDEN_HEADERS : [],
       },
@@ -1546,9 +1553,9 @@ function invokeUpdateStatusBarUpdate(optionalDoIt) {
 function updateStatusBar() {
    var headerExists = $("#jbmnplsHeader").exists();
    //Get the name
-   $.get(LINKS.RANKINGS, function(response){
+   $.get(LINKS.DOCUMENTS, function(response){
         if(headerExists && PREF.load("SETTINGS_GENERAL_SHOW_STATUS_BAR", null, true)) {
-            //Start parsing the html
+            // Get the name of the user
             var name, end,
                 start = response.indexOf("id='UW_CO_STUDENT_UW_CO_PREF_NAME'");
             if (start == -1) {
@@ -1563,6 +1570,22 @@ function updateStatusBar() {
                 name = fullName[1] + " " + fullName[0];     // last name and then first name
             }
             $("#jbmnpls-status-user-name").text(name).parents("li").removeClass("hide");
+            
+            // Get the resume namespace
+            var base = "UW_CO_STU_DOCS_UW_CO_DOC_DESC$"
+                query = "", index = 0, lookFor = 'value="', lookEndFor = '"';
+            for (var i = 0; i < 3; i++) {
+               index = response.indexOf(base + i, index);
+               if (index == -1) { break; }
+               index = response.indexOf(lookFor, index);
+               if (index == -1) { break; }
+               index += lookFor.length;
+               var canView = response.contains("'UW_CO_PDF_LINKS_UW_CO_DOC_VIEW$" + i, index)?"1":"0"
+               var name = response.substring(index, response.indexOf(lookEndFor, index));
+               query += name + CONSTANTS.RESUME_DELIMITOR1 + canView + CONSTANTS.RESUME_DELIMITOR2;
+            }
+            query = query.substring(0, query.lastIndexOf(CONSTANTS.RESUME_DELIMITOR2));
+            PREF.save("RESUMES", query);
         }
    });
    
@@ -1786,6 +1809,21 @@ function finishApplying() {
    }
 }
 BRIDGE.registerFunction("finishApplying", finishApplying);
+
+function fixApplyInterface() {
+   $('#UW_CO_APPDOCWRK_UW_CO_DOC_NUM option:eq(0)').text("Choose");
+   var resumes = PREF.load("RESUMES").split(CONSTANTS.RESUME_DELIMITOR2);
+   if (!resumes.empty()) {
+      var $options = $("#UW_CO_APPDOCWRK_UW_CO_DOC_NUM").find("option");
+      for (var i = 0; i < 3; i++) {
+         var resumeName = "(Not Created)", $obj = $options.eq(i + 1);
+         if (i < resumes.length) {
+            resumeName = resumes[i].split(CONSTANTS.RESUME_DELIMITOR1)[0];
+         }
+         $obj.text((i + 1) + " - " + resumeName.replaceCharCodes());
+      }
+   }
+}
 
 /**
  *    Miscellaneous
@@ -2076,6 +2114,7 @@ function initAjaxCapture() {
                   dataArrayAsString = [];
                   dataArrayAsString.push(true);
                }
+               this.onload.call(this);
             } else {
                //Run and parse
                if(name == "TYPE_COOP") {
@@ -2133,11 +2172,12 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
          var resumeName = dataArrayAsString[0];
          if (resumeName == "&nbsp;") {
             resumeName = "<span style='color:red'>Please select/upload a resume.</span>";
+            $("#view-resume").hide();
+         } else {
+            $("#view-resume").show();
          }
          $('#resume-name').html(resumeName);
       }
-   } else if (name.startsWith('UW_CO_PDF_WRK_UW_CO_DOC_DELETE$')) {
-      showMessage("Successfully deleted the resume.");
    }
    switch(PAGEINFO.TYPE) {
      /* case PAGES.INTERVIEWS:      //Not to release in First release
@@ -2148,18 +2188,43 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
          }
          break;*/
       case PAGES.DOCUMENTS: 
+         var didSomething = false;
          if (isSaving) {
             showMessage("Successfully saved the resume name.");
+            didSomething = true;
+         } else if (name.startsWith('UW_CO_PDF_WRK_UW_CO_DOC_DELETE$')) {
+            showMessage("Successfully deleted the resume.");
+            didSomething = true;
+         }
+         if (didSomething) {
+            // After saving resumes, we put them into storage for later
+            var query = "";
+            for (var i = 0; i < 3; i++) {
+               var obj = UTIL.getID("UW_CO_STU_DOCS_UW_CO_DOC_DESC$" + i);
+               if (obj) {
+                  query += obj.value.replaceHTMLCodes() + CONSTANTS.RESUME_DELIMITOR1;
+                  query += (UTIL.getID("UW_CO_PDF_LINKS_UW_CO_DOC_VIEW$" + i)?"1":"0") + CONSTANTS.RESUME_DELIMITOR2;
+               } else {
+                  break;
+               }
+            }
+            query = query.substring(0, query.lastIndexOf(CONSTANTS.RESUME_DELIMITOR2));
+            PREF.save("RESUMES", query);
          }
          break;
       case PAGES.APPLY:
-         $('#UW_CO_APPDOCWRK_UW_CO_DOC_NUM option:eq(0)').text("Choose");
+         // Apply the default interface things for submit application
+         fixApplyInterface();
+         
+         // After submit button was pressed
          if (name === "UW_CO_APPWRK_UW_CO_CONFIRM_APP") {
             if (dataArrayAsString && !dataArrayAsString.empty() && dataArrayAsString[0]) {
                BRIDGE.run(function(){
                   window.parent.finishApplying();
                });
             } else {
+               $("#resume-name").html("<span style='color:red'>Please select/upload a resume.</span>");
+               $("#view-resume").hide();
                showMessage("Failed to submit application.");
             }
          }
@@ -5467,33 +5532,61 @@ switch (PAGEINFO.TYPE) {
       initAjaxCapture();
       var viewLink = $('#UW_CO_PDF_LINKS_UW_CO_DOC_VIEW').attr('href'),
           message = $('#UW_CO_APPDOCWRK_UW_CO_ALL_TEXT').val(),
-          $dropdown = $("#UW_CO_APPDOCWRK_UW_CO_DOC_NUM");
+          $dropdown = $("#UW_CO_APPDOCWRK_UW_CO_DOC_NUM"),
+          hideView = true;
       
-      var resumeName = "Loading...";
-      if (message.contains("Upload cancelled.")) {
-         // Put back the resume name if failed to Updating
-         //resumeName = "";
+      // Crazy if statement to decide messages and errors if user did something wrong or right
+      var resumes = PREF.load("RESUMES").split(CONSTANTS.RESUME_DELIMITOR2),
+          resumeName = "Loading...";
+      if (message.contains("Upload cancelled.") 
+         || message.contains("Your document was not uploaded as it is not a PDF file.")
+         || message.contains("You must select a PDF document to upload.")) {
+         // Once we cancel the upload, fix everything up
+         var index = $("#UW_CO_APPDOCWRK_UW_CO_DOC_NUM").val();
+         if (index != "") {
+            index = parseInt(index) - 1;
+            var isViewAble = !resumes.empty() && resumes[index].charAt(resumes[index].length-1) == "1";
+            if (isViewAble) {
+               resumeName = resumes[index].split(CONSTANTS.RESUME_DELIMITOR1)[0];
+               hideView = false;
+            }
+         }
+         if (message.contains("You must select a PDF document to upload.") 
+            || message.contains("Your document was not uploaded as it is not a PDF file.")) {
+            showMessage("Upload a valid PDF document.");
+         }
       } else if (message.contains('Your PDF document has been successfully')) {
          resumeName = "[Uploaded Resume]";
+         hideView = false;
       }
+      
+      // Append the rest of the interface
       $(document.body).append("<span id='or-text'>OR</span>").append(
          '<span id="resume-holder">\
             <span id="resume-name">' + resumeName + '</span> \
-            <a onclick="showMessage(\'Retrieving resume, please wait.\')" href="' + viewLink + '">(View)</a>\
+            <a id="view-resume" onclick="showMessage(\'Retrieving resume, please wait.\')" href="' + viewLink + '">(View)</a>\
           </span>');
-      console.log(message);
+      if (hideView) {
+         $('#view-resume').hide();
+      }
     
-      // Show the first resume
-      if (message == "") {
+      // Show the first resume if it is viewable
+      var firstResumeViewable = !resumes.empty() && resumes[0].charAt(resumes[0].length-1) == "1";
+      if (message == "" && firstResumeViewable) {
          $dropdown.val(1);
          BRIDGE.run(function(){     // for Chrome <3
             var obj = document.getElementById('UW_CO_APPDOCWRK_UW_CO_DOC_NUM');
             addchg_win0(obj);
             submitAction_win0(obj.form,obj.name);
          });
+      } else if (resumeName == "Loading..." || !firstResumeViewable) {
+         $("#resume-name").html("<span style='color:red'>Please select/upload a resume.</span>");
       }
-      $dropdown.find(':first-child').text("Choose");
       
+      // Add the names of the resumes to the dropdown
+      fixApplyInterface();
+      
+      // Apply CSS
       var cssObj = {
          'body, html' : {
             'overflow' : 'hidden !important',
@@ -5553,6 +5646,7 @@ switch (PAGEINFO.TYPE) {
          '#or-text' : {
             'top'       : '137px',
             'left'      : '238px',
+            'color'     : '#444',
          },
       };
       var $dropdown = $("#UW_CO_APPS_UW_CO_APPL_MARKS");
