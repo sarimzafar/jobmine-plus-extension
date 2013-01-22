@@ -2673,7 +2673,6 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          'box-sizing' : 'border-box',
          '-webkit-box-sizing' : 'border-box',
          'top'          : '-5000px',
-         
       },
       "#PSTAB" : {
          'display'      : 'none',
@@ -2685,6 +2684,9 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
       },
       '#old-criteria-wrapper table' : {
          'max-width'    : '100px',
+      },
+      '#old-criteria-wrapper table.PSLEVEL1GRIDWBO' : {
+         'display'    : 'none !important',
       },
       // The job level
       "#UW_CO_JOBSRCH_UW_CO_COOP_JR,\
@@ -2947,7 +2949,6 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          showPopup(false, "Please wait while Jobmine receives the search results.<br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>", "Search is in Progress",550);
          //Close it if wanted
          if(!UTIL.getID("jbmnplsDontCloseSearch").checked) {
-            //this.parentNode.parentNode.parentNode.className = "closed";
             var els = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP1,\
                         #UW_CO_JOBSRCH_UW_CO_ADV_DISCP2,\
                         #UW_CO_JOBSRCH_UW_CO_ADV_DISCP3");
