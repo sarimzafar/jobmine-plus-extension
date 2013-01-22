@@ -2947,7 +2947,13 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          showPopup(false, "Please wait while Jobmine receives the search results.<br/><br/><img src='"+IMAGES.LARGE_LOADING+"'/>", "Search is in Progress",550);
          //Close it if wanted
          if(!UTIL.getID("jbmnplsDontCloseSearch").checked) {
-            this.parentNode.parentNode.parentNode.className = "closed";
+            //this.parentNode.parentNode.parentNode.className = "closed";
+            var els = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP1,\
+                        #UW_CO_JOBSRCH_UW_CO_ADV_DISCP2,\
+                        #UW_CO_JOBSRCH_UW_CO_ADV_DISCP3");
+            var obj = $('#jbmnplsSearchCriteria, #old-criteria-wrapper');
+            obj.addClass("closed");
+            els.fadeOut(200).delay(500);
          }
          //Location
          var selectedIndex = UTIL.getID("jbmnplsLocation").value;
