@@ -47,6 +47,7 @@
 /*===============================*\
 |*        __CONSTANTS__          *|
 \*===============================*/
+{/*Expand to see the constants*/
 var CONSTANTS = {
    VERSION              : "2.0.9",
    DEBUG_ON             : false,
@@ -149,6 +150,7 @@ var INPUT_RESTRICTIONS = {
    INTEGERS          : function(a){return UTIL.isNumeric(String.fromCharCode(a)) || a == KEYS.DASH;},
    POSITIVE_INTEGERS : function(a){return UTIL.isNumeric(String.fromCharCode(a));},
 };
+}
 
 /*===============================*\
 |*    __PROTOTYPE_FUNCTIONS__    *|
@@ -2591,8 +2593,80 @@ BRIDGE.registerFunction("showSettings", SETTINGS.show);
 {/*Expand to see job search criteria*/
 if(PAGEINFO.TYPE == PAGES.SEARCH) {
    function attachNewSearchFields(){
-   form.find("div").css({"position":"absolute","top":"100px","left":"-1000px"});    //Fixes some scrolling issue, hiding wont work
+      $("#PAGECONTAINER > .PSPAGECONTAINER").wrap("<div id='old-criteria-wrapper'>");
    var searchCSS = {
+      /**
+       *    The Old Job Search Criteria
+       */
+      '#PAGECONTAINER' : {
+         'position'     : 'absolute',
+         'width'        : '100%',
+         'left'         : '0',
+         'padding'      : '0 50px',
+         '-moz-box-sizing' : 'border-box',
+         'box-sizing' : 'border-box',
+         '-webkit-box-sizing' : 'border-box',
+         'top'          : '-5000px',
+         
+      },
+      "#PSTAB" : {
+         'display'      : 'none',
+      },  
+      '#old-criteria-wrapper' : {
+         'width'        : '733px',
+         'margin'       : '0 auto',
+         "position"     : 'relative',
+      },
+      '#old-criteria-wrapper table' : {
+         'max-width'    : '100px',
+      },
+      // The job level
+      "#UW_CO_JOBSRCH_UW_CO_COOP_JR,\
+       #UW_CO_JOBSRCH_UW_CO_COOP_INT,\
+       #UW_CO_JOBSRCH_UW_CO_COOP_SR,\
+       #UW_CO_JOBSRCH_UW_CO_BACHELOR,\
+       #UW_CO_JOBSRCH_UW_CO_MASTERS,\
+       #UW_CO_JOBSRCH_UW_CO_PHD" : {
+         'position'     :  'absolute',
+         'left'         :  '15px',
+         'top'          :  '5368px',
+         'z-index'      :  '2',
+      },
+      '#UW_CO_JOBSRCH_UW_CO_COOP_INT' : {
+         'left'         :  '140px',
+      },
+      '#UW_CO_JOBSRCH_UW_CO_COOP_SR' : {
+         'left'         :  '280px',
+      },
+      '#UW_CO_JOBSRCH_UW_CO_BACHELOR' : {
+         'left'         :  '405px',
+      },
+      '#UW_CO_JOBSRCH_UW_CO_MASTERS' : {
+         'left'         :  '530px',
+      },
+      '#UW_CO_JOBSRCH_UW_CO_PHD' : {
+         'left'         :  '650px',
+      },
+      // Field Dropdowns 
+      "#UW_CO_JOBSRCH_UW_CO_ADV_DISCP1,\
+       #UW_CO_JOBSRCH_UW_CO_ADV_DISCP2,\
+       #UW_CO_JOBSRCH_UW_CO_ADV_DISCP3" : {
+         'position'     :  'absolute',
+         'top'          :  '0',
+         'left'         :  '16px',
+         'z-index'      :  '2',
+         'top'          :  '5182px',
+         "font-size"    :  "12px",
+         margin         :  "0 4px",
+         'width'        :  '225px !important',
+      },
+      '#UW_CO_JOBSRCH_UW_CO_ADV_DISCP2' : {
+         'left'         :  '250px',
+      },
+      '#UW_CO_JOBSRCH_UW_CO_ADV_DISCP3' : {
+         'left'         :  '484px',
+      },
+ 
       /**
        *    Job Search Page
        */
@@ -2603,6 +2677,9 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          overflow       :  "hidden",
          "margin-bottom":  "5px",
          "font-size"    :  "14px",
+      },
+      "#jbmnplsSearchCriteria div.header:first-child" : {
+         'margin-bottom': '36px',
       },
       "#jbmnplsSearchCriteria div.header span.name" : {
          "display"      :  "inline-block",
@@ -2616,6 +2693,7 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          "font-size"    :  "13px",
          "top"          :  "-2px",
          "position"     :  "relative",
+         'margin-left'  :  '20px',
       },
       "#jbmnplsSearchCriteria div.fields input,#jbmnplsSearchCriteria div.fields select" : {
          "font-size"    :  "12px",
@@ -2699,13 +2777,23 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
    };
    appendCSS(searchCSS);
    
+    //"#UW_CO_JOBSRCH_UW_CO_COOP_JR,\
+    //   #UW_CO_JOBSRCH_UW_CO_COOP_INT,\
+    //   #UW_CO_JOBSRCH_UW_CO_COOP_SR,\
+    //   #UW_CO_JOBSRCH_UW_CO_BACHELOR,\
+    //   #UW_CO_JOBSRCH_UW_CO_MASTERS,\
+    //   #UW_CO_JOBSRCH_UW_CO_PHD" : {
+   
+   
    //Pull information from the old job search
-   var disc1 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP1").html().replace("&nbsp; ", "Select a discipline");
-   var disc2 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP2").html().replace("&nbsp; ", "Select a discipline");
-   var disc3 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP3").html().replace("&nbsp; ", "Select a discipline");
+   //var disc1 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP1").html().replace("&nbsp; ", "Select a discipline");
+   //var disc2 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP2").html().replace("&nbsp; ", "Select a discipline");
+   //var disc3 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP3").html().replace("&nbsp; ", "Select a discipline");
    var filter = $("#UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS").html();
    
-   var html = '<div id="jbmnplsSearchCriteria"><div class="field" style="position:absolute;top:6px;font-size:12px;z-index:3;color:#222;"><input type="checkbox" '+(PREF.load("SETTINGS_PAGES_SEARCH_CLOSE", null, false)?"checked":"")+' id="jbmnplsDontCloseSearch"><label style="position:relative;top:-2px;" for="jbmnplsDontCloseSearch">Do not close when searching</label></div><div id="jbmnplsCloser" class="field"><span class="fakeLink noselect" onclick="var parent=this.parentNode.parentNode;if(parent.className==&quot;closed&quot;){parent.className=&quot;&quot;}else{parent.className=&quot;closed&quot;}">Click to hide/show</span></div><div id="jbmnplsSearchWrapper"><div class="header"><span class="name" style="width:100%; text-align:center;">Disciplines</span></div><div class="fields"><select style="width:32%" id="jbmnplsDisciples1" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP1">'+disc1+'</select><select style="width:32%" id="jbmnplsDisciples2" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP2">'+disc2+'</select><select style="width:32%" id="jbmnplsDisciples3" name="UW_CO_JOBSRCH_UW_CO_ADV_DISCP3">'+disc3+'</select></div><div class="header"><span class="name" style="width:21%; text-align:center;" title="Required field">Term*</span><span class="name" style="width:35%; text-align:center;"> Location</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Search Filter*</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Type*</span></div><div class="fields"><select onchange="var obj=document.getElementById(\'UW_CO_JOBSRCH_UW_CO_WT_SESSION\');addchg_win0(obj);obj.value=this.value;" style="width:21%" class="required" id="jbmnplsTerm"><option value="">Select a term</option></select><select style="width:35%" id="jbmnplsLocation" title="Jobmine will ONLY allow you to choose these places!"><option value="0">All locations</option></select><select class="required" style="width:19%" id="jbmnplsJobFilter" name="UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS"><option value="">Select a job filter</option>'+filter+'</select><select onchange="if(this.value!=\'\'){document.getElementById(this.value).checked=true;submitAction_win0(this.form,\'TYPE_COOP\');}" class="required" style="width:19%" id="jbmnplsJobType"><option value="">Select a job type</option><option value="TYPE_COOP">Co-op</option><option value="TYPE_ARCH">Co-op ARCH</option><option value="TYPE_CA">Co-op CA</option><option value="TYPE_TEACH">Co-op TEACH</option><option value="TYPE_PHARM">Co-op PHARM</option><option value="TYPE_ALUM">Alumni</option><option value="TYPE_GRAD">Graduating</option><option value="TYPE_PART_TIME">Other</option><option value="TYPE_SUMMER">Summer </option></select></div><div class="header"><span class="name" style="width:48.5%; text-align:center;">Employer\'s Name</span><span class="name" style="width:48.5%; text-align:center;">Job Title</span></div><div class="fields"><input type="input"  name="UW_CO_JOBSRCH_UW_CO_EMPLYR_NAME" style="width:48.5%" id="jbmnplsEmployer" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"><input name="UW_CO_JOBSRCH_UW_CO_JOB_TITLE" type="input" style="width:48.5%" id="jbmnplsJobTitle" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"></div><div class="header"><span class="name" style="width:100%; text-align:center;">Job Level</span></div><div class="fields"><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_JR").checked?" checked='checked'":"")+' type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_JR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_JR" name="UW_CO_JOBSRCH_UW_CO_COOP_JR"><label for="UW_CO_JOBSRCH_UW_CO_COOP_JR">Junior</label></div><div style="width:20%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_INT").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_COOP_INT" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_INT$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_INT"><label for="UW_CO_JOBSRCH_UW_CO_COOP_INT">Intermediate</label></div><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_COOP_SR").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_COOP_SR" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_COOP_SR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_COOP_SR"><label for="UW_CO_JOBSRCH_UW_CO_COOP_SR">Senior</label></div><div style="width:18%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_BACHELOR").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_BACHELOR" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_BACHELOR$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_BACHELOR"><label for="UW_CO_JOBSRCH_UW_CO_BACHELOR">Bachelors</label></div><div style="width:17%;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_MASTERS").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_MASTERS" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_MASTERS$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_MASTERS"><label for="UW_CO_JOBSRCH_UW_CO_MASTERS">Masters</label></div><div style="width:auto;float:left;" class="chkbxGroup"><input'+(UTIL.getID("UW_CO_JOBSRCH_UW_CO_PHD").checked?" checked='checked'":"")+' name="UW_CO_JOBSRCH_UW_CO_PHD" type="checkbox" onchange="document.getElementById(\'UW_CO_JOBSRCH_UW_CO_PHD$chk\').value=(this.checked?\'Y\':\'N\');" id="UW_CO_JOBSRCH_UW_CO_PHD"><label for="UW_CO_JOBSRCH_UW_CO_PHD">Ph.D.</label></div></div><div class="fields"><br><button  style="width:100%" id="jbmnplsSearchBtn">SEARCH</button></div></div></div>';
+   //jbmnplsDisciples1
+   
+   var html = '<div id="jbmnplsSearchCriteria"><div class="field" style="position:absolute;top:6px;font-size:12px;z-index:3;color:#222;"><input type="checkbox" '+(PREF.load("SETTINGS_PAGES_SEARCH_CLOSE", null, false)?"checked":"")+' id="jbmnplsDontCloseSearch"><label style="position:relative;top:-2px;" for="jbmnplsDontCloseSearch">Do not close when searching</label></div><div id="jbmnplsCloser" class="field"><span class="fakeLink noselect" onclick="var parent=this.parentNode.parentNode;if(parent.className==&quot;closed&quot;){parent.className=&quot;&quot;}else{parent.className=&quot;closed&quot;}">Click to hide/show</span></div><div id="jbmnplsSearchWrapper"><div class="header"><span class="name" style="width:100%; text-align:center;">Disciplines</span></div><div class="fields"><!-- THEY USED TO BE HERE --></div><div class="header"><span class="name" style="width:21%; text-align:center;" title="Required field">Term*</span><span class="name" style="width:35%; text-align:center;"> Location</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Search Filter*</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Type*</span></div><div class="fields"><select onchange="var obj=document.getElementById(\'UW_CO_JOBSRCH_UW_CO_WT_SESSION\');addchg_win0(obj);obj.value=this.value;" style="width:21%" class="required" id="jbmnplsTerm"><option value="">Select a term</option></select><select style="width:35%" id="jbmnplsLocation" title="Jobmine will ONLY allow you to choose these places!"><option value="0">All locations</option></select><select class="required" style="width:19%" id="jbmnplsJobFilter" name="UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS"><option value="">Select a job filter</option>'+filter+'</select><select onchange="if(this.value!=\'\'){document.getElementById(this.value).checked=true;submitAction_win0(this.form,\'TYPE_COOP\');}" class="required" style="width:19%" id="jbmnplsJobType"><option value="">Select a job type</option><option value="TYPE_COOP">Co-op</option><option value="TYPE_ARCH">Co-op ARCH</option><option value="TYPE_CA">Co-op CA</option><option value="TYPE_TEACH">Co-op TEACH</option><option value="TYPE_PHARM">Co-op PHARM</option><option value="TYPE_ALUM">Alumni</option><option value="TYPE_GRAD">Graduating</option><option value="TYPE_PART_TIME">Other</option><option value="TYPE_SUMMER">Summer </option></select></div><div class="header"><span class="name" style="width:48.5%; text-align:center;">Employer\'s Name</span><span class="name" style="width:48.5%; text-align:center;">Job Title</span></div><div class="fields"><input type="input"  name="UW_CO_JOBSRCH_UW_CO_EMPLYR_NAME" style="width:48.5%" id="jbmnplsEmployer" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"><input name="UW_CO_JOBSRCH_UW_CO_JOB_TITLE" type="input" style="width:48.5%" id="jbmnplsJobTitle" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"></div><div class="header"><span class="name" style="width:100%; text-align:center;">Job Level</span></div><div class="fields"><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_JR">Junior</label></div><div style="width:20%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_INT">Intermediate</label></div><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_SR">Senior</label></div><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_BACHELOR">Bachelors</label></div><div style="width:17%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_MASTERS">Masters</label></div><div style="width:auto;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_PHD">Ph.D.</label></div></div><div class="fields"><br><button  style="width:100%" id="jbmnplsSearchBtn">SEARCH</button></div></div></div>';
    $("body > form:eq(0)").prepend(html);
    
    /**
@@ -2751,7 +2839,8 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
    $("#jbmnplsDontCloseSearch").change(function(){
       PREF.save("SETTINGS_PAGES_SEARCH_CLOSE", this.checked);
    });
-   $("#jbmnplsSearchBtn").mousedown(function(){
+   $("#jbmnplsSearchBtn").mousedown(function(e){
+      if (e.which != 1) { return; }    // Only allow left click
       var wrapper = $(this.parentNode.parentNode);
       var error = false;
       wrapper.find("input.required, select.required").each(function(){
