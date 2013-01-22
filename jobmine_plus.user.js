@@ -1688,15 +1688,10 @@ function invokeRefreshTimer() {
    }
 }
 
-
 /**
- *    Miscellaneous
+ *    Applying
  */
-function isScrollbarShown() {
-   return $(document).height() > $(window).height();
-}
-
-function invokeApplyPopup(jobId, title) {
+ function invokeApplyPopup(jobId, title) {
    if (typeof (OBJECTS.UWATERLOO_ID) === "undefined") {
       alert("Failed to get user id, please report this to jobmineplus@gmail.com.");
       return;
@@ -1721,6 +1716,52 @@ function invokeApplyPopup(jobId, title) {
    }, LINKS.APPLY + jobId + "&UW_CO_STU_ID=" + OBJECTS.UWATERLOO_ID);
 }
 BRIDGE.registerFunction("invokeApplyPopup", invokeApplyPopup);
+
+function finishApplying() {
+   hidePopup();
+   
+   // Display message
+   if (PAGEINFO.TYPE == PAGES.APPLICATIONS) {
+      showMessage("Application has been successfully edited.");
+   } else {
+      showMessage("Application has been successfully submitted.");
+   }
+   
+   // Change the row to applied
+   switch(PAGEINFO.TYPE) {
+      case PAGES.SEARCH:
+         //var $tr = $("#jbmnplsResultsTable tr.lastClickedRow"),
+         //    $ths = $("#jbmnplsResultsTable tr:eq(0)"),
+         //    $tds = $tr.children(),
+         //    applyCol = parseInt($("#jbmnplsResultsTable > thead > tr > th").filter(function(){
+         //      return $(this).text() == "Apply"}).attr('col'));
+         //    listCol = parseInt($("#jbmnplsResultsTable > thead > tr > th").filter(function(){
+         //      return $(this).text() == "Short List"}).attr('col'));
+               
+         // Change the row text and highlight
+         //$tds.eq(0).text("Applied");
+         //$tds.eq(applyCol).html("Already Applied");
+         //$tds.eq(listCol).html("");
+         //HIGHLIGHT.apply($tr);
+         //break;
+      case PAGES.LIST:
+         var $tr = $("#jbmnplsJobsTable tr.lastClickedRow"),
+             applyCol = parseInt($("#jbmnplsJobsTable > thead > tr > th").filter(function(){
+               return $(this).text() == "Apply"}).attr('col'));
+         // Change the row text and highlight
+         $tr.children().eq(applyCol).html("Already Applied");
+         HIGHLIGHT.apply($tr);
+         break;
+   }
+}
+BRIDGE.registerFunction("finishApplying", finishApplying);
+
+/**
+ *    Miscellaneous
+ */
+function isScrollbarShown() {
+   return $(document).height() > $(window).height();
+}
 
 function appendCSS(cssObj) {
    var cssString = "";
@@ -2078,13 +2119,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
          $('#UW_CO_APPDOCWRK_UW_CO_DOC_NUM option:eq(0)').text("Choose");
          if (name === "UW_CO_APPWRK_UW_CO_CONFIRM_APP") {
             BRIDGE.run(function(){
-               var p = window.parent;
-               p.hidePopup();
-               if (p.document.body.className.indexOf("APPLICATIONS") != -1) {
-                  p.showMessage("Application has been successfully edited.");
-               } else {
-                  p.showMessage("Application has been successfully submitted.");
-               }
+               window.parent.finishApplying();
             });
          }
          break;
