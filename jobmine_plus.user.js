@@ -1728,7 +1728,10 @@ function invokeRefreshTimer() {
              doc = $frame.contents().get(0),
              $submitButton = $(doc.getElementById('UW_CO_APPWRK_UW_CO_CONFIRM_APP'));
          if ($submitButton.exists()) {
-            $submitButton.click();
+            BRIDGE.run(function(){
+               var win = document.getElementById('jbmnplsPopupFrame').contentWindow;
+               win.hAction_win0(win.document.win0,'UW_CO_APPWRK_UW_CO_CONFIRM_APP', 0, 0, 'Submit Application', false, true); 
+            });
          } else {
             // Runs a message saying to select or upload a resume.
             BRIDGE.run(function(){
@@ -5376,13 +5379,19 @@ switch (PAGEINFO.TYPE) {
       }
       $(document.body).append("<span id='or-text'>OR</span>").append(
          '<span id="resume-holder">\
-            <span id="resume-name">' + resumeName + '</span> <a href="' + viewLink + '">(View)</a>\
+            <span id="resume-name">' + resumeName + '</span> \
+            <a onclick="showMessage(\'Retrieving resume, please wait.\')" href="' + viewLink + '">(View)</a>\
           </span>');
       console.log(message);
     
       // Show the first resume
       if (message == "") {
-         $dropdown.val(1).change();
+         $dropdown.val(1);
+         BRIDGE.run(function(){     // for Chrome <3
+            var obj = document.getElementById('UW_CO_APPDOCWRK_UW_CO_DOC_NUM');
+            addchg_win0(obj);
+            submitAction_win0(obj.form,obj.name);
+         });
       }
       $dropdown.find(':first-child').text("Choose");
       
