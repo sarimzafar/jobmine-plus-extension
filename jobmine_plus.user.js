@@ -2068,6 +2068,12 @@ function initAjaxCapture() {
                   dataArrayAsString.push(resumeName);
                   this.onload.call(this);
                }
+            } else if (name == "UW_CO_APPWRK_UW_CO_CONFIRM_APP") {
+               // Checks to see if the application really is submitted or not
+               if (text.indexOf('Your application has been submitted.') >= 0) {
+                  dataArrayAsString = [];
+                  dataArrayAsString.push(true);
+               }
             } else {
                //Run and parse
                if(name == "TYPE_COOP") {
@@ -2147,9 +2153,13 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
       case PAGES.APPLY:
          $('#UW_CO_APPDOCWRK_UW_CO_DOC_NUM option:eq(0)').text("Choose");
          if (name === "UW_CO_APPWRK_UW_CO_CONFIRM_APP") {
-            BRIDGE.run(function(){
-               window.parent.finishApplying();
-            });
+            if (dataArrayAsString && !dataArrayAsString.empty() && dataArrayAsString[0]) {
+               BRIDGE.run(function(){
+                  window.parent.finishApplying();
+               });
+            } else {
+               showMessage("Failed to submit application.");
+            }
          }
          break;
       case PAGES.SEARCH:
