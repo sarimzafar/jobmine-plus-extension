@@ -1462,6 +1462,7 @@ function handleCustomize(tableNum, columnNum) {
       for(var i=0; i<table.headers.length; i++) {
          var hidden = !table.isColumnShown(i);
          var name = table.headers[i];
+         name = name.substring(0, name.indexOf("_"));
          name = name == "" ? "Column #"+(i+1) : name;
          if (!(name.charAt(0) == "{" && name.charAt(name.length-1))) {
             html += "<div class='customizeEntry' title='Click to hide' "+(hidden?"selected='true'":"")+"><input class='checkbox' onclick='this.parentNode.setAttribute(\"selected\",this.checked);handleCustomize("+tableNum+","+i+")' type='checkbox' "+(hidden?"checked='true'":"")+"/><span class='row' onclick='var chbx=this.previousSibling;chbx.checked = !chbx.checked;this.parentNode.setAttribute(\"selected\",chbx.checked);handleCustomize("+tableNum+","+i+")'>"+name+"<span class='hiddenMsg'>(Hidden)</span></span></div>";
