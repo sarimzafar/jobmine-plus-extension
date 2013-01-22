@@ -16,9 +16,10 @@
 // @exclude        *WEBLIB_UW_DOCS.UW_CO_DOC_TEXT*
 // @exclude        *UW_CO_STUDENTS.UW_CO_EVALUATION*
 // @exclude        *&jbmnpls=ignore
+// @exclude        *Page=UW_CO_CT_STU_APP*
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.0.9
+// @version        2.1.0
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -49,8 +50,8 @@
 \*===============================*/
 {/*Expand to see the constants*/
 var CONSTANTS = {
-   VERSION              : "2.0.9",
-   DEBUG_ON             : true,
+   VERSION              : "2.1.0",
+   DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
    EXTRA_URL_TEXT       : "__Jobmine_Plus_has_taken_over_Jobmine",
@@ -1766,7 +1767,7 @@ function invokeRefreshTimer() {
          }
          return false;
       }
-   }, LINKS.APPLY + jobId + "&UW_CO_STU_ID=" + OBJECTS.UWATERLOO_ID);
+   }, LINKS.APPLY + jobId + "&UW_CO_STU_ID=" + OBJECTS.UWATERLOO_ID + "&inpopup");
 }
 BRIDGE.registerFunction("invokeApplyPopup", invokeApplyPopup);
 
@@ -2696,6 +2697,8 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          'left'         :  '15px',
          'top'          :  '5368px',
          'z-index'      :  '2',
+         "-webkit-transition": "opacity 1s, top 1s",
+         "-moz-transition": "opacity 1s, top 1s",
       },
       '#UW_CO_JOBSRCH_UW_CO_COOP_INT' : {
          'left'         :  '140px',
@@ -2712,6 +2715,17 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
       '#UW_CO_JOBSRCH_UW_CO_PHD' : {
          'left'         :  '650px',
       },
+      // Animate
+      ".closed #UW_CO_JOBSRCH_UW_CO_COOP_JR,\
+       .closed #UW_CO_JOBSRCH_UW_CO_COOP_INT,\
+       .closed #UW_CO_JOBSRCH_UW_CO_COOP_SR,\
+       .closed #UW_CO_JOBSRCH_UW_CO_BACHELOR,\
+       .closed #UW_CO_JOBSRCH_UW_CO_MASTERS,\
+       .closed #UW_CO_JOBSRCH_UW_CO_PHD" : {
+         'top'          :  '5108px',
+         'opacity'      :  '0',
+         'pointer-events': 'none',
+      },
       // Field Dropdowns 
       "#UW_CO_JOBSRCH_UW_CO_ADV_DISCP1,\
        #UW_CO_JOBSRCH_UW_CO_ADV_DISCP2,\
@@ -2724,12 +2738,21 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          "font-size"    :  "12px",
          margin         :  "0 4px",
          'width'        :  '225px !important',
+         "-webkit-transition": "top 1s",
+         "-moz-transition": "top 1s",
       },
       '#UW_CO_JOBSRCH_UW_CO_ADV_DISCP2' : {
          'left'         :  '250px',
       },
       '#UW_CO_JOBSRCH_UW_CO_ADV_DISCP3' : {
          'left'         :  '484px',
+      },
+      // Animate
+      ".closed #UW_CO_JOBSRCH_UW_CO_ADV_DISCP1,\
+       .closed #UW_CO_JOBSRCH_UW_CO_ADV_DISCP2,\
+       .closed #UW_CO_JOBSRCH_UW_CO_ADV_DISCP3" : {
+         'top'          :  '4922px',
+         'pointer-events': 'none',
       },
  
       /**
@@ -2800,7 +2823,7 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
          margin         :  "0 auto 50px",
          width          :  "700px",
          padding        :  "15px",
-         border         :  "3px solid #222",
+         //border         :  "3px solid #222",
          "-moz-border-radius":  "20px",
          "border-radius":  "20px",
          "box-shadow"   :  "0 0 7px black",
@@ -2841,24 +2864,24 @@ if(PAGEINFO.TYPE == PAGES.SEARCH) {
       },
    };
    appendCSS(searchCSS);
+
+   BRIDGE.registerFunction('toggleOpen', function(){
+      var els = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP1,\
+       #UW_CO_JOBSRCH_UW_CO_ADV_DISCP2,\
+       #UW_CO_JOBSRCH_UW_CO_ADV_DISCP3");
+      var obj = $('#jbmnplsSearchCriteria, #old-criteria-wrapper');
+      if (obj.hasClass("closed")) {
+         obj.removeClass("closed");
+         els.delay(550).fadeIn(400);
+      } else {
+         obj.addClass("closed");
+         els.fadeOut(200).delay(500);
+      }
+   });
    
-    //"#UW_CO_JOBSRCH_UW_CO_COOP_JR,\
-    //   #UW_CO_JOBSRCH_UW_CO_COOP_INT,\
-    //   #UW_CO_JOBSRCH_UW_CO_COOP_SR,\
-    //   #UW_CO_JOBSRCH_UW_CO_BACHELOR,\
-    //   #UW_CO_JOBSRCH_UW_CO_MASTERS,\
-    //   #UW_CO_JOBSRCH_UW_CO_PHD" : {
-   
-   
-   //Pull information from the old job search
-   //var disc1 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP1").html().replace("&nbsp; ", "Select a discipline");
-   //var disc2 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP2").html().replace("&nbsp; ", "Select a discipline");
-   //var disc3 = $("#UW_CO_JOBSRCH_UW_CO_ADV_DISCP3").html().replace("&nbsp; ", "Select a discipline");
    var filter = $("#UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS").html();
    
-   //jbmnplsDisciples1
-   
-   var html = '<div id="jbmnplsSearchCriteria"><div class="field" style="position:absolute;top:6px;font-size:12px;z-index:3;color:#222;"><input type="checkbox" '+(PREF.load("SETTINGS_PAGES_SEARCH_CLOSE", null, false)?"checked":"")+' id="jbmnplsDontCloseSearch"><label style="position:relative;top:-2px;" for="jbmnplsDontCloseSearch">Do not close when searching</label></div><div id="jbmnplsCloser" class="field"><span class="fakeLink noselect" onclick="var parent=this.parentNode.parentNode;if(parent.className==&quot;closed&quot;){parent.className=&quot;&quot;}else{parent.className=&quot;closed&quot;}">Click to hide/show</span></div><div id="jbmnplsSearchWrapper"><div class="header"><span class="name" style="width:100%; text-align:center;">Disciplines</span></div><div class="fields"><!-- THEY USED TO BE HERE --></div><div class="header"><span class="name" style="width:21%; text-align:center;" title="Required field">Term*</span><span class="name" style="width:35%; text-align:center;"> Location</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Search Filter*</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Type*</span></div><div class="fields"><select onchange="var obj=document.getElementById(\'UW_CO_JOBSRCH_UW_CO_WT_SESSION\');addchg_win0(obj);obj.value=this.value;" style="width:21%" class="required" id="jbmnplsTerm"><option value="">Select a term</option></select><select style="width:35%" id="jbmnplsLocation" title="Jobmine will ONLY allow you to choose these places!"><option value="0">All locations</option></select><select class="required" style="width:19%" id="jbmnplsJobFilter" name="UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS"><option value="">Select a job filter</option>'+filter+'</select><select onchange="if(this.value!=\'\'){document.getElementById(this.value).checked=true;submitAction_win0(this.form,\'TYPE_COOP\');}" class="required" style="width:19%" id="jbmnplsJobType"><option value="">Select a job type</option><option value="TYPE_COOP">Co-op</option><option value="TYPE_ARCH">Co-op ARCH</option><option value="TYPE_CA">Co-op CA</option><option value="TYPE_TEACH">Co-op TEACH</option><option value="TYPE_PHARM">Co-op PHARM</option><option value="TYPE_ALUM">Alumni</option><option value="TYPE_GRAD">Graduating</option><option value="TYPE_PART_TIME">Other</option><option value="TYPE_SUMMER">Summer </option></select></div><div class="header"><span class="name" style="width:48.5%; text-align:center;">Employer\'s Name</span><span class="name" style="width:48.5%; text-align:center;">Job Title</span></div><div class="fields"><input type="input"  name="UW_CO_JOBSRCH_UW_CO_EMPLYR_NAME" style="width:48.5%" id="jbmnplsEmployer" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"><input name="UW_CO_JOBSRCH_UW_CO_JOB_TITLE" type="input" style="width:48.5%" id="jbmnplsJobTitle" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"></div><div class="header"><span class="name" style="width:100%; text-align:center;">Job Level</span></div><div class="fields"><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_JR">Junior</label></div><div style="width:20%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_INT">Intermediate</label></div><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_SR">Senior</label></div><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_BACHELOR">Bachelors</label></div><div style="width:17%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_MASTERS">Masters</label></div><div style="width:auto;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_PHD">Ph.D.</label></div></div><div class="fields"><br><button  style="width:100%" id="jbmnplsSearchBtn">SEARCH</button></div></div></div>';
+   var html = '<div id="jbmnplsSearchCriteria"><div class="field" style="position:absolute;top:6px;font-size:12px;z-index:3;color:#222;"><input type="checkbox" '+(PREF.load("SETTINGS_PAGES_SEARCH_CLOSE", null, false)?"checked":"")+' id="jbmnplsDontCloseSearch"><label style="position:relative;top:-2px;" for="jbmnplsDontCloseSearch">Do not close when searching</label></div><div id="jbmnplsCloser" class="field"><span class="fakeLink noselect" onclick="toggleOpen();">Click to hide/show</span></div><div id="jbmnplsSearchWrapper"><div class="header"><span class="name" style="width:100%; text-align:center;">Disciplines</span></div><div class="fields"><!-- THEY USED TO BE HERE --></div><div class="header"><span class="name" style="width:21%; text-align:center;" title="Required field">Term*</span><span class="name" style="width:35%; text-align:center;"> Location</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Search Filter*</span><span class="name" style="width:19%; text-align:center;" title="Required field">Job Type*</span></div><div class="fields"><select onchange="var obj=document.getElementById(\'UW_CO_JOBSRCH_UW_CO_WT_SESSION\');addchg_win0(obj);obj.value=this.value;" style="width:21%" class="required" id="jbmnplsTerm"><option value="">Select a term</option></select><select style="width:35%" id="jbmnplsLocation" title="Jobmine will ONLY allow you to choose these places!"><option value="0">All locations</option></select><select class="required" style="width:19%" id="jbmnplsJobFilter" name="UW_CO_JOBSRCH_UW_CO_JS_JOBSTATUS"><option value="">Select a job filter</option>'+filter+'</select><select onchange="if(this.value!=\'\'){document.getElementById(this.value).checked=true;submitAction_win0(this.form,\'TYPE_COOP\');}" class="required" style="width:19%" id="jbmnplsJobType"><option value="">Select a job type</option><option value="TYPE_COOP">Co-op</option><option value="TYPE_ARCH">Co-op ARCH</option><option value="TYPE_CA">Co-op CA</option><option value="TYPE_TEACH">Co-op TEACH</option><option value="TYPE_PHARM">Co-op PHARM</option><option value="TYPE_ALUM">Alumni</option><option value="TYPE_GRAD">Graduating</option><option value="TYPE_PART_TIME">Other</option><option value="TYPE_SUMMER">Summer </option></select></div><div class="header"><span class="name" style="width:48.5%; text-align:center;">Employer\'s Name</span><span class="name" style="width:48.5%; text-align:center;">Job Title</span></div><div class="fields"><input type="input"  name="UW_CO_JOBSRCH_UW_CO_EMPLYR_NAME" style="width:48.5%" id="jbmnplsEmployer" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"><input name="UW_CO_JOBSRCH_UW_CO_JOB_TITLE" type="input" style="width:48.5%" id="jbmnplsJobTitle" onblur="if(this.value==&quot;&quot;){this.className=&quot;empty&quot;;}" onfocus="if(this.className==&quot;empty&quot;){this.value=&quot;&quot;;this.className=&quot;&quot;;}" class="empty"></div><div class="header"><span class="name" style="width:100%; text-align:center;">Job Level</span></div><div class="fields"><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_JR">Junior</label></div><div style="width:20%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_INT">Intermediate</label></div><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_COOP_SR">Senior</label></div><div style="width:18%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_BACHELOR">Bachelors</label></div><div style="width:17%;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_MASTERS">Masters</label></div><div style="width:auto;float:left;" class="chkbxGroup"><label for="UW_CO_JOBSRCH_UW_CO_PHD">Ph.D.</label></div></div><div class="fields"><br><button  style="width:100%" id="jbmnplsSearchBtn">SEARCH</button></div></div></div>';
    $("body > form:eq(0)").prepend(html);
    
    /**
@@ -5529,6 +5552,7 @@ switch (PAGEINFO.TYPE) {
       }
    }break;
    case PAGES.APPLY:{      /*Expand to see what happens when you apply*/
+   console.log(window.location.href)
       initAjaxCapture();
       var viewLink = $('#UW_CO_PDF_LINKS_UW_CO_DOC_VIEW').attr('href'),
           message = $('#UW_CO_APPDOCWRK_UW_CO_ALL_TEXT').val(),
@@ -5696,7 +5720,11 @@ switch (PAGEINFO.TYPE) {
                PREF.save("LAST_PAGE", pageKey);
             }
          }
-         BRIDGE.addJS(function(){if(window.parent.hideFrame){window.parent.hideFrame();} });
+         BRIDGE.addJS(function(){
+            if (window.parent.hideFrame) {
+               window.parent.hideFrame();} 
+            }
+         );
       });
       
       //Welcome message - only shown once!
@@ -5708,7 +5736,7 @@ switch (PAGEINFO.TYPE) {
             function(){   //Callback
                PREF.save("SHOW_WELCOME_MSG", false);     //Clicking close will never let you see the message again
             });
-      }
+         }
       }
       
       //Parse Individual pages here
@@ -5781,6 +5809,9 @@ switch (PAGEINFO.TYPE) {
                         data = data.replace("<a ", "<a onmousedown='if(event.which<3){;markRead("+row+",\""+id+"\");}' ");
                      }
                      return data;
+                  })
+                  .applyFilter("Apply", function(cell, row, rowData, reverseLookup){
+                     return cell.replace('href="javascript:', 'href="javascript:window.parent.hideFrame = null;');
                   })
                   //.applyFilter("Apply", TABLEFILTERS.fixApply)        //TODO fix bug when changing pages
                   .applyFilter("Short List", function(cell, row, rowData, reverseLookup){
