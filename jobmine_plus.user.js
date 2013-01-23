@@ -4284,6 +4284,7 @@ JbmnplsTable.prototype.applyTableSorter = function() {
       case PAGES.LIST: 
          this.jInstance.tablesorter({
             headers : {
+               6:{sorter : "plainText"},
                7:{sorter : "date"}
             }
          });
