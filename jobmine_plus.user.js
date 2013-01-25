@@ -3082,9 +3082,9 @@ var TABLECOLUMNS = {
       var type = rowData[reverseLookup["Type"]];if(type==""){return "";}
       var location = rowData[reverseLookup["Room"]];location=location==""?"Somewhere in Tatham Center":encodeURIComponent("Tatham Center Room "+location.substr(2));
       var jobTitle = rowData[reverseLookup["Job Title"]].getTextBetween(">","</a>");if(jobTitle==""){return "";}
-      var interviewer = rowData[reverseLookup["Interviewer"]];if(interviewer==""){return "";}
+      var interviewer = rowData[reverseLookup["Interviewer"]];
       var instructions = rowData[reverseLookup["Instructions"]];instructions==""?"":"\nExtra Information:\n"+instructions;
-      var details = encodeURIComponent(type + " interview with " + company + "\nInterviewer: " + interviewer + "\nTitle: "+ jobTitle + instructions);
+      var details = encodeURIComponent(type + " interview with " + company + (interviewer!=""?"\nInterviewer: " + interviewer:"") + "\nTitle: "+ jobTitle + instructions);
       
       //Dates
       var date = rowData[reverseLookup["Date"]].split(" ");if(date[0]==''){return "";}
