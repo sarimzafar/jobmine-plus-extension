@@ -3082,9 +3082,9 @@ var TABLECOLUMNS = {
       var type = rowData[reverseLookup["Type"]];if(type==""){return "";}
       var location = rowData[reverseLookup["Room"]];location=location==""?"Somewhere in Tatham Center":encodeURIComponent("Tatham Center Room "+location.substr(2));
       var jobTitle = rowData[reverseLookup["Job Title"]].getTextBetween(">","</a>");if(jobTitle==""){return "";}
-      var interviewer = rowData[reverseLookup["Interviewer"]];
+      var interviewer = rowData[reverseLookup["Interviewer"]];if(interviewer==""){return "";}
       var instructions = rowData[reverseLookup["Instructions"]];instructions==""?"":"\nExtra Information:\n"+instructions;
-      var details = encodeURIComponent(type + " interview with " + company + (interviewer!=""?"\nInterviewer: " + interviewer:"") + "\nTitle: "+ jobTitle + instructions);
+      var details = encodeURIComponent(type + " interview with " + company + "\nInterviewer: " + interviewer + "\nTitle: "+ jobTitle + instructions);
       
       //Dates
       var date = rowData[reverseLookup["Date"]].split(" ");if(date[0]==''){return "";}
@@ -5560,7 +5560,8 @@ switch (PAGEINFO.TYPE) {
       }
    }break;
    case PAGES.APPLY:{      /*Expand to see what happens when you apply*/
-   console.log(window.location.href)
+   // Fixes the issue where this runs on Job Search Resume upload
+	  if (window.parent == window.top) {return;}
       initAjaxCapture();
       var viewLink = $('#UW_CO_PDF_LINKS_UW_CO_DOC_VIEW').attr('href'),
           message = $('#UW_CO_APPDOCWRK_UW_CO_ALL_TEXT').val(),
