@@ -50,7 +50,7 @@
 \*===============================*/
 {/*Expand to see the constants*/
 var CONSTANTS = {
-   VERSION              : "2.1.0",
+   VERSION              : "2.1.1",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -85,6 +85,7 @@ var LINKS = {
    EMPLYR_FRAME: "jobmine.ccol.uwaterloo.ca/psc/ES",
    UPDATE_LINK : "http://userscripts.org/scripts/source/80771.user.js",
    UPDATE_CSS  : "https://jobmine-plus.googlecode.com/svn/trunk/resource/scripts/update.css",
+   ANDROID_APP : "https://play.google.com/store/apps/details?id=com.jobmineplus.mobile",
    WORK_TERM   : null,     //Will set later
 };
 
@@ -139,6 +140,7 @@ var IMAGES = {
    EMPLOYER_NAME  : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOYAAAANCAMAAACKN+LIAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAADBQTFRFycnJiYmJra2t9vb2kpKS7e3tgICA5OTkpKSktra20tLSm5ubwMDA29vbd3d3////5P2LPQAAAn5JREFUeNrElul2ozAMhb0bsJDe/23nyhsmzbTNnEzrPxBrsT5rIUa+vU6WV9bJ8VP5waf82DJc1xcsdffNmLuVn8Skb6Tsf2AG+g1M3hIHL5paIyZxMiJlC+yqUHdPdlx/dmnLCXPIUCh4UmIb1ROrJ8WMgXnrRDDx0CoqgVVmr454b34IJ4SoD4taLgGuCMZ4Jxs0JIGt+upReBXlfpOlBE55UcGLg1qBLAc948Is0VsaeQMpXJRw3rLp4DhPaY3OZnFWrb1P4A27YnpvXcW0RSKcUkIrJg9/3gdXHenyfIgp/ZXEb6dB8FQVsxTcyx70CAP6elyGwYhiA8/ejGuc+nuq7IrqYzrEJ6gnM3tTb8e5BrSrCbwX+lC02B3SUXkRMai1auvBLQWKqeHoq/IUzQB+Gjur318Nc7Z5VGNN7WAqOqbaU3r1FJpRHIyL7TWl6sbKTUUdIroDNwyuK5sLZuFWu88xh3RUMy+Y1DENK2ZtTzXbSsTuWZUvTCSOE62NXFwLdLg6ByZKwui5F6YkMsj7DXNV6RFRPfM55r5f5k+yuS9z5LisV0xU25JNXL1Wtmf/YcxR29Nae5LNgYlyiFrpSzYxqYuTG+ZNpUd0hIcR1DCzPrX70CkXZt9tBwzp6M0cHjAJ3UBrbyL0egx6U4ybmGfJtWV1WYiW3lwxrReXvIZw2gUz8/zwdsybSo9Ie1OIHntTXJ20FmMqXph1dx7QpXNCugdMW+fnMml1IKu+xwxONDFjaXO1vofbpL1htmGOEMKKKWF+eEfRriojIp204TTv/0Y9+3fjyj+7o7+Z2hc+vD+DOWfiGzG/+vvxC5hzJr4R86UC+SPAAPcUmZQN0BP2AAAAAElFTkSuQmCC",
    JOB_TITLE      : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG0AAAANCAMAAACU0hA+AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAC1QTFRFiYmJ9vb27e3tpKSkgICA5OTkkpKStra2ycnJm5ubra2twMDA29vbd3d3////XBn6XAAAATBJREFUeNq8kul2xCAIhcEtbvD+j1tEjUlq2+mZnvpnIst8XrjAL59Km2DK67M8chlmoxkRID3f/2WP7lO8pZV0a1y08rOAv6eRdRSQm9DI0ZGL0m8D6aQ0WimTXke2JyRQiKBKdQICPyByTIHZaBgTUcJFSwahzMcIUEpSqLcnZvbkz2zfTZbvysWhVHu2cNEmtFNbCoghn3uTltaq6cM21XHNZk1SojM7abbdXa/24xVPGsorOcLSdqEl6gPd02Z20tSWUtqqDdUtTUdLe9pxPPZ+13ZcXf7Uhl9ow7tLOs2337YZtHXRRrTTZvbT3oQahxfbvdFGo+6N46e9cVZPSjiZi6ezWmvsa2Qn7fSkhEOXxhi6J0ejeNISuQL83sn5N9Xv0qD8H22N7rXzIcAAJahEsPp7aB4AAAAASUVORK5CYII=",
    STATUS_DIVIDER : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAASCAYAAABxYA+/AAAAK0lEQVQImbXNoQEAMAzDsP5PfVjO8BkZWuHYmJhGrdp5IEmTdIACP7HX3Q8e3m6JE637qgAAAABJRU5ErkJggg==",
+   GOOGLE_PLAY_STORE : "data:image/jpeg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQABAAQAAAA8AAD/4QMraHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJBZG9iZSBYTVAgQ29yZSA1LjMtYzAxMSA2Ni4xNDU2NjEsIDIwMTIvMDIvMDYtMTQ6NTY6MjcgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDUzYgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkRBNTg2NzM5QURDRjExRTJBNjRFQThENEZFNzJGOENGIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkRBNTg2NzNBQURDRjExRTJBNjRFQThENEZFNzJGOENGIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6REE1ODY3MzdBRENGMTFFMkE2NEVBOEQ0RkU3MkY4Q0YiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6REE1ODY3MzhBRENGMTFFMkE2NEVBOEQ0RkU3MkY4Q0YiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7/7gAOQWRvYmUAZMAAAAAB/9sAhAAGBAQEBQQGBQUGCQYFBgkLCAYG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",
 };
 
 var KEYS = {
@@ -1223,7 +1225,7 @@ function addHeader() {
    BRIDGE.registerFunction("showAbout", function(){
       showPopup(true, "<h1>Jobmine Plus Version "+CONSTANTS.VERSION+"</h1><br/>Hey there!<br/><br/>This is Matthew Ng the creator of Jobmine Plus. I am a System Designs Engineering Student at the University of Waterloo. I created this because Jobmine is not user friendly so this addon/extension should speed things up.<br/><br/>Feel free to email me if there are any problems, concerns or requests for future updates:<br/><a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a><br/><br/>Visit the extensions website for information and future updates:<br/><a href='http://userscripts.org/scripts/show/80771'>http://userscripts.org/scripts/show/80771</a><br/><br/>", "About Me", 400);
    });
-   header += '</ul></nav><div id="uwBanner" class="banner"></div><div style="float:right;" id="jbmnplsTwitterHolder">'+attachTwitterButton()+'</div></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul></ul></div><div id="jbmplsControlPanel"><span class="fakeLink" onclick="showSettings();">Settings</span> | <span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
+   header += '</ul></nav><div id="uwBanner" class="banner"></div><div style="float:right;" id="jbmnplsTwitterHolder">'+attachTwitterButton()+'</div><a href="' + LINKS.ANDROID_APP + '" target="_blank" class="google_play_button"></a></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul></ul></div><div id="jbmplsControlPanel"><span class="fakeLink" onclick="showSettings();">Settings</span> | <span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
    $("body").prepend(header);
 }
 
@@ -4509,7 +4511,7 @@ var CSSOBJ = {
       overflow : "hidden",
    },
    "#jbmnplsHeader": {
-      "min-width": "1000px",
+      "min-width": "1120px",
       width    : "100%",
       position : "fixed",
       top   : 0,
@@ -4613,6 +4615,20 @@ var CSSOBJ = {
    },
    "#jbmnplsFrameWrapper" : {  
       background        :  'no-repeat center center url("'+IMAGES.LARGE_LOADING+'")',
+   },
+   ".google_play_button" : {
+      background        :  'no-repeat url("'+IMAGES.GOOGLE_PLAY_STORE+'")',
+      width             :  '100px',
+      height            :  '23px',
+      display           :  'block',
+      'float'           :  'right',
+      'margin-right'    :  '15px',
+   },
+   ".google_play_button:hover" : {
+      opacity           :  '0.9',
+   },
+   ".google_play_button:active" : {
+      opacity           :  '0.6',
    },
    /**
     *    Profile Nav
@@ -6033,7 +6049,6 @@ switch (PAGEINFO.TYPE) {
       break;
 }
  
-
 
 
 
