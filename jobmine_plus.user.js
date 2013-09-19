@@ -19,7 +19,7 @@
 // @exclude        *Page=UW_CO_CT_STU_APP*
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.1.0
+// @version        2.1.2
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -50,7 +50,7 @@
 \*===============================*/
 {/*Expand to see the constants*/
 var CONSTANTS = {
-   VERSION              : "2.1.1",
+   VERSION              : "2.1.2",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -5699,10 +5699,12 @@ switch (PAGEINFO.TYPE) {
          },
       };
       var $dropdown = $("#UW_CO_APPS_UW_CO_APPL_MARKS");
-      var hideGrades = $dropdown.attr('disabled') !== null;
-      cssObj["#UW_CO_APPS_UW_CO_APPL_MARKS,#win0divlblUW_CO_APPS_UW_CO_APPL_MARKS"] = {
-         'display' : (hideGrades?"none":"block"),
-      };
+      var showGrades = !$dropdown.attr('disabled');
+      if (!showGrades) {
+		  cssObj["#win0divUW_CO_APPS_UW_CO_APPL_MARKS, #win0divlblUW_CO_APPS_UW_CO_APPL_MARKS"] = {
+			display: "none"
+		  };
+      }
       appendCSS(cssObj);
    }
    break;
