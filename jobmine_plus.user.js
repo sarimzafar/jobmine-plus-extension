@@ -19,7 +19,7 @@
 // @exclude        *Page=UW_CO_CT_STU_APP*
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.1.2
+// @version        2.1.4
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -50,7 +50,7 @@
 \*===============================*/
 {/*Expand to see the constants*/
 var CONSTANTS = {
-   VERSION              : "2.1.2",
+   VERSION              : "2.1.4",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -1420,7 +1420,7 @@ function closeMessage() {
 //Update Message
 function addUpdateMessage() {
    if(UTIL.idExists("jbnplsUpdate")) {return;}
-   var message = "You are using an old version of Jobmine Plus, click to update" + (PAGEINFO.BROWSER == BROWSER.CHROME ? " (make sure you have NinjaKit installed)":'');
+   var message = "You are using an old version of Jobmine Plus, click to update";
    $(document.body).append("<div style='display:none;' id='jbnplsUpdate'>\
         <a title='You know you want to click this' class='update-link' style='margin:0 auto;width:700px;' target='_blank' href='"+LINKS.UPDATE_LINK+"'>\
             " + message + "</a><div onclick='this.parentNode.style.visibility=\"hidden\";' class='close'></div></div>");
@@ -2118,6 +2118,8 @@ function initAjaxCapture() {
                   dataArrayAsString.push(true);
                }
                this.onload.call(this);
+			} else if (name.indexOf("UW_CO_JOBTITLE_HL$") != -1) {		// Does nothing with the request
+				allowResubmit();										// need this because it will fix random errors on search
             } else {
                //Run and parse
                if(name == "TYPE_COOP") {
@@ -2256,6 +2258,19 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
             jobFinished = true;
          } else if(name.startsWith("UW_CO_SLIST_HL$")) {
             showMessage("Added job to shortlist.",3);
+            $("#jbmnplsResults").removeClass("disable-links");
+            var $shortlistedEL = table.jInstance.find("tr td .loading");
+            
+            // Change the status of the shortlist on the table
+            if ($shortlistedEL.exists()) {
+				$shortlistedEL.removeClass("loading");
+				var $parent = $shortlistedEL.parent()
+				$parent.siblings(":first").text("Shortlisted");
+				$parent.html("On Short List");
+				table.updateTable();
+            } else {
+				alert(":(   There was an error in shortlisting, please email jobmineplus@gmail.com about this!");
+            }
          } else if(dataArrayAsString != null && name == "UW_CO_JOBSRCH_UW_CO_LOCATION$prompt") {
             //Fills the location dropdown
             var options = "";
@@ -4283,6 +4298,14 @@ JbmnplsTable.prototype.applyTableSorter = function() {
       return;
    }
    switch(PAGEINFO.TYPE) {
+	  case PAGES.SEARCH:
+         this.jInstance.tablesorter({
+		 headers : {
+               8:{sorter : "plainText"},
+               11:{sorter : "date"}
+            }
+         });
+		 break;
       case PAGES.LIST: 
          this.jInstance.tablesorter({
             headers : {
@@ -4806,9 +4829,12 @@ var CSSOBJ = {
       "display" : "block",
       "cursor" : "pointer",
    },
-   "div.jbmnplsTable table td .delete.loading" : {
-      "background" : "-5px -5px url('"+IMAGES.DELETE_LOADING+"')",
+   "div.jbmnplsTable table td .loading" : {
+      "background" : "-5px -5px url('"+IMAGES.DELETE_LOADING+"') no-repeat",
       "cursor" : "default",
+      "display" : "block",
+      "min-width" : "22px",
+      "min-height" : "22px",
    },
    "div.jbmnplsTable table td .delete.disabled, div.jbmnplsTable table td .delete[disabled='disabled']" : {
       "background" : "0 0 url('"+IMAGES.DELETE_DISABLE+"')",
@@ -4832,6 +4858,13 @@ var CSSOBJ = {
    "div.jbmnplsTable div.jbmnplsTableControls a:hover, div.jbmnplsTable div.jbmnplsTableControls span.fakeLink:hover" : {
       "color" : "white",
    },
+   "div.jbmnplsTable.disable-links a, div.jbmnplsTable.disable-links .fakeLink" : {
+	  "color" : "#ccc",
+	  "pointer-events": "none",
+   },
+   "div.jbmnplsTable.disable-links div.jbmnplsTableControls a, div.jbmnplsTable.disable-links div.jbmnplsTableControls .fakeLink" : {
+	   "color" : "#777",
+	},
    /**
     *    Table column hiding
     */
@@ -5783,9 +5816,8 @@ switch (PAGEINFO.TYPE) {
                var row = $("#row_Results_"+rowNum);
                Assert(row.exists(), "Read status is broken, row "+rowNum+" does not exist.");
                var rowData = row.children();
-               rowData.eq(0).text("Shortlisted");
-               rowData.eq(shortListIndex).text("On Short List");
-               table0.updateTable();
+               rowData.eq(shortListIndex).find(":first").addClass("loading").removeAttr("onclick").text("");
+               $("#jbmnplsResults").addClass("disable-links");		// Disables the table so that it waits to finish shortlisting
             }
             BRIDGE.registerFunction("markRead", markRead);
             BRIDGE.registerFunction("onShortList", onShortList);
@@ -5830,10 +5862,11 @@ switch (PAGEINFO.TYPE) {
                      return "New";
                   })
                   .applyFilter("Job Title", function(cell, row, rowData, reverseLookup){
+					 var trackJS = cell.getTextBetween("javascript:", ";\"");
                      var data = TABLEFILTERS.jobDescription(cell, row, rowData, reverseLookup);
                      if (rowData[reverseLookup["Read Status"]] == "New"){
                         var id = rowData[reverseLookup["Job Identifier"]];
-                        data = data.replace("<a ", "<a onmousedown='if(event.which<3){;markRead("+row+",\""+id+"\");}' ");
+                        data = data.replace('<a ', '<a onmousedown="if(event.which<3){markRead('+row+','+id+');}' + trackJS + ';" ');
                      }
                      return data;
                   })
