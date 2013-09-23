@@ -1420,7 +1420,7 @@ function closeMessage() {
 //Update Message
 function addUpdateMessage() {
    if(UTIL.idExists("jbnplsUpdate")) {return;}
-   var message = "You are using an old version of Jobmine Plus, click to update" + (PAGEINFO.BROWSER == BROWSER.CHROME ? " (make sure you have NinjaKit installed)":'');
+   var message = "You are using an old version of Jobmine Plus, click to update";
    $(document.body).append("<div style='display:none;' id='jbnplsUpdate'>\
         <a title='You know you want to click this' class='update-link' style='margin:0 auto;width:700px;' href='"+LINKS.UPDATE_LINK+"'>\
             " + message + "</a><div onclick='this.parentNode.style.visibility=\"hidden\";' class='close'></div></div>");
