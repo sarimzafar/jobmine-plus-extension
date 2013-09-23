@@ -19,7 +19,7 @@
 // @exclude        *Page=UW_CO_CT_STU_APP*
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.1.2
+// @version        2.1.3
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -50,7 +50,7 @@
 \*===============================*/
 {/*Expand to see the constants*/
 var CONSTANTS = {
-   VERSION              : "2.1.2",
+   VERSION              : "2.1.3",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -2118,6 +2118,8 @@ function initAjaxCapture() {
                   dataArrayAsString.push(true);
                }
                this.onload.call(this);
+			} else if (name.indexOf("UW_CO_JOBTITLE_HL$") != -1) {		// Does nothing with the request
+				allowResubmit();										// need this because it will fix random errors on search
             } else {
                //Run and parse
                if(name == "TYPE_COOP") {
@@ -5830,10 +5832,11 @@ switch (PAGEINFO.TYPE) {
                      return "New";
                   })
                   .applyFilter("Job Title", function(cell, row, rowData, reverseLookup){
+					 var trackJS = cell.getTextBetween("javascript:", ";\"");
                      var data = TABLEFILTERS.jobDescription(cell, row, rowData, reverseLookup);
                      if (rowData[reverseLookup["Read Status"]] == "New"){
                         var id = rowData[reverseLookup["Job Identifier"]];
-                        data = data.replace("<a ", "<a onmousedown='if(event.which<3){;markRead("+row+",\""+id+"\");}' ");
+                        data = data.replace('<a ', '<a onmousedown="if(event.which<3){markRead('+row+','+id+');}' + trackJS + ';" ');
                      }
                      return data;
                   })
