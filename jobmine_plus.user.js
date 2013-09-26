@@ -4319,7 +4319,7 @@ JbmnplsTable.prototype.applyTableSorter = function() {
             headers : {
                5:{sorter : "plainText"},
                6:{sorter : "plainText"},
-               9:{sorter : "date"}
+               8:{sorter : "date"}
             }
          });
          break;
