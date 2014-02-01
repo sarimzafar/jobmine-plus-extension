@@ -19,7 +19,7 @@
 // @exclude        *Page=UW_CO_CT_STU_APP*
 // @exclude        *UW_CO_EMPINFO_DTLS*
 // @grant          GM_getValue
-// @version        2.1.4
+// @version        2.1.5
 // ==/UserScript==
 
 /*========Table of Contents============
@@ -50,7 +50,7 @@
 \*===============================*/
 {/*Expand to see the constants*/
 var CONSTANTS = {
-   VERSION              : "2.1.4",
+   VERSION              : "2.1.5",
    DEBUG_ON             : false,
    PAGESIMILAR          : "https://jobmine.ccol.uwaterloo.ca/psc/SS/",
    PAGESIMILARTOP       : "https://jobmine.ccol.uwaterloo.ca/psp/SS/",
@@ -2391,6 +2391,8 @@ var SearchManager = {
       }
    },
    validateKey : function(jobID) {
+      console.log(jobID, parseInt(jobID + "", 10))
+      jobID = parseInt(jobID + "", 10);
       Assert(jobID!=null&&jobID!="", MESSAGE.JOBID_INVALID);
       return this.prefix + jobID;
    },
@@ -2401,12 +2403,14 @@ var SearchManager = {
       }catch(e){Throw("Something wrong with reading item in localStorage: "+e)}
    },
    setRead : function(jobID){
+        console.log(jobID)
       var key = this.validateKey(jobID);
       try{
       OBJECTS.STORAGE.setItem(key, 1);
       }catch(e){Throw("Something wrong with setting item in localStorage: "+e)}
    },
    setNew : function(jobID){
+        console.log(jobID)
       var key = this.validateKey(jobID);
       try{
       OBJECTS.STORAGE.removeItem(key);
@@ -5866,7 +5870,7 @@ switch (PAGEINFO.TYPE) {
                      var data = TABLEFILTERS.jobDescription(cell, row, rowData, reverseLookup);
                      if (rowData[reverseLookup["Read Status"]] == "New"){
                         var id = rowData[reverseLookup["Job Identifier"]];
-                        data = data.replace('<a ', '<a onmousedown="if(event.which<3){markRead('+row+','+id+');}' + trackJS + ';" ');
+                        data = data.replace('<a ', '<a onmousedown="if(event.which<3){markRead('+row+','+parseInt(id, 10)+');}' + trackJS + ';" ');
                      }
                      return data;
                   })
