@@ -1,0 +1,33 @@
+{
+    "data": {
+        "version": "2.1.5",
+        "debug": "false",
+        "email": "jobmineplus@gmail.com",
+        "upload_link": "http://userscripts.org/scripts/source/80771.user.js",
+        "update_css": "https://jobmine-plus.googlecode.com/svn/trunk/resource/scripts/update.css",
+        "android_link": "https://play.google.com/store/apps/details?id=com.jobmineplus.mobile"
+    },
+    "build_order": [
+        "src/metadata.js",
+        "src/constants.js",
+        "src/images.js",
+        "src/prototype_functions.js",
+        "src/parse_page.js",
+        "src/bridge.js",
+        "src/jquery_tablesorter.js",
+        "src/debugging.js",
+        "src/preferences.js",
+        "src/function.js",
+        "src/highlighting.js",
+        "src/job_queue.js",
+        "src/ajax_functions.js",
+        "src/search_manager.js",
+        "src/settings.js",
+        "src/job_search_criteria.js",
+        "src/table.js",
+        "src/clean_up.js",
+        "src/css.js",
+        "src/individual_pages.js"
+    ],
+    "output": "../jobmine_plus.user.js"
+}
