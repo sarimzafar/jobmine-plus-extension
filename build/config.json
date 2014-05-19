@@ -3,8 +3,8 @@
         "version": "2.1.6",
         "debug": "false",
         "email": "jobmineplus@gmail.com",
-        "upload_link": "http://userscripts.org/scripts/source/80771.user.js",
-        "update_css": "https://jobmine-plus.googlecode.com/svn/trunk/resource/scripts/update.css",
+        "upload_link": "https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js",
+        "update_css": "https://cdn.rawgit.com/matthewn4444/jobmine-plus-extension/master/build/src/update.css",
         "android_link": "https://play.google.com/store/apps/details?id=com.jobmineplus.mobile"
     },
     "build_order": [

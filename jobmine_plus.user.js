@@ -1,10 +1,3 @@
-//
-//    If you see this message after you pressed install on the Jobmine Plus install site 
-//    (http://userscripts.org/scripts/show/80771), then you are doing it wrong.
-//    Please install Greasemonkey (https://addons.mozilla.org/firefox/downloads/latest/748/addon-748-latest.xpi?src=addondetail)
-//    or if you have it, please enable it (monkey face is lit up). Alternatively you can use Google Chrome
-//    to install this directly.
-//
 // ==UserScript==
 // @name           Jobmine Plus
 // @namespace      matthewng
@@ -18,6 +11,7 @@
 // @exclude        *&jbmnpls=ignore
 // @exclude        *Page=UW_CO_CT_STU_APP*
 // @exclude        *UW_CO_EMPINFO_DTLS*
+// @updateURL      https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js
 // @grant          GM_getValue
 // @version        2.1.6
 // ==/UserScript==
@@ -59,8 +53,8 @@ var LINKS = {
    BLANK       : "about:blank",
    EMPLYR_TOP  : "jobmine.ccol.uwaterloo.ca/psp/ES",
    EMPLYR_FRAME: "jobmine.ccol.uwaterloo.ca/psc/ES",
-   UPDATE_LINK : "http://userscripts.org/scripts/source/80771.user.js",
-   UPDATE_CSS  : "https://jobmine-plus.googlecode.com/svn/trunk/resource/scripts/update.css",
+   UPDATE_LINK : "https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js",
+   UPDATE_CSS  : "https://cdn.rawgit.com/matthewn4444/jobmine-plus-extension/master/build/src/update.css",
    ANDROID_APP : "https://play.google.com/store/apps/details?id=com.jobmineplus.mobile",
    WORK_TERM   : null,     //Will set later
 };
@@ -1188,7 +1182,7 @@ function addHeader() {
       }
    }
    BRIDGE.registerFunction("showAbout", function(){
-      showPopup(true, "<h1>Jobmine Plus Version "+CONSTANTS.VERSION+"</h1><br/>Hey there!<br/><br/>This is Matthew Ng the creator of Jobmine Plus. I am a System Designs Engineering Student at the University of Waterloo. I created this because Jobmine is not user friendly so this addon/extension should speed things up.<br/><br/>Feel free to email me if there are any problems, concerns or requests for future updates:<br/><a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a><br/><br/>Visit the extensions website for information and future updates:<br/><a href='http://userscripts.org/scripts/show/80771'>http://userscripts.org/scripts/show/80771</a><br/><br/>", "About Me", 400);
+      showPopup(true, "<h1>Jobmine Plus Version "+CONSTANTS.VERSION+"</h1><br/>Hey there!<br/><br/>This is Matthew Ng the creator of Jobmine Plus. I am a System Designs Engineering Student at the University of Waterloo. I created this because Jobmine is not user friendly so this addon/extension should speed things up.<br/><br/>Feel free to email me if there are any problems, concerns or requests for future updates:<br/><a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a><br/><br/>Visit the extensions website for information and future updates:<br/><a href='https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js'>https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js</a><br/><br/>", "About Me", 400);
    });
    header += '</ul></nav><div id="uwBanner" class="banner"></div><a href="' + LINKS.ANDROID_APP + '" target="_blank" class="google_play_button"></a></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul></ul></div><div id="jbmplsControlPanel"><span class="fakeLink" onclick="showSettings();">Settings</span> | <span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
    $("body").prepend(header);
