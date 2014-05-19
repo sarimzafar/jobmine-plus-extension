@@ -22,7 +22,9 @@ You can try the Android app which you can read and search job descriptions and v
 There are interview notifications and much more!
 
 [Play Store (No ads)](https://play.google.com/store/apps/details?id=com.jobmineplus.mobilepro)
+
 [Play Store (Ads)](https://play.google.com/store/apps/details?id=com.jobmineplus.mobile)
+
 
 Check out the source code [here](https://github.com/matthewn4444/Jobmine-Plus)
 
