@@ -2,6 +2,8 @@
 
 Runs Waterloo's JobMine but enhances the functionality and navigation. 
 
+[**INSTALL**](https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js)
+
 ## Installation
 
 - [Chrome](https://github.com/matthewn4444/jobmine-plus-extension/wiki/Chrome)
@@ -18,8 +20,11 @@ Runs Waterloo's JobMine but enhances the functionality and navigation.
 
 ## Mobile (Android)
 
+![http://imagizer.imageshack.us/a/img823/6480/googleplayicon.png](playstore)
+
 You can try the Android app which you can read and search job descriptions and view offline.
 There are interview notifications and much more!
+
 
 [Play Store (No ads)](https://play.google.com/store/apps/details?id=com.jobmineplus.mobilepro)
 
