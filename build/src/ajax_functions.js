@@ -51,7 +51,7 @@ function initAjaxCapture() {
                   if (start === -1) {
                      start = text.indexOf('window.open("');
                      if (start === -1) {
-                        showMessage("Failed to retrieve PDF, please report at jobmineplus@gmail.com.");
+                        showMessage("Failed to retrieve PDF, please report at {{ email }}.");
                         this.bInProcess = false;
                         return;
                      }
@@ -134,7 +134,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
                return;
             }
          }
-         showMessage("Failed to retrieve PDF, please report at jobmineplus@gmail.com.");
+         showMessage("Failed to retrieve PDF, please report at {{ email }}.");
       });
       return;
    } else if (name == "UW_CO_APPDOCWRK_UW_CO_DOC_NUM") {
@@ -234,7 +234,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
 				$parent.html("On Short List");
 				table.updateTable();
             } else {
-				alert(":(   There was an error in shortlisting, please email jobmineplus@gmail.com about this!");
+				alert(":(   There was an error in shortlisting, please email {{ email }} about this!");
             }
          } else if(dataArrayAsString != null && name == "UW_CO_JOBSRCH_UW_CO_LOCATION$prompt") {
             //Fills the location dropdown
