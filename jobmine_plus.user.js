@@ -18,7 +18,7 @@
 /*===============================*\
 |*        __CONSTANTS__          *|
 \*===============================*/
-{/*Expand to see the constants*/
+{/*Expand to see the constants*/ 
 var CONSTANTS = {
    VERSION              : "2.1.6",
    DEBUG_ON             : false,
