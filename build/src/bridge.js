@@ -223,7 +223,7 @@ var BRIDGE = {
          code = this.handleArguments(code, arguments);
          
          //Strips the function(){} wrapper
-         code =  (code+"").replace(/\n/g, "");    //Convert to string
+         code += "";
          code = code.replace(/^[^{]*?{/, "");
          code = code.substring(0, code.lastIndexOf("}"));
          this.appendScript(code);

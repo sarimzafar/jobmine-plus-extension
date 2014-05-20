@@ -54,7 +54,7 @@ var LINKS = {
    EMPLYR_TOP  : "jobmine.ccol.uwaterloo.ca/psp/ES",
    EMPLYR_FRAME: "jobmine.ccol.uwaterloo.ca/psc/ES",
    UPDATE_LINK : "http://userscripts.org:8080/scripts/source/80771.user.js",
-   UPDATE_CSS  : "https://cdn.rawgit.com/matthewn4444/jobmine-plus-extension/master/build/src/update.css",
+   UPDATE_CSS  : "https://googledrive.com/host/0B8D5PyLxHOt8eG11VEpRcmJRVjg",
    ANDROID_APP : "https://play.google.com/store/apps/details?id=com.jobmineplus.mobile",
    WORK_TERM   : null,     //Will set later
 };
@@ -597,7 +597,7 @@ var BRIDGE = {
          code = this.handleArguments(code, arguments);
          
          //Strips the function(){} wrapper
-         code =  (code+"").replace(/\n/g, "");    //Convert to string
+         code += "";
          code = code.replace(/^[^{]*?{/, "");
          code = code.substring(0, code.lastIndexOf("}"));
          this.appendScript(code);
