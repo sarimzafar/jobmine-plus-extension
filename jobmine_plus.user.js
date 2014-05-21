@@ -11,7 +11,7 @@
 // @exclude        *&jbmnpls=ignore
 // @exclude        *Page=UW_CO_CT_STU_APP*
 // @exclude        *UW_CO_EMPINFO_DTLS*
-// @updateURL      http://userscripts.org:8080/scripts/source/80771.user.js
+// @updateURL      https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js
 // @grant          GM_getValue
 // @version        2.1.7
 // ==/UserScript==
@@ -53,7 +53,7 @@ var LINKS = {
    BLANK       : "about:blank",
    EMPLYR_TOP  : "jobmine.ccol.uwaterloo.ca/psp/ES",
    EMPLYR_FRAME: "jobmine.ccol.uwaterloo.ca/psc/ES",
-   UPDATE_LINK : "http://userscripts.org:8080/scripts/source/80771.user.js",
+   UPDATE_LINK : "https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js",
    UPDATE_CSS  : "https://googledrive.com/host/0B8D5PyLxHOt8eG11VEpRcmJRVjg",
    ANDROID_APP : "https://play.google.com/store/apps/details?id=com.jobmineplus.mobile",
    WORK_TERM   : null,     //Will set later
@@ -1182,7 +1182,7 @@ function addHeader() {
       }
    }
    BRIDGE.registerFunction("showAbout", function(){
-      showPopup(true, "<h1>Jobmine Plus Version "+CONSTANTS.VERSION+"</h1><br/>Hey there!<br/><br/>This is Matthew Ng the creator of Jobmine Plus. I am a System Designs Engineering Student at the University of Waterloo. I created this because Jobmine is not user friendly so this addon/extension should speed things up.<br/><br/>Feel free to email me if there are any problems, concerns or requests for future updates:<br/><a href='mailto:jobmineplus@gmail.com'>jobmineplus@gmail.com</a><br/><br/>Visit the extensions website for information and future updates:<br/><a href='http://userscripts.org:8080/scripts/source/80771.user.js'>http://userscripts.org:8080/scripts/source/80771.user.js</a><br/><br/>", "About Me", 400);
+      showPopup(true, "<h1>Jobmine Plus Version "+CONSTANTS.VERSION+"</h1><br/>Hey there!<br/><br/>This is Matthew Ng the creator of Jobmine Plus. I am a System Designs Engineering Student at the University of Waterloo. I created this because Jobmine is not user friendly so this addon/extension should speed things up.<br/><br/>Feel free to email me if there are any problems, concerns or requests for future updates:<br/><a href='mailto:<insert your developer's email here>'><insert your developer's email here></a><br/><br/>Visit the extensions website for information and future updates:<br/><a href='https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js'>https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js</a><br/><br/>", "About Me", 400);
    });
    header += '</ul></nav><div id="uwBanner" class="banner"></div><a href="' + LINKS.ANDROID_APP + '" target="_blank" class="google_play_button"></a></div><div id="jbmnplsBottomGroup"><div id="jbmnplsStatus"><ul></ul></div><div id="jbmplsControlPanel"><span class="fakeLink" onclick="showSettings();">Settings</span> | <span onclick="showAbout();" class="fakeLink">About</span> | <a href="'+LINKS.LOGOUT+'">Logout</a></div></div></header>';
    $("body").prepend(header);
@@ -1701,7 +1701,7 @@ function invokeRefreshTimer() {
  */
  function invokeApplyPopup(jobId, title) {
    if (typeof (OBJECTS.UWATERLOO_ID) === "undefined") {
-      alert("Failed to get user id, please report this to jobmineplus@gmail.com.");
+      alert("Failed to get user id, please report this to <insert your developer's email here>.");
       return;
    }
    title = title || "Submit Application";
@@ -2035,7 +2035,7 @@ function initAjaxCapture() {
                   if (start === -1) {
                      start = text.indexOf('window.open("');
                      if (start === -1) {
-                        showMessage("Failed to retrieve PDF, please report at jobmineplus@gmail.com.");
+                        showMessage("Failed to retrieve PDF, please report at <insert your developer's email here>.");
                         this.bInProcess = false;
                         return;
                      }
@@ -2118,7 +2118,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
                return;
             }
          }
-         showMessage("Failed to retrieve PDF, please report at jobmineplus@gmail.com.");
+         showMessage("Failed to retrieve PDF, please report at <insert your developer's email here>.");
       });
       return;
    } else if (name == "UW_CO_APPDOCWRK_UW_CO_DOC_NUM") {
@@ -2218,7 +2218,7 @@ function ajaxComplete(name, url, popupOccurs, dataArrayAsString) {
 				$parent.html("On Short List");
 				table.updateTable();
             } else {
-				alert(":(   There was an error in shortlisting, please email jobmineplus@gmail.com about this!");
+				alert(":(   There was an error in shortlisting, please email <insert your developer's email here> about this!");
             }
          } else if(dataArrayAsString != null && name == "UW_CO_JOBSRCH_UW_CO_LOCATION$prompt") {
             //Fills the location dropdown
@@ -5728,7 +5728,7 @@ switch (PAGEINFO.TYPE) {
       
       //Welcome message - only shown once!
       if(PREF.load("SHOW_WELCOME_MSG")) {
-         showPopup(true, "<h1>Welcome to Jobmine Plus!</h1><br/>Before you get started please know that I save all your preferences to localStorage. If you do not know what that means, that means that all your saved settings will only apply to <span class='bold'>this computer</span> and <span class='bold'>this browser</span>.<br/><br/><h2>Important</h2><span style='color:red;'>The 'customize' button on each table requires that you un-hide any columns in the original Jobmine or else some features will work on Jobmine Plus.</span><br/><span class='detail'>(If you do know know what I mean, <a href='mailto:jobmineplus@gmail.com'>I can explain via email</a>)</span><br/><br/>Therefore please disable Jobmine Plus and go back to Jobmine to un-hide all custom headers if you have done so.<br/><br/>That is it, so please enjoy using Jobmine Plus 2.0!<br/><br/><br/><br/>",
+         showPopup(true, "<h1>Welcome to Jobmine Plus!</h1><br/>Before you get started please know that I save all your preferences to localStorage. If you do not know what that means, that means that all your saved settings will only apply to <span class='bold'>this computer</span> and <span class='bold'>this browser</span>.<br/><br/><h2>Important</h2><span style='color:red;'>The 'customize' button on each table requires that you un-hide any columns in the original Jobmine or else some features will work on Jobmine Plus.</span><br/><span class='detail'>(If you do know know what I mean, <a href='mailto:<insert your developer's email here>'>I can explain via email</a>)</span><br/><br/>Therefore please disable Jobmine Plus and go back to Jobmine to un-hide all custom headers if you have done so.<br/><br/>That is it, so please enjoy using Jobmine Plus 2.0!<br/><br/><br/><br/>",
             "Welcome!",     //Title
             400,            //Width
             null,          //No max height

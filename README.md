@@ -2,11 +2,9 @@
 
 Runs Waterloo's JobMine but enhances the functionality and navigation. 
 
-
-May 20, 2014: Fixed now
-
-
 [**CLICK TO INSTALL**](https://raw.githubusercontent.com/matthewn4444/jobmine-plus-extension/master/jobmine_plus.user.js)
+
+### I AM NOT WORKING ON THIS ANYMORE, EMAIL ME IF YOU WANT TO TAKE OVER THIS PROJECT
 
 ## Installation Steps
 
