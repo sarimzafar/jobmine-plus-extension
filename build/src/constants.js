@@ -64,6 +64,7 @@ var COLOURS = {
    AVERAGE              : "#fffe93",
    WORST                : "#AAAAAA",
    GOOD                 : "#a1f6cd",
+   MODERATE             : "#ff7f50";
 };
 
 var OBJECTS = {

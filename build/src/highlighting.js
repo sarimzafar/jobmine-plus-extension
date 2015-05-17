@@ -28,7 +28,7 @@ var HIGHLIGHT = {
             return {
                'New'                      :     COLOURS.AVERAGE,
                'Read'                     :     COLOURS.BLANK,
-               'On Short List'            :     COLOURS.GREAT,
+               'On Short List'            :     COLOURS.MODERATE,
                'Already Applied'          :     COLOURS.GREAT,
             };
             break;
